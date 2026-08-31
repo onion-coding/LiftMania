@@ -33,6 +33,7 @@
   --magenta:#FF7ABA; --magentaF:#FF3D9A; --onMagenta:#2E0619;
   --red:#FF9086;     --redF:#FF6B5E;     --onRed:#2E0805;
   --onGroup:#12102B; --focus:#FFC93F;
+  --ease:cubic-bezier(.2,.8,.2,1); --easeout:cubic-bezier(.16,1,.3,1);
   --holdBg:#4A2E6E; --holdFg:#EFDCFF;
   --kgBg:#1E3E7C;   --kgFg:#D2E1FF;
   --bwBg:#1C4A37;   --bwFg:#C6F5DF;
@@ -75,7 +76,7 @@ body[data-theme="bright"]{
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--night);color:var(--cream);font-family:var(--b);
-  font-size:15px;line-height:1.5;
+  font-size:15px;line-height:1.5;transition:background-color .35s ease,color .35s ease;
   padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);position:relative}
 #app{width:min(100vw - 20px, 470px);margin:14px auto 30px;padding-bottom:24px;
   display:flex;flex-direction:column;gap:12px}
@@ -178,7 +179,7 @@ h2{margin:0}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 .track{position:relative;background:var(--deep);border-radius:99px;overflow:hidden;width:100%}
-.fill{position:absolute;inset:0 auto 0 0;border-radius:99px;transition:width .7s cubic-bezier(.2,.8,.2,1)}
+.fill{position:absolute;inset:0 auto 0 0;border-radius:99px;transform-origin:left center}
 
 /* ══════════════════ MISSIONS ══════════════════ */
 .objrow{display:flex;align-items:flex-start;gap:12px;padding:12px 0;width:100%;text-align:left;
@@ -229,7 +230,19 @@ h2{margin:0}
   width:min(100%,420px);margin:0 auto}
 .lin{width:100%;height:50px;text-align:center;font-size:18px;letter-spacing:.08em;
   font-family:var(--m);background:var(--deep);color:var(--cream);border:1px solid var(--line);
-  border-radius:12px;padding:0 10px}
+  border-radius:12px;padding:0 10px;transition:border-color .25s var(--ease)}
+.lin:focus{outline:none;border-color:var(--focus)}
+.lstate{display:flex;align-items:center;gap:9px;margin-top:12px;min-height:20px;
+  font-family:var(--m);font-size:12px;line-height:1.4;color:var(--dim)}
+.lstate b{color:var(--cream);font-weight:500}
+.lstate .ic{width:17px;height:17px}
+.lstate.swap{animation:lstatein .3s var(--easeout) both}
+@keyframes lstatein{from{opacity:0;transform:translateY(-6px)}}
+.cta.swap{animation:ctaswap .34s var(--easeout) both}
+@keyframes ctaswap{from{opacity:0;transform:translateY(9px) scale(.97)}}
+.dots{display:inline-block;width:14px;text-align:left}
+.dots:after{content:"";animation:dots 1.2s steps(4,end) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
 
 /* ══════════════════ PICKER ══════════════════ */
 .gchips{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
@@ -330,6 +343,56 @@ input::placeholder{color:var(--dim);opacity:1}
 .banner.warn{background:var(--redF);color:var(--onRed)}
 .banner.info{background:var(--panel2);color:var(--cream)}
 .banner .ghost{display:inline-block;margin-top:9px;background:rgba(0,0,0,.14);color:inherit}
+
+/* ══════════════════ MOTION ══════════════════
+   Entrance motion only runs under #app.enter, which render() sets when the
+   view actually changed. Everything else here is press/hover feedback or a
+   one-shot flagged through U.fx. */
+@keyframes cardin{from{opacity:0;transform:translateY(12px)}}
+@keyframes growx{from{transform:scaleX(0)}}
+@keyframes tabin{from{transform:scale(.9);opacity:.5}}
+#app.enter .card,#app.enter .statstrip{animation:cardin .36s var(--easeout) both}
+#app.enter .col>.card:nth-child(2){animation-delay:.06s}
+#app.enter .col>.card:nth-child(3){animation-delay:.12s}
+#app.enter .col>.card:nth-child(4){animation-delay:.18s}
+#app.enter .col>.card:nth-child(5){animation-delay:.24s}
+#app.enter .fill{animation:growx .75s .1s var(--easeout) both}
+#app.enter .tab.on{animation:tabin .3s var(--easeout) both}
+#app.enter .prbadge{animation:badgein .35s var(--easeout) both}
+@keyframes badgein{from{transform:scale(.4);opacity:0}}
+
+/* a bar that knows where it came from animates the gap it just closed */
+@keyframes widthto{from{width:var(--from)}}
+.fill.animw{animation:widthto .9s var(--easeout) both}
+
+@keyframes bump{40%{transform:scale(1.09)}}
+input.sval.bump{animation:bump .28s var(--ease)}
+
+@keyframes popbox{0%{transform:scale(.4);opacity:.3}55%{transform:scale(1.22)}100%{transform:scale(1)}}
+.objbox.justdone{animation:popbox .5s cubic-bezier(.2,1.5,.4,1) both}
+
+@keyframes reveal{from{opacity:0;transform:translateY(-7px)}}
+.help.reveal,.expand.reveal{animation:reveal .24s var(--easeout) both}
+
+/* press + hover feedback survives re-renders because it is pure CSS state */
+.tab,.filt,.gchip,.exchip,.qchip,.ghost,.cta,.sbtn,.theme-pill,.hbtn,.seg button,
+.gatechip,.kvi,button.li,.objrow{
+  transition:background-color .18s var(--ease),color .18s var(--ease),
+             border-color .18s var(--ease),box-shadow .18s var(--ease),
+             filter .18s var(--ease),transform .1s var(--ease)}
+.cta:active{transform:scale(.985)}
+.sbtn:active{transform:scale(.9)}
+.tab:active,.filt:active,.gchip:active,.exchip:active,.ghost:active,.qchip:active,
+.hbtn:active,.theme-pill:active,.gatechip:active,.kvi:active{transform:scale(.96)}
+button.li:active,.objrow:active{transform:scale(.995)}
+@media (hover:hover){
+  button.li:hover,.objrow:hover,.gatechip:hover{background:var(--row)}
+  .filt:not(.on):hover,.qchip:hover,.ghost:hover,.exchip:not(.on):hover,
+  .hbtn:not(.on):hover,.seg button:not(.on):hover{background:var(--panel2)}
+  .tab:not(.on):hover{color:var(--cream);background:var(--row)}
+  .gchip:hover,.cta:hover,.filt.on:hover,.tab.on:hover{filter:brightness(1.07)}
+  .theme-pill:not(.active):hover{background:var(--row)}
+}
 
 /* ══════════════════ DEFEAT SEQUENCE ══════════════════
    The overlay always draws on a dark scrim, so it pins its own dark token
@@ -1012,6 +1075,11 @@ function logSet(){
   S.lastDay=today; S.decayedThrough=dayNum(today); S.away=null;
   updateCalibration();
   rollDaily();
+  /* snapshot the bars before any of this lands, so they animate the distance */
+  const hpFrom=(bossAt(S.ci).hp-S.cd)/bossAt(S.ci).hp*100;
+  const objFrom=S.daily.objs.map(o=>{const v=progressOf(o,S.daily.acc);
+    return o.t==="pr"?(v?100:0):Math.min(100,v/o.target*100);});
+  const popObj=[];
 
   /* records */
   const rec=S.records[ex.id]||{};
@@ -1048,8 +1116,8 @@ function logSet(){
 
   /* objectives */
   let bounty=0; const finished=[];
-  S.daily.objs.forEach(o=>{
-    if(!o.done && progressOf(o,a)>=o.target){ o.done=true; bounty+=o.reward; finished.push(o.label); }
+  S.daily.objs.forEach((o,i)=>{
+    if(!o.done && progressOf(o,a)>=o.target){ o.done=true; bounty+=o.reward; finished.push(o.label); popObj.push(i); }
   });
   let perfect=false;
   if(!S.daily.perfect && S.daily.objs.every(o=>o.done)){
@@ -1086,6 +1154,8 @@ function logSet(){
   S.log=S.log.slice(0,900);
 
   U.flash={ton,dmg,applied,pass,bounty,cleared,broke,finished,perfect,weekBonus,boss:boss.name};
+  /* a cleared boss swaps the bar for a different fight, so do not travel it */
+  U.fx={objFrom,popObj,hpFrom:cleared.length?null:hpFrom};
   startRest(90);
   persist(); publish(); render();
   if(FXQ.length) playFx();
@@ -1162,7 +1232,12 @@ document.getElementById("fileIn").addEventListener("change",e=>{
 
 /* ══════════════════ RENDER HELPERS ══════════════════ */
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const bar=(pct,color,h)=>`<div class="track" style="height:${h||6}px"><div class="fill" style="width:${Math.max(0,Math.min(100,pct))}%;background:${color}"></div></div>`;
+const clamp=n=>Math.max(0,Math.min(100,n));
+const bar=(pct,color,h,from)=>{
+  const anim = from!=null && Math.abs(from-pct)>0.5;
+  return `<div class="track" style="height:${h||6}px"><div class="fill${anim?" animw":""}" `
+    + `style="width:${clamp(pct)}%;background:${color}${anim?`;--from:${clamp(from)}%`:""}"></div></div>`;
+};
 const exTag=e=>{const[c,t]=MODE_TAG[e.mode];return `<span class="tag ${c}">${t}</span>`;};
 const hasEx=id=>EX.some(e=>e.id===id);
 const initial=n=>(String(n||"?").trim()[0]||"?").toUpperCase();
@@ -1210,6 +1285,9 @@ function setDesc(r){
     + (r.sd==="each"?" /side":"");
 }
 
+/* one-shot animation flags, set by a handler and consumed by the next render */
+let FX={}, lastView=null;
+
 /* Every card is one icon, one title, and content. Prose lives behind the ?
    and is shut by default — that is what keeps the screens from being walls. */
 function card(o){
@@ -1221,18 +1299,18 @@ function card(o){
       ${o.help?`<button class="hbtn ${U.help[o.k]?"on":""}" data-a="help" data-k="${o.k}" title="What is this?" aria-label="What is this?">?</button>`:""}
     </div>
     ${o.sub?`<div class="csub">${o.sub}</div>`:""}
-    ${o.help&&U.help[o.k]?`<div class="help">${o.help}</div>`:""}
+    ${o.help&&U.help[o.k]?`<div class="help${FX.help===o.k?" reveal":""}">${o.help}</div>`:""}
     ${o.body?`<div class="body">${o.body}</div>`:""}
   </section>`;
 }
 const cols=(a,b)=>`<div class="cols"><div class="col">${a}</div><div class="col">${b}</div></div>`;
-const qualList=(list,note)=>`<div class="expand">
+const qualList=(list,note)=>`<div class="expand${FX.expand?" reveal":""}">
   ${note?`<div class="mini" style="margin-bottom:9px">${esc(note)}</div>`:""}
   <div>${list.map(e=>`<button class="qchip" data-a="jump" data-e="${e.id}">${esc(e.n)} ${exTag(e)}</button>`).join("")}</div></div>`;
 const stepper=(label,field,step,min)=>`
  <div class="stepper"><span class="slabel">${label}</span><div class="srow">
    <button class="sbtn" data-a="dec" data-f="${field}" data-s="${step}" data-min="${min}">−</button>
-   <input class="sval" id="st_${field}" inputmode="decimal" autocomplete="off" value="${U[field]}">
+   <input class="sval${FX.bump===field?" bump":""}" id="st_${field}" inputmode="decimal" autocomplete="off" value="${U[field]}">
    <button class="sbtn" data-a="inc" data-f="${field}" data-s="${step}">+</button>
  </div></div>`;
 
@@ -1265,6 +1343,7 @@ const TABS=[["train","TRAIN","dumbbell"],["week","WEEK","cal"],["bosses","BOSSES
 
 function render(){
   rollDaily();
+  FX=U.fx||{}; U.fx=null;
   const ex=byId(U.ex), boss=bossAt(S.ci), p=PLAN[S.daily.dow];
   let h=topBar()+tabBar()+alerts();
   if(U.tab==="train")  h+=tabTrain(ex,boss,p);
@@ -1272,7 +1351,12 @@ function render(){
   else if(U.tab==="bosses") h+=tabBosses();
   else if(U.tab==="crew")   h+=tabCrew();
   else if(U.tab==="you")    h+=tabYou();
-  document.getElementById("app").innerHTML=h;
+  const app=document.getElementById("app");
+  /* only a genuine view change earns the entrance run - otherwise every tap on
+     a stepper would replay the whole page */
+  app.className = lastView===U.tab ? "" : "enter";
+  lastView=U.tab;
+  app.innerHTML=h;
   wireInputs();
   paintRest();
 }
@@ -1328,10 +1412,10 @@ function tabTrain(ex,boss,p){
     body:`<div class="list">${S.daily.objs.map((o,i)=>{
       const v=progressOf(o,S.daily.acc), open=U.openObj===i;
       return `<button class="objrow ${o.done?"done":""}" data-a="obj" data-i="${i}">
-        <span class="objbox">${o.done?"✓":i+1}</span>
+        <span class="objbox${o.done&&(FX.popObj||[]).includes(i)?" justdone":""}">${o.done?"✓":i+1}</span>
         <span class="objtxt">
           <span class="objlab">${esc(o.label)}</span>
-          <span class="objbar">${bar(o.t==="pr"?(v?100:0):v/o.target*100,o.done?"var(--greenF)":gcol(p.gs[0]),5)}</span>
+          <span class="objbar">${bar(o.t==="pr"?(v?100:0):v/o.target*100,o.done?"var(--greenF)":gcol(p.gs[0]),5,FX.objFrom&&FX.objFrom[i])}</span>
           <span class="lsub">${fmtProg(o,v)} · +${fmt(o.reward)} bounty · ${open?"hide":"what counts?"}</span>
         </span>
       </button>${open?qualList(objQualifiers(o,p,S.bw),OBJ_HINT[o.t]):""}`;
@@ -1348,7 +1432,7 @@ function tabTrain(ex,boss,p){
     help:`Boss health is a week of <b>your</b> output, measured over your first six training days and then locked. Every kilo you move chips it down; mission bounties hit it too. Miss two days in a row and it starts healing.`,
     body:`
       <div class="mathrow"><span>hp remaining</span><span><b>${fmt(boss.hp-S.cd)}</b> / ${fmt(boss.hp)}</span></div>
-      <div style="margin-top:10px">${bar((boss.hp-S.cd)/boss.hp*100,"linear-gradient(90deg,var(--cobaltF),var(--cobalt))",10)}</div>
+      <div style="margin-top:10px">${bar((boss.hp-S.cd)/boss.hp*100,"linear-gradient(90deg,var(--cobaltF),var(--cobalt))",10,FX.hpFrom)}</div>
       <div class="kv" style="margin-top:12px">
         <div class="kvi"><span class="k">asks</span><b>${fmtK(need)}</b><span class="k2">kg / week</span></div>
         <div class="kvi"><span class="k">you make</span><b style="color:${ok?"var(--green)":"var(--gold)"}">${out?fmtK(out):"—"}</b><span class="k2">kg / week</span></div>
@@ -1779,13 +1863,13 @@ document.getElementById("app").addEventListener("click",e=>{
   const a=b.dataset.a;
   if(a==="tab"){ U.tab=b.dataset.t; U.flash=null; U.logDays=5; render(); window.scrollTo(0,0); }
   else if(a==="theme"){ U.theme=b.dataset.v||"night"; applyTheme(); render(); }
-  else if(a==="help"){ const k=b.dataset.k; U.help[k]=!U.help[k]; render(); }
+  else if(a==="help"){ const k=b.dataset.k; U.help[k]=!U.help[k]; U.fx={help:k}; render(); }
   else if(a==="group"){ U.group=b.dataset.g;
     const first=(U.only?EX.filter(x=>x.g===U.group&&countsNow(x)):EX.filter(x=>x.g===U.group))[0]||EX.find(x=>x.g===U.group);
     pickEx(first.id); render(); }
   else if(a==="ex"){ pickEx(b.dataset.e); render(); }
-  else if(a==="obj"){ const i=Number(b.dataset.i); U.openObj = U.openObj===i?null:i; render(); }
-  else if(a==="gate"){ U.openGate=!U.openGate; render(); }
+  else if(a==="obj"){ const i=Number(b.dataset.i); U.openObj = U.openObj===i?null:i; U.fx={expand:true}; render(); }
+  else if(a==="gate"){ U.openGate=!U.openGate; U.fx={expand:true}; render(); }
   else if(a==="only"){ U.only=!U.only; render(); }
   else if(a==="logmore"){ U.logDays=(U.logDays||5)+10; render(); }
   else if(a==="server"){ U.openServer=!U.openServer; render(); }
@@ -1798,6 +1882,7 @@ document.getElementById("app").addEventListener("click",e=>{
     const f=b.dataset.f, s=Number(b.dataset.s), min=Number(b.dataset.min||0);
     U[f]=Math.round(Math.max(a==="inc"?0:min, U[f]+(a==="inc"?s:-s))*10)/10;
     if(a==="dec") U[f]=Math.max(min,U[f]);
+    U.fx={bump:f};
     render();
   }
   else if(a==="log") logSet();
@@ -1819,7 +1904,7 @@ document.getElementById("app").addEventListener("click",e=>{
       publish().then(refreshBoard).then(()=>{ MP.loading=false; render(); }); } }
   else if(a==="logout"){ if(confirm("Switch account? This device keeps every account's training separately.")){
       MP.board={}; MP.ready=false; clearTimeout(MP.pushT);
-      STORE.set("null","liftmania:me").then(()=>{ S=null; MP.me=null; U.tab="train"; renderLogin(); }); } }
+      STORE.set("null","liftmania:me").then(()=>{ S=null; MP.me=null; U.tab="train"; lastView=null; renderLogin(); }); } }
   else if(a==="wipe"){ if(confirm("Wipe all progress on this account? This cannot be undone.")){
     S=migrate(null); rollDaily(); persist(); U.tab="train"; render(); } }
 });
@@ -1850,10 +1935,10 @@ function renderLogin(err,busy,keepName){
       <div class="chead"><h2 class="ctitle">Who's lifting?</h2></div>
       <div class="body">
         <input class="lin" id="inName" placeholder="NAME" maxlength="14" autocomplete="off" autocapitalize="characters" value="${esc(keepName||"")}">
-        <input class="lin" id="inPin" inputmode="numeric" maxlength="4" placeholder="4-DIGIT PIN" autocomplete="off" style="margin-top:8px">
+        <div class="lstate" id="lstate"></div>
+        <input class="lin" id="inPin" inputmode="numeric" maxlength="4" placeholder="4-DIGIT PIN" autocomplete="off" style="margin-top:12px">
         ${err?`<div class="prline" style="margin-top:9px;border-color:var(--red);color:var(--red)">${esc(err)}</div>`:""}
-        <button class="cta" style="margin-top:11px" data-l="go">${busy?"CHECKING…":"START LIFTING"}</button>
-        <div class="mini" style="margin-top:10px">A new name starts a new account. The same name and PIN gets you back in on any device.</div>
+        <button class="cta" id="loginCta" style="margin-top:12px" data-l="go">${busy?"CHECKING…":"START LIFTING"}</button>
       </div>
     </section>
     <section class="card" style="--accent:${cloudOn()?"var(--green)":"var(--dim)"}">
@@ -1867,8 +1952,63 @@ function renderLogin(err,busy,keepName){
       </div>
     </section>
   </div>`;
-  const pin=document.getElementById("inPin");
-  pin.addEventListener("keydown",ev=>{ if(ev.key==="Enter") doLogin(document.getElementById("inName").value,pin.value); });
+  document.getElementById("app").className="enter";
+  const pin=document.getElementById("inPin"), nm=document.getElementById("inName");
+  pin.addEventListener("keydown",ev=>{ if(ev.key==="Enter") doLogin(nm.value,pin.value); });
+  nm.addEventListener("keydown",ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); pin.focus(); } });
+  /* a name is only a few characters, so debounce lightly and check locally */
+  nm.addEventListener("input",()=>{ clearTimeout(LG.t); LG.t=setTimeout(paintLoginState,180); });
+  LG.mode=null;
+  if(!busy){ paintLoginState(); loadRoll(); }
+}
+
+/* ══════════════════ IS THAT NAME TAKEN? ══════════════════ */
+const LG={ids:null,err:false,mode:null,t:null,loading:false};
+
+async function loadRoll(){
+  if(LG.ids||LG.loading) return;
+  if(!cloudOn()){ LG.ids=new Set(); return; }
+  LG.loading=true;
+  try{
+    const rows=await rpc("lm_board",{});
+    LG.ids=new Set((rows||[]).map(r=>String(r.id)));
+    LG.err=false;
+  }catch(e){ LG.ids=new Set(); LG.err=true; }
+  LG.loading=false;
+  LG.mode=null; paintLoginState();
+}
+
+const LOGIN_COPY={
+  empty:  ["START LIFTING","","Pick a name to begin.","var(--dim)"],
+  looking:["CHECKING…","clock",'Looking that name up<span class="dots"></span>',"var(--dim)"],
+  known:  ["LOG IN","users","<b>NAME</b> already has an account — enter its PIN.","var(--cobalt)"],
+  fresh:  ["MAKE ACCOUNT","spark","<b>NAME</b> is free — pick a PIN to claim it.","var(--gold)"],
+  local:  ["START LIFTING","gear","No server connected — this account stays on this device.","var(--dim)"],
+  unknown:["START LIFTING","alert","Couldn't reach the server to check the name.","var(--red)"]
+};
+
+function paintLoginState(){
+  const nm=document.getElementById("inName"), cta=document.getElementById("loginCta"),
+        st=document.getElementById("lstate"), pin=document.getElementById("inPin");
+  if(!nm||!cta||!st) return;
+  const raw=String(nm.value||"").trim(), id=slugify(raw);
+  let mode;
+  if(id.length<2)      mode="empty";
+  else if(!cloudOn())  mode="local";
+  else if(!LG.ids)     mode="looking";
+  else if(LG.err)      mode="unknown";
+  else                 mode=LG.ids.has(id)?"known":"fresh";
+
+  if(mode===LG.mode) return;          /* nothing changed, do not replay */
+  LG.mode=mode;
+  const c=LOGIN_COPY[mode];
+  cta.textContent=c[0];
+  cta.className="cta"+(mode==="known"?" alt":"");
+  st.style.color=c[3];
+  st.innerHTML=(c[1]?ico(c[1]):"")+"<span>"+c[2].replace("NAME",esc(raw.toUpperCase()))+"</span>";
+  if(pin) pin.placeholder = mode==="known" ? "YOUR PIN" : mode==="fresh" ? "CHOOSE A PIN" : "4-DIGIT PIN";
+  /* restart both animations from the top */
+  [cta,st].forEach(el=>{ el.classList.remove("swap"); void el.offsetWidth; el.classList.add("swap"); });
 }
 
 document.getElementById("app").addEventListener("click",e=>{
@@ -1894,6 +2034,7 @@ async function doLogin(name,pin){
       if(!row||!row.token) throw new Error("Server didn't return an account");
       MP.me={id:row.id||id,name:row.name||name,token:row.token};
       MP.status="live";
+      if(LG.ids) LG.ids.add(MP.me.id);
     }catch(e){
       const m=String(e.message||e);
       return renderLogin(/bad pin/i.test(m)
