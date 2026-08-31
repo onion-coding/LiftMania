@@ -98,16 +98,17 @@ h2{margin:0}
 }
 
 /* ══════════════════ HEADER ══════════════════ */
-.topbar{display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center}
-.brandline{grid-column:1;min-width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brandline{min-width:0}
 .brand{font-family:var(--d);font-size:22px;line-height:1;letter-spacing:.01em}
-.themebox{grid-column:2;display:flex;align-items:center;gap:3px;padding:3px;
+.themebox{display:flex;align-items:center;gap:3px;padding:3px;flex:none;
   border:1px solid var(--line);border-radius:11px;background:var(--panel)}
 .theme-pill{display:inline-flex;align-items:center;justify-content:center;width:29px;height:27px;
   border-radius:8px;border:none;background:transparent;color:var(--cream);font-size:13px;line-height:1;padding:0}
 .theme-pill.active{background:var(--goldF);color:var(--onGold)}
 
-.statstrip{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.statstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:2px}
+@media (min-width:900px){ .statstrip{grid-template-columns:repeat(3,200px)} }
 .stat{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:13px;
   background:var(--panel);border:1px solid var(--line);min-width:0}
 .stat .ic{width:18px;height:18px;color:var(--accent,var(--dim))}
@@ -117,12 +118,6 @@ h2{margin:0}
 .stat b i{font-style:normal;font-size:11px;color:var(--dim);margin-left:3px}
 .stat .k{display:block;font-family:var(--m);font-size:9.5px;letter-spacing:.11em;
   text-transform:uppercase;color:var(--dim);margin-top:2px}
-@media (min-width:900px){
-  .topbar{grid-template-columns:auto minmax(0,1fr) auto}
-  .brandline{grid-column:1}
-  .statstrip{grid-column:2;justify-self:end;grid-template-columns:repeat(3,158px)}
-  .themebox{grid-column:3}
-}
 
 /* ══════════════════ TABS ══════════════════ */
 .tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:5px;
@@ -1290,15 +1285,19 @@ function topBar(){
     </div>
     <div class="themebox">${THEMES.map(t=>
       `<button class="theme-pill ${U.theme===t.id?"active":""}" data-a="theme" data-v="${t.id}" title="${t.title}" aria-label="${t.title}">${t.label}</button>`).join("")}</div>
-    <div class="statstrip">
-      <div class="stat" style="--accent:var(--gold)">${ico("flame")}
-        <span class="sv"><b>${S.streak}d <i>×${flowMult(S.streak).toFixed(2)}</i></b><span class="k">streak</span></span></div>
-      <div class="stat" style="--accent:var(--green)">${ico("bolt")}
-        <span class="sv"><b>${S.power} <i>+${Math.min(S.power,60)}%</i></b><span class="k">power</span></span></div>
-      <div class="stat" style="--accent:var(--cobalt)">${ico("weight")}
-        <span class="sv"><b>${fmtK(S.totalTon)} <i>kg</i></b><span class="k">lifted</span></span></div>
-    </div>
   </header>`;
+}
+/* streak and power are damage modifiers on the set you are about to log, so
+   they belong with the training screen rather than above the navigation */
+function statStrip(){
+  return `<div class="statstrip">
+    <div class="stat" style="--accent:var(--gold)">${ico("flame")}
+      <span class="sv"><b>${S.streak}d <i>×${flowMult(S.streak).toFixed(2)}</i></b><span class="k">streak</span></span></div>
+    <div class="stat" style="--accent:var(--green)">${ico("bolt")}
+      <span class="sv"><b>${S.power} <i>+${Math.min(S.power,60)}%</i></b><span class="k">power</span></span></div>
+    <div class="stat" style="--accent:var(--cobalt)">${ico("weight")}
+      <span class="sv"><b>${fmtK(S.totalTon)} <i>kg</i></b><span class="k">lifted</span></span></div>
+  </div>`;
 }
 function tabBar(){
   return `<nav class="tabs">${TABS.map(t=>
@@ -1407,7 +1406,7 @@ function tabTrain(ex,boss,p){
   }):"";
 
   const rest=`<button id="restBtn" class="ghost wide" style="display:${U.rest>0?"block":"none"}" data-a="skiprest">rest</button>`;
-  return cols(missions+bossCard+crew, logger+logged) + rest + (U.flash?flashCard(U.flash):"");
+  return statStrip() + cols(missions+bossCard+crew, logger+logged) + rest + (U.flash?flashCard(U.flash):"");
 }
 
 function loggerBody(ex){
@@ -1699,7 +1698,10 @@ function tabYou(){
     body:`<div class="kv">
         <div class="kvi"><span class="k">moved</span><b>${fmtK(S.totalTon)}</b><span class="k2">kg</span></div>
         <div class="kvi"><span class="k">sets</span><b>${S.log.length}</b><span class="k2">logged</span></div>
-        <div class="kvi"><span class="k">bosses</span><b>${S.ci}</b><span class="k2">${S.perfectWeeks} perfect wks</span></div>
+        <div class="kvi"><span class="k">bosses</span><b>${S.ci}</b><span class="k2">down</span></div>
+        <div class="kvi"><span class="k">streak</span><b>${S.streak}d</b><span class="k2">×${flowMult(S.streak).toFixed(2)} flow</span></div>
+        <div class="kvi"><span class="k">power</span><b>${S.power}</b><span class="k2">+${Math.min(S.power,60)}% damage</span></div>
+        <div class="kvi"><span class="k">perfect</span><b>${S.perfectWeeks}</b><span class="k2">weeks</span></div>
       </div>
       <div style="display:flex;align-items:center;gap:11px;margin-top:13px">
         <span class="mini" style="flex:none">bodyweight</span>
