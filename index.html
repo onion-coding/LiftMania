@@ -11,116 +11,341 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
 
+/* ══════════════════ DESIGN TOKENS ══════════════════
+   Every theme defines the same set, so nothing in the app ever needs a raw
+   hex. Accent colours come in three roles and they are NOT interchangeable:
+
+     --x     text/icon of that colour sitting on a page surface  (>=4.5:1)
+     --xF    a filled block of that colour
+     --onX   the text colour that sits on top of --xF
+
+   In the dark theme fills are bright and their ink is near-black; in the
+   light themes fills are deep and their ink is white. Using --x as a
+   background (or --xF as text) is what makes a theme unreadable. */
 :root{
-  --night:#12102B; --panel:#1E1946; --panel2:#2A2361; --line:#38307A; --deep:#0C0A20;
-  --cobalt:#3D6BFF; --magenta:#FF3D9A; --green:#00E88C; --gold:#FFC53D;
-  --cream:#F2EDFF; --dim:#B6ADDD; --red:#FF6B5E;
+  color-scheme:dark;
+  --night:#12102B; --panel:#1C1841; --panel2:#2A2364; --line:#3B3484; --deep:#0B0920;
+  --cream:#F5F2FF; --dim:#B3A9DC;
+  --row:rgba(255,255,255,.05);
+  --gold:#FFC93F;    --goldF:#FFC93F;    --onGold:#241B00;
+  --green:#3DEFA7;   --greenF:#00E88C;   --onGreen:#002B1B;
+  --cobalt:#8FACFF;  --cobaltF:#3B65F0;  --onCobalt:#FFFFFF;
+  --magenta:#FF7ABA; --magentaF:#FF3D9A; --onMagenta:#2E0619;
+  --red:#FF9086;     --redF:#FF6B5E;     --onRed:#2E0805;
+  --onGroup:#12102B; --focus:#FFC93F;
+  --holdBg:#4A2E6E; --holdFg:#EFDCFF;
+  --kgBg:#1E3E7C;   --kgFg:#D2E1FF;
+  --bwBg:#1C4A37;   --bwFg:#C6F5DF;
   --d:'Bungee',Impact,'Haettenschweiler','Arial Narrow Bold',sans-serif;
   --b:'Space Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
   --m:'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--night);color:var(--cream);font-family:var(--b);
-  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);}
-#app{max-width:480px;margin:0 auto;padding:18px 14px 40px;display:flex;flex-direction:column;gap:12px}
-button{cursor:pointer;font-family:inherit;border:none}
-:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+body[data-theme="foresty"]{
+  color-scheme:light;
+  --night:#F1EEE3; --panel:#FCFAF5; --panel2:#E7E0CF; --line:#D5CAB2; --deep:#EFEADD;
+  --cream:#1D2925; --dim:#5A6961;
+  --row:rgba(60,45,15,.045);
+  --gold:#7A570B;    --goldF:#E2A63C;    --onGold:#241900;
+  --green:#1D6B45;   --greenF:#257A4C;   --onGreen:#FFFFFF;
+  --cobalt:#1A5D73;  --cobaltF:#1F718A;  --onCobalt:#FFFFFF;
+  --magenta:#993858; --magentaF:#AF446B; --onMagenta:#FFFFFF;
+  --red:#A33528;     --redF:#BE4436;     --onRed:#FFFFFF;
+  --onGroup:#FFFFFF; --focus:#1A5D73;
+  --holdBg:#EADFF2; --holdFg:#4B2A6B;
+  --kgBg:#DBE5F3;   --kgFg:#1D4C74;
+  --bwBg:#DAECDF;   --bwFg:#1C5A38;
+}
+body[data-theme="bright"]{
+  color-scheme:light;
+  --night:#F4F6F9; --panel:#FFFFFF; --panel2:#EDF1F6; --line:#D8DFE8; --deep:#F1F4F8;
+  --cream:#141821; --dim:#586474;
+  --row:rgba(15,23,42,.035);
+  --gold:#7F5400;    --goldF:#F0B429;    --onGold:#241900;
+  --green:#0E7A45;   --greenF:#12864C;   --onGreen:#FFFFFF;
+  --cobalt:#1D4ED8;  --cobaltF:#2456D6;  --onCobalt:#FFFFFF;
+  --magenta:#AC1D5A; --magentaF:#C22B6C; --onMagenta:#FFFFFF;
+  --red:#AF2A20;     --redF:#C4342A;     --onRed:#FFFFFF;
+  --onGroup:#FFFFFF; --focus:#1D4ED8;
+  --holdBg:#ECE3FA; --holdFg:#4A2A85;
+  --kgBg:#DDE8FB;   --kgFg:#17458F;
+  --bwBg:#DBEFE3;   --bwFg:#0F6438;
+}
 
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px}
-.eyebrow{font-family:var(--m);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
-.disp{font-family:var(--d);line-height:1.05}
+/* ══════════════════ BASE ══════════════════ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--night);color:var(--cream);font-family:var(--b);
+  font-size:15px;line-height:1.5;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);position:relative}
+#app{width:min(100vw - 20px, 470px);margin:14px auto 30px;padding-bottom:24px;
+  display:flex;flex-direction:column;gap:12px}
+button{cursor:pointer;font-family:inherit;border:none;color:inherit;font-size:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h2{margin:0}
+.ic{width:20px;height:20px;flex:none;display:block}
+.disp{font-family:var(--d);line-height:1.1}
 .mono{font-family:var(--m)}
-.row{display:flex;justify-content:space-between;align-items:baseline}
-.muted{color:var(--dim);font-size:13px;line-height:1.45}
+.mini{font-family:var(--m);font-size:11.5px;color:var(--dim);line-height:1.45}
+.mini b{color:var(--cream);font-weight:500}
+.empty{font-size:13.5px;color:var(--dim);line-height:1.5;padding:2px 0}
+
+/* two columns once there is room for them */
+.cols{display:flex;flex-direction:column;gap:12px}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (min-width:900px){
+  #app{width:min(100vw - 40px, 1100px);gap:16px}
+  .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+}
+
+/* ══════════════════ HEADER ══════════════════ */
+.topbar{display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center}
+.brandline{grid-column:1;min-width:0}
+.brand{font-family:var(--d);font-size:22px;line-height:1;letter-spacing:.01em}
+.themebox{grid-column:2;display:flex;align-items:center;gap:3px;padding:3px;
+  border:1px solid var(--line);border-radius:11px;background:var(--panel)}
+.theme-pill{display:inline-flex;align-items:center;justify-content:center;width:29px;height:27px;
+  border-radius:8px;border:none;background:transparent;color:var(--cream);font-size:13px;line-height:1;padding:0}
+.theme-pill.active{background:var(--goldF);color:var(--onGold)}
+
+.statstrip{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:13px;
+  background:var(--panel);border:1px solid var(--line);min-width:0}
+.stat .ic{width:18px;height:18px;color:var(--accent,var(--dim))}
+.stat .sv{min-width:0}
+.stat b{display:block;font-family:var(--m);font-size:15px;font-weight:500;line-height:1.15;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat b i{font-style:normal;font-size:11px;color:var(--dim);margin-left:3px}
+.stat .k{display:block;font-family:var(--m);font-size:9.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--dim);margin-top:2px}
+@media (min-width:900px){
+  .topbar{grid-template-columns:auto minmax(0,1fr) auto}
+  .brandline{grid-column:1}
+  .statstrip{grid-column:2;justify-self:end;grid-template-columns:repeat(3,158px)}
+  .themebox{grid-column:3}
+}
+
+/* ══════════════════ TABS ══════════════════ */
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:5px;
+  background:var(--panel);border:1px solid var(--line);border-radius:15px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:5px;border-radius:11px;
+  padding:9px 2px 8px;background:transparent;color:var(--dim);
+  font-family:var(--m);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;line-height:1}
+.tab .ic{width:21px;height:21px}
+.tab.on{background:var(--goldF);color:var(--onGold)}
+@media (min-width:900px){
+  .tabs{max-width:560px}
+  .tab{flex-direction:row;gap:8px;font-size:11px;padding:10px 4px}
+}
+
+/* ══════════════════ CARDS ══════════════════
+   One header line: an icon in the section's colour, a title, optional meta,
+   and the ? that holds every word of explanation. */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px 16px}
+.chead{display:flex;align-items:center;gap:11px}
+.cicon{width:32px;height:32px;border-radius:10px;flex:none;display:flex;align-items:center;
+  justify-content:center;background:var(--row);color:var(--accent,var(--cream))}
+@supports (background:color-mix(in srgb,red 10%,white)){
+  .cicon{background:color-mix(in srgb,var(--accent,var(--dim)) 15%,transparent)}
+}
+.ctitle{flex:1;min-width:0;font-size:15px;font-weight:700;line-height:1.2;letter-spacing:-.01em}
+.ctitle.big{font-family:var(--d);font-size:19px;font-weight:400;letter-spacing:.01em;line-height:1.15}
+.cmeta{font-family:var(--m);font-size:11.5px;color:var(--dim);white-space:nowrap;flex:none}
+.hbtn{width:24px;height:24px;flex:none;border-radius:50%;background:var(--row);
+  color:var(--dim);font-family:var(--m);font-size:12px;line-height:1;padding:0}
+.hbtn.on{background:var(--goldF);color:var(--onGold)}
+.csub{font-family:var(--m);font-size:11.5px;color:var(--dim);margin-top:7px;line-height:1.45}
+.help{margin-top:12px;padding:12px 13px;border-radius:12px;background:var(--deep);
+  color:var(--dim);font-size:13px;line-height:1.6}
+.help b{color:var(--cream);font-weight:500}
+.body{margin-top:13px}
+
+/* ══════════════════ ROWS ══════════════════ */
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:11px;padding:11px 0;width:100%;text-align:left;
+  background:none;border:none;border-bottom:1px solid var(--line);min-width:0;color:inherit}
+.li:first-child{padding-top:0}
+.li:last-child{padding-bottom:0;border-bottom:none}
+.ldot{width:9px;height:9px;border-radius:50%;flex:none}
+.lmain{flex:1;min-width:0}
+.lname{font-size:14px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lsub{display:block;font-family:var(--m);font-size:11px;color:var(--dim);margin-top:3px;line-height:1.35}
+.lval{flex:none;text-align:right;font-family:var(--m);font-size:13.5px;line-height:1.2;white-space:nowrap}
+.lval .u{font-size:10px;color:var(--dim);margin-left:3px}
+
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kv.two{grid-template-columns:repeat(2,1fr)}
+.kvi{padding:10px 11px;border-radius:12px;background:var(--row);border:none;min-width:0;text-align:left}
+.kvi .k{display:block;font-family:var(--m);font-size:9.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--dim)}
+.kvi b{display:block;font-family:var(--m);font-size:16px;font-weight:500;margin-top:4px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kvi .k2{display:block;font-family:var(--m);font-size:10px;color:var(--dim);margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 .track{position:relative;background:var(--deep);border-radius:99px;overflow:hidden;width:100%}
 .fill{position:absolute;inset:0 auto 0 0;border-radius:99px;transition:width .7s cubic-bezier(.2,.8,.2,1)}
 
-header{display:flex;justify-content:space-between;align-items:flex-end}
-.tabs{display:flex;gap:6px}
-.tab{flex:1;border-radius:12px;padding:9px 1px;background:transparent;color:var(--dim);
-  border:1px solid var(--line);font-family:var(--d);font-size:9.5px;letter-spacing:-.01em}
-.tab.on{background:var(--gold);color:var(--night);border-color:var(--gold)}
+/* ══════════════════ MISSIONS ══════════════════ */
+.objrow{display:flex;align-items:flex-start;gap:12px;padding:12px 0;width:100%;text-align:left;
+  background:none;border:none;border-bottom:1px solid var(--line);color:inherit}
+.objrow:first-child{padding-top:0}
+.objrow:last-child{padding-bottom:0;border-bottom:none}
+.objbox{width:22px;height:22px;flex:none;border-radius:7px;background:var(--row);
+  display:flex;align-items:center;justify-content:center;font-family:var(--m);font-size:11px;
+  color:var(--dim);margin-top:1px}
+.objrow.done .objbox{background:var(--greenF);color:var(--onGreen)}
+.objtxt{flex:1;min-width:0}
+.objlab{display:block;font-size:14px;line-height:1.3}
+.objrow.done .objlab{color:var(--dim)}
+.objbar{display:block;margin:8px 0 6px}
 
-/* league */
-.lrow{display:flex;align-items:center;gap:9px;padding:10px 8px;border-top:1px solid var(--line)}
-.lrow:first-of-type{border-top:none}
-.lrow.me{background:linear-gradient(90deg,rgba(255,197,61,.14),transparent);border-radius:10px}
-.rk{width:27px;height:27px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;
-  font-family:var(--d);font-size:11px;background:var(--panel2);color:var(--dim)}
-.rk.g1{background:var(--gold);color:var(--night)}
-.rk.g2{background:#CFC7EE;color:var(--night)}
-.rk.g3{background:#C4813C;color:var(--night)}
-.pname{font-weight:700;font-size:14px;line-height:1.2}
-.pstat{font-family:var(--m);font-size:10px;color:var(--dim);margin-top:2px}
-.pbig{font-family:var(--m);font-size:15px;color:var(--gold);margin-left:auto;flex:none;text-align:right}
-.pbig span{font-size:10px;color:var(--dim)}
-.login{min-height:72vh;display:flex;flex-direction:column;justify-content:center;gap:14px}
-.lin{width:100%;height:46px;text-align:center;font-size:17px;letter-spacing:.06em}
+/* ══════════════════ FEED ══════════════════ */
+.fr{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.fr:first-child{padding-top:0}
+.fr:last-child{padding-bottom:0;border-bottom:none}
+.av{width:28px;height:28px;flex:none;border-radius:9px;background:var(--row);
+  display:flex;align-items:center;justify-content:center;font-family:var(--d);font-size:11px}
+.av.me{background:var(--goldF);color:var(--onGold)}
+.ftxt{flex:1;min-width:0;font-size:13.5px;line-height:1.3}
+.ftxt b{font-weight:700}
+.ftime{flex:none;font-family:var(--m);font-size:10.5px;color:var(--dim);white-space:nowrap;padding-top:3px}
+.prbadge{display:inline-block;font-family:var(--m);font-size:9.5px;letter-spacing:.07em;padding:2px 5px;
+  border-radius:5px;background:var(--goldF);color:var(--onGold);margin-left:6px}
 
-.chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.gchip{border-radius:9px;padding:6px 9px;white-space:nowrap;font-size:12px;font-weight:700;
-  background:var(--panel2);color:var(--dim)}
-.exwrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.exchip{border-radius:9px;padding:7px 9px;font-size:13px;background:transparent;color:var(--cream);
-  border:1px solid var(--line);display:inline-flex;align-items:center;gap:6px}
-.exchip.on{background:var(--cream);color:var(--night);border-color:var(--cream)}
+/* ══════════════════ BOARD ══════════════════ */
+.lrow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.lrow:first-child{padding-top:0}
+.lrow:last-child{padding-bottom:0;border-bottom:none}
+.lrow.me .pname{color:var(--gold)}
+.rk{width:26px;height:26px;border-radius:9px;flex:none;display:flex;align-items:center;
+  justify-content:center;font-family:var(--d);font-size:11px;background:var(--row);color:var(--dim)}
+.rk.g1{background:var(--goldF);color:var(--onGold)}
+.rk.g2{background:#B9BECF;color:#1A1D26}
+.rk.g3{background:#9A5B22;color:#FFFFFF}
+.pname{font-weight:700;font-size:14.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.youtag{font-family:var(--m);font-size:9.5px;letter-spacing:.1em;color:var(--onGold);
+  background:var(--goldF);border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:2px}
+.pbig{font-family:var(--m);font-size:16px;color:var(--gold);margin-left:auto;flex:none;
+  text-align:right;line-height:1.15}
+.pbig span{display:block;font-size:9px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+
+/* ══════════════════ SIGN IN ══════════════════ */
+.login{min-height:72vh;display:flex;flex-direction:column;justify-content:center;gap:14px;
+  width:min(100%,420px);margin:0 auto}
+.lin{width:100%;height:50px;text-align:center;font-size:18px;letter-spacing:.08em;
+  font-family:var(--m);background:var(--deep);color:var(--cream);border:1px solid var(--line);
+  border-radius:12px;padding:0 10px}
+
+/* ══════════════════ PICKER ══════════════════ */
+.gchips{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.gchip{border-radius:10px;padding:9px 4px;font-size:12.5px;font-weight:700;background:var(--row);
+  color:var(--cream);border:1px solid transparent;line-height:1.1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gchip .cnt{font-family:var(--m);font-size:9px;color:var(--gold);vertical-align:2px;margin-left:4px}
+.exwrap{display:flex;flex-wrap:wrap;gap:6px}
+.exchip{border-radius:10px;padding:9px 11px;font-size:13.5px;background:var(--row);color:var(--cream);
+  border:1px solid transparent;display:inline-flex;align-items:center;gap:7px;line-height:1.15}
+.exchip.on{background:var(--cream);color:var(--night);font-weight:700}
 .exchip.hit{border-color:var(--gold)}
-.tag{font-family:var(--m);font-size:9px;letter-spacing:.06em;padding:2px 4px;border-radius:4px;
-  background:var(--panel2);color:var(--dim);flex:none}
+.exchip.on.hit{box-shadow:0 0 0 2px var(--goldF)}
+.tag{font-family:var(--m);font-size:10px;font-weight:500;letter-spacing:.07em;padding:3px 5px;
+  border-radius:5px;background:var(--panel2);color:var(--dim);flex:none;line-height:1.1}
+.tag.hold{background:var(--holdBg);color:var(--holdFg)}
+.tag.kg{background:var(--kgBg);color:var(--kgFg)}
+.tag.bw{background:var(--bwBg);color:var(--bwFg)}
 .exchip.on .tag{background:var(--night);color:var(--cream)}
-.tag.hold{background:#4A2E6E;color:#E6C9FF}
-.tag.kg{background:#1F3F7A;color:#B9D2FF}
-.tag.bw{background:#2E4A3C;color:#B6F0D4}
-.exchip.on .tag.hold,.exchip.on .tag.kg,.exchip.on .tag.bw{opacity:.85}
-.sidebox{margin-top:10px;padding:9px 11px;border-radius:10px;border:1px solid;background:var(--deep)}
-.exchip .side{font-family:var(--m);font-size:9px;color:var(--magenta);flex:none}
-.prline{margin-top:8px;padding:8px 10px;border-radius:10px;border:1px solid;font-size:12px;line-height:1.45;background:var(--deep)}
-.recrow{padding:10px 0;border-bottom:1px solid var(--line)}
-.recstats{display:flex;flex-wrap:wrap;gap:10px;margin-top:5px;font-family:var(--m);font-size:11px;color:var(--dim)}
-.recstats b{color:var(--gold);font-weight:500}
-.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
-.legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:9px;font-family:var(--m);font-size:10px;color:var(--dim)}
-.expand{margin-top:9px;padding:10px;border-radius:10px;background:var(--deep);border:1px solid var(--line)}
-.qhead{font-family:var(--m);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:7px}
-.qchip{border-radius:8px;padding:5px 8px;font-size:12px;background:var(--panel2);color:var(--cream);
-  border:1px solid var(--line);margin:0 4px 4px 0}
-.tapme{font-family:var(--m);font-size:10px;color:var(--gold);margin-top:4px}
-.objbtn{width:100%;text-align:left;background:transparent;padding:0}
-.filt{border-radius:8px;padding:5px 9px;font-size:11px;font-family:var(--m);background:var(--panel2);color:var(--dim);border:1px solid var(--line)}
-.filt.on{background:var(--gold);color:var(--night);border-color:var(--gold)}
+.exchip .side{font-family:var(--m);font-size:10px;color:var(--magenta);flex:none}
+.exchip.on .side{color:var(--night);opacity:.7}
+.expand{margin-top:10px;padding:12px;border-radius:12px;background:var(--deep)}
+.qchip{border-radius:9px;padding:7px 9px;font-size:12.5px;background:var(--row);color:var(--cream);
+  border:none;margin:0 5px 5px 0;display:inline-flex;align-items:center;gap:6px}
+.filt{border-radius:9px;padding:7px 11px;font-size:12px;font-family:var(--m);background:var(--row);
+  color:var(--cream);border:none;line-height:1.35;white-space:nowrap}
+.filt.on{background:var(--goldF);color:var(--onGold)}
+.chiprow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.seg{display:inline-flex;border-radius:9px;overflow:hidden;background:var(--row);flex:none}
+.seg button{padding:7px 12px;font-family:var(--m);font-size:12px;color:var(--dim);
+  background:transparent;line-height:1.3}
+.seg button.on{background:var(--goldF);color:var(--onGold)}
+.legend{display:flex;flex-direction:column;gap:9px;font-family:var(--m);font-size:11.5px;
+  color:var(--dim);line-height:1.35}
+.legend>span{display:flex;align-items:center;gap:9px}
+.legend .swatch{width:20px;height:14px;border-radius:4px;flex:none;border:1px solid var(--gold)}
 
-.steppers{display:flex;gap:8px;margin-top:12px}
+/* ══════════════════ LOGGER ══════════════════ */
+.steppers{display:flex;gap:10px}
 .stepper{flex:1;min-width:0}
-.sbtn{width:34px;height:44px;border-radius:10px;background:var(--panel2);color:var(--cream);font-size:19px}
-input.sval{flex:1;height:44px;border-radius:10px;background:var(--deep);color:var(--cream);
-  font-family:var(--m);font-size:16px;text-align:center;border:1px solid transparent;
+.slabel{display:block;font-family:var(--m);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sbtn{width:38px;height:48px;border-radius:11px;background:var(--row);color:var(--cream);
+  font-size:21px;line-height:1}
+.sbtn:active{background:var(--goldF);color:var(--onGold)}
+input.sval{flex:1;height:48px;border-radius:11px;background:var(--deep);color:var(--cream);
+  font-family:var(--m);font-size:18px;text-align:center;border:1px solid transparent;
   min-width:0;width:100%;padding:0;-webkit-appearance:none}
-input.sval:focus{border-color:var(--gold);outline:none;background:#0A0818}
-.srow{display:flex;align-items:center;gap:4px;margin-top:5px}
+input.sval:focus{border-color:var(--focus);outline:none;background:var(--panel2)}
+.srow{display:flex;align-items:center;gap:6px}
+.mathrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  font-family:var(--m);font-size:12px;color:var(--dim);padding:11px 13px;border-radius:12px;
+  background:var(--row)}
+.mathrow b{color:var(--cream);font-weight:500;font-size:15px}
+.prline{padding:10px 12px;border-radius:12px;font-size:12.5px;line-height:1.45;background:var(--deep);
+  border-left:3px solid var(--line)}
+.cta{width:100%;border-radius:14px;padding:17px 0;background:var(--greenF);color:var(--onGreen);
+  font-family:var(--d);font-size:16px}
+.cta.alt{background:var(--cobaltF);color:var(--onCobalt)}
+.ghost{border-radius:10px;padding:10px 13px;background:var(--row);color:var(--cream);
+  border:none;font-family:var(--m);font-size:12px}
+.ghost.wide{width:100%}
+.gatechip{display:block;width:100%;border-radius:12px;padding:11px 13px;background:var(--row);
+  border:none;color:var(--cream);font-family:var(--m);font-size:12px;text-align:left;line-height:1.5}
 
-.cta{width:100%;border-radius:12px;padding:14px 0;background:var(--green);color:var(--night);
-  font-family:var(--d);font-size:15px;margin-top:12px}
-.ghost{border-radius:10px;padding:9px 12px;background:transparent;color:var(--dim);
-  border:1px solid var(--line);font-family:var(--m);font-size:11px}
-.gate{display:inline-block;border-radius:8px;padding:4px 8px;background:var(--panel2);
-  font-family:var(--m);font-size:11px;margin-top:9px}
+/* ══════════════════ BOSSES ══════════════════ */
+.roster{display:grid;grid-template-columns:1fr;column-gap:26px}
+@media (min-width:900px){ .roster{grid-template-columns:1fr 1fr} }
+.acthead{grid-column:1/-1;font-family:var(--d);font-size:12px;color:var(--gold);
+  margin:20px 0 4px;letter-spacing:.04em}
+.acthead:first-child{margin-top:0}
+.brow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.brow.done{opacity:.45}
+.brow.done .bname{text-decoration:line-through}
+.brow.cur{background:var(--row);border-radius:12px;padding:12px;border-bottom:none;margin:4px 0}
+.bnum{font-family:var(--m);font-size:11px;color:var(--dim);flex:none;width:22px}
+.bname{font-family:var(--d);font-size:12px;line-height:1.3}
 
-.obj{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
-.obj:first-of-type{border-top:none}
-.box{width:20px;height:20px;border-radius:6px;border:1px solid var(--line);flex:none;margin-top:2px;
-  display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--night)}
-.box.done{background:var(--green);border-color:var(--green)}
+/* ══════════════════ WEEK ══════════════════ */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.wday{text-align:center;border-radius:11px;padding:10px 1px;background:var(--row);
+  font-family:var(--m);font-size:10.5px;color:var(--dim);line-height:1.7}
+.wday.p{background:var(--panel2);color:var(--cream)}
+.wday.f{background:var(--greenF);color:var(--onGreen)}
+.wday.today{outline:2px solid var(--gold);outline-offset:1px;color:var(--cream)}
+.daysep{display:flex;align-items:center;gap:10px;margin:16px 0 9px;font-family:var(--m);
+  font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.daysep:first-child{margin-top:0}
+.daysep .ln{flex:1;height:1px;background:var(--line)}
 
-.bosscard{border-radius:12px;padding:11px;border:1px solid var(--line)}
-.bosscard.cur{background:var(--panel2);border-color:var(--cobalt)}
-.bosscard.done{opacity:.4}
-.bosscard.done .bname{text-decoration:line-through}
-.acthead{font-family:var(--d);font-size:12px;color:var(--gold);margin:14px 0 4px;letter-spacing:.04em}
+/* ══════════════════ FORMS & BANNERS ══════════════════ */
+input[type=text],input[type=number]{background:var(--deep);color:var(--cream);
+  border:1px solid var(--line);border-radius:11px;padding:11px;font-family:var(--m);font-size:14px}
+input::placeholder{color:var(--dim);opacity:1}
+.banner{display:flex;align-items:flex-start;gap:11px;border-radius:13px;padding:13px 14px;
+  background:var(--goldF);color:var(--onGold);font-size:13px;line-height:1.5}
+.banner .ic{margin-top:1px}
+.banner.warn{background:var(--redF);color:var(--onRed)}
+.banner.info{background:var(--panel2);color:var(--cream)}
+.banner .ghost{display:inline-block;margin-top:9px;background:rgba(0,0,0,.14);color:inherit}
 
+/* ══════════════════ DEFEAT SEQUENCE ══════════════════
+   The overlay always draws on a dark scrim, so it pins its own dark token
+   set - otherwise the light themes would paint dark ink onto it. */
 #fx{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 50% 45%,rgba(0,232,140,.14),rgba(6,4,18,.93) 60%);
-  padding:24px;text-align:center;overflow:hidden}
+  background:radial-gradient(circle at 50% 45%,rgba(0,232,140,.20),rgba(10,8,26,0) 62%),#0A0818;
+  padding:24px;text-align:center;overflow:hidden;color:var(--cream);
+  --cream:#F5F2FF; --dim:#C6BEE8; --night:#12102B;
+  --gold:#FFC93F; --goldF:#FFC93F; --onGold:#241B00;
+  --green:#3DEFA7; --greenF:#00E88C; --magenta:#FF7ABA;
+  --line:rgba(255,255,255,.24); --row:rgba(255,255,255,.07)}
 #fx.on{display:flex}
 .shake{animation:shake .65s cubic-bezier(.36,.07,.19,.97) both}
 @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}
@@ -128,7 +353,7 @@ input.sval:focus{border-color:var(--gold);outline:none;background:#0A0818}
 .slam{animation:slam .6s cubic-bezier(.2,1.5,.3,1) both}
 @keyframes slam{0%{transform:scale(2.7);opacity:0;letter-spacing:.45em;filter:blur(7px)}
   55%{opacity:1}100%{transform:scale(1);opacity:1;letter-spacing:.01em;filter:blur(0)}}
-.ring{position:absolute;border-radius:50%;border:2px solid var(--green);animation:ring 1.2s cubic-bezier(.1,.7,.3,1) forwards}
+.ring{position:absolute;border-radius:50%;border:2px solid var(--greenF);animation:ring 1.2s cubic-bezier(.1,.7,.3,1) forwards}
 @keyframes ring{from{width:0;height:0;opacity:.95}to{width:150vmax;height:150vmax;opacity:0}}
 .spark{position:absolute;width:7px;height:7px;border-radius:2px;animation:spark 1.2s cubic-bezier(.15,.7,.3,1) forwards}
 @keyframes spark{from{transform:translate(0,0) scale(1.2) rotate(0);opacity:1}
@@ -136,10 +361,12 @@ input.sval:focus{border-color:var(--gold);outline:none;background:#0A0818}
 .fxcard{position:relative;z-index:2;max-width:340px}
 .rise{animation:rise .55s .3s both}
 @keyframes rise{from{transform:translateY(16px);opacity:0}}
-.actban{display:inline-block;border-radius:12px;padding:10px 18px;background:var(--gold);color:var(--night);
+.fxpill{display:inline-block;border-radius:999px;padding:5px 12px;background:var(--row);
+  font-family:var(--m);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.actban{display:inline-block;border-radius:12px;padding:11px 18px;background:var(--goldF);color:var(--onGold);
   font-family:var(--d);font-size:13px;transform-origin:center;animation:sweepin .75s .4s both}
 @keyframes sweepin{from{transform:scaleX(.04) skewX(-18deg);opacity:0}}
-.crack{height:14px;margin:14px 0;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--gold),var(--magenta));
+.crack{height:14px;margin:14px 0;border-radius:99px;background:linear-gradient(90deg,var(--greenF),var(--goldF),var(--magentaF));
   animation:crack .7s cubic-bezier(.6,0,.9,.2) forwards}
 @keyframes crack{0%{transform:scaleX(1);opacity:1}70%{transform:scaleX(1.05);opacity:1}
   100%{transform:scaleX(0);opacity:0}}
@@ -147,18 +374,6 @@ input.sval:focus{border-color:var(--gold);outline:none;background:#0A0818}
 @keyframes fadein{from{opacity:0}}
 .pop{animation:pop .4s cubic-bezier(.2,1.4,.4,1) both}
 @keyframes pop{from{transform:scale(.86);opacity:0}}
-@keyframes popdup{from{transform:scale(.86);opacity:0}}
-.week{display:flex;gap:4px}
-.wday{flex:1;text-align:center;border-radius:9px;padding:7px 2px;border:1px solid var(--line);
-  font-family:var(--m);font-size:10px;color:var(--dim)}
-.wday.p{background:var(--panel2);color:var(--cream)}
-.wday.f{background:var(--green);color:var(--night);border-color:var(--green)}
-.wday.today{border-color:var(--gold);border-width:2px}
-input[type=text],input[type=number]{background:var(--deep);color:var(--cream);border:1px solid var(--line);
-  border-radius:9px;padding:8px;font-family:var(--m);font-size:14px}
-textarea{width:100%;background:var(--deep);color:var(--cream);border:1px solid var(--line);
-  border-radius:9px;padding:8px;font-family:var(--m);font-size:11px;min-height:70px}
-.banner{border-radius:12px;padding:11px;background:var(--gold);color:var(--night);font-size:12px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -171,14 +386,17 @@ textarea{width:100%;background:var(--deep);color:var(--cream);border:1px solid v
 <script>
 "use strict";
 
-/* ══════════════════ MUSCLE GROUPS ══════════════════ */
+/* ══════════════════ MUSCLE GROUPS ══════════════════
+   c = the colour on a dark background, l = the same hue deep enough to read
+   on a light one. gcol() picks; never use .c directly. */
 const GROUPS = {
-  chest:{name:"Chest",c:"#FF6B5E"}, back:{name:"Back",c:"#3D6BFF"},
-  shoulders:{name:"Shoulders",c:"#FFC53D"}, biceps:{name:"Biceps",c:"#00E88C"},
-  triceps:{name:"Triceps",c:"#00C4E8"}, legs:{name:"Legs",c:"#FF3D9A"},
-  core:{name:"Core",c:"#B78CFF"}
+  chest:{name:"Chest",c:"#FF8478",l:"#B23A2C"}, back:{name:"Back",c:"#7C9CFF",l:"#1D4ED8"},
+  shoulders:{name:"Shoulders",c:"#FFC53D",l:"#8A5D00"}, biceps:{name:"Biceps",c:"#2FE39C",l:"#12784A"},
+  triceps:{name:"Triceps",c:"#3FCFEE",l:"#0B6980"}, legs:{name:"Legs",c:"#FF6FB2",l:"#B01B5E"},
+  core:{name:"Core",c:"#BB9BFF",l:"#6234B8"}
 };
 const GK = Object.keys(GROUPS);
+const gcol = g => U.theme==="night" ? GROUPS[g].c : GROUPS[g].l;
 
 /* mode: bw = bodyweight × leverage · load = external kg · bwload = bodyweight + added · time = seconds */
 const EX = [
@@ -388,7 +606,7 @@ function bossAt(i){
     hp:Math.round(bossHp(99)*Math.pow(1.12,k+1)*(ENDLESS[k%ENDLESS.length]&&ENDLESS[k%ENDLESS.length].time?HOLD_HP:1)/50)*50, act:"XI · Endless"};
 }
 function gateText(gt){
-  if(!gt) return "Takes any work";
+  if(!gt) return "any exercise, any weight";
   const b=[];
   if(gt.g) b.push(GROUPS[gt.g].name.toLowerCase()+" only");
   if(gt.minLoad) b.push(gt.minLoad+"kg+ per rep");
@@ -615,8 +833,10 @@ function statsCard(){
   const lifts={};
   Object.keys(S.records||{}).forEach(id=>{ const r=S.records[id];
     if(r&&(r.e1rm>0||r.reps>0)) lifts[id]={e:Math.round(r.e1rm||0),l:Math.round((r.load||0)*10)/10,r:r.reps||0}; });
+  const recent=(S.log||[]).slice(0,8).map(r=>({t:r.t||dayNum(r.d)*864e5+432e5,ex:r.ex,sets:r.sets,
+    reps:r.reps,load:r.load,sd:r.sd,ton:Math.round(r.ton||0),pr:r.pr||null}));
   return {name:MP.me.name,pwr:S.power|0,ci:S.ci|0,streak:S.streak|0,ton:Math.round(S.totalTon||0),
-          prs:(S.prLog||[]).length,pw:S.perfectWeeks|0,sets:(S.log||[]).length,lastDay:S.lastDay,lifts};
+          prs:(S.prLog||[]).length,pw:S.perfectWeeks|0,sets:(S.log||[]).length,lastDay:S.lastDay,lifts,recent};
 }
 
 /* push my save + my board card to the server */
@@ -664,6 +884,7 @@ const EMPTY={ver:4,bw:75,power:0,streak:0,lastDay:null,start:null,ci:0,cd:0,peak
   pace:7,baseWeek:null,calLocked:false,wstep:2.5,
   decayedThrough:null,away:null,daily:null,records:{},prLog:[],last:{},log:[],totalTon:0,weeks:{},
   lastExport:0,perfectWeeks:0,savedAt:0};
+const THEMES=[{id:"night",label:"☾",title:"Night"},{id:"foresty",label:"🌿",title:"Foresty"},{id:"bright",label:"☀",title:"Bright"}];
 
 /* forward-compatible: unknown keys from newer saves are kept, missing ones defaulted */
 function migrate(o){
@@ -684,8 +905,17 @@ function migrate(o){
 
 /* ══════════════════ STATE ══════════════════ */
 let S=null;
-const U={tab:"train",group:"chest",ex:"pushup",sets:3,reps:10,load:10,flash:null,rest:0,restT:null,paste:false,
-  metric:"pwr",rgroup:"all"};
+const U={tab:"train",group:"chest",ex:"pushup",sets:3,reps:10,load:10,flash:null,rest:0,restT:null,
+  metric:"pwr",rgroup:"all",theme:"night",help:{},logDays:5,openServer:false,openObj:null,openGate:false};
+
+function applyTheme(){
+  const theme=THEMES.some(t=>t.id===U.theme)?U.theme:"night";
+  U.theme=theme;
+  document.body.setAttribute("data-theme",theme);
+  const tc=document.querySelector('meta[name="theme-color"]');
+  if(tc) tc.setAttribute("content",getComputedStyle(document.body).getPropertyValue("--night").trim()||"#12102B");
+  try{ localStorage.setItem("liftmania:theme",theme); }catch(e){}
+}
 
 async function persist(){ S.savedAt=Date.now();
   const ok=await STORE.set(JSON.stringify(S)); if(!ok) U.saveWarn=true; queuePush(); }
@@ -856,7 +1086,8 @@ function logSet(){
   if(S.ci>S.peak) S.peak=S.ci;
 
   S.last[ex.id]={sets:U.sets,reps:U.reps,load:U.load,sd:U.sd};
-  S.log.unshift({d:today,ex:ex.id,sets:U.sets,reps:U.reps,load:U.load,sd:U.sd,prk,ton,dmg,ap:applied});
+  S.log.unshift({d:today,t:Date.now(),ex:ex.id,sets:U.sets,reps:U.reps,load:U.load,sd:U.sd,prk,ton,dmg,ap:applied,
+    pr:broke.length?broke.slice():null});
   S.log=S.log.slice(0,900);
 
   U.flash={ton,dmg,applied,pass,bounty,cleared,broke,finished,perfect,weekBonus,boss:boss.name};
@@ -888,18 +1119,18 @@ function playFx(){
   }
   el.innerHTML=`${r?"":`<div class="ring"></div><div class="ring" style="animation-delay:.18s;border-color:var(--gold)"></div>`}${sparks}
     <div class="fxcard">
-      <div class="eyebrow" style="color:var(--green)">boss ${it.n} of 100 defeated</div>
+      <div class="fxpill" style="color:var(--green)">boss ${it.n} of 100 defeated</div>
       <div class="disp ${r?"":"slam"}" style="font-size:29px;margin:12px 0 0">${esc(it.name.toUpperCase())}</div>
       ${r?"":`<div class="crack"></div>`}
       <div class="rise muted">${esc(it.flavor)}</div>
       ${it.act?`<div style="margin-top:16px"><div class="actban">ACT ${esc(it.act.split(" · ")[0])} COMPLETE · ${esc(it.act.split(" · ")[1].toUpperCase())}</div></div>`:""}
 
       <div class="rise" style="margin-top:20px">
-        <div class="eyebrow">now entering</div>
-        <div class="disp" style="font-size:17px;color:var(--gold);margin-top:5px">${esc(it.next.toUpperCase())}</div>
-        <div class="mono" style="font-size:12px;color:var(--dim);margin-top:5px">${fmt(it.nextHp)} HP · ${esc(it.nextGate)}</div>
+        <div class="fxpill">now entering</div>
+        <div class="disp" style="font-size:18px;color:var(--gold);margin-top:5px">${esc(it.next.toUpperCase())}</div>
+        <div class="mono" style="font-size:13px;color:var(--dim);margin-top:5px">${fmt(it.nextHp)} HP · ${esc(it.nextGate)}</div>
       </div>
-      <div class="tapdis mono" style="font-size:11px;color:var(--dim);margin-top:22px">tap anywhere to continue</div>
+      <div class="tapdis mono" style="font-size:12px;color:var(--dim);margin-top:22px">tap anywhere to continue</div>
     </div>`;
   el.classList.add("on");
   if(!r){ const app=document.getElementById("app");
@@ -921,12 +1152,6 @@ function exportSave(){
   a.href=URL.createObjectURL(blob); a.download=`liftmania-${MP.me?MP.me.id:"save"}-${dayKey()}.json`; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),4000); render();
 }
-function copySave(){
-  const t=JSON.stringify({app:"liftmania",ver:3,exported:dayKey(),save:S});
-  navigator.clipboard?.writeText(t).then(()=>alert("Save copied. Paste it somewhere safe."))
-    .catch(()=>{ U.paste=true; U.pasteText=t; render(); });
-  S.lastExport=Date.now(); persist();
-}
 function loadSaveObj(o){
   if(o && (o.app==="liftmania"||o.app==="iron-run") && o.save) o=o.save;
   if(!o || typeof o!=="object" || !("log" in o)) { alert("That file isn't a LiftMania save."); return; }
@@ -942,397 +1167,578 @@ document.getElementById("fileIn").addEventListener("change",e=>{
 
 /* ══════════════════ RENDER HELPERS ══════════════════ */
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const bar=(pct,color,h)=>`<div class="track" style="height:${h||12}px"><div class="fill" style="width:${Math.max(0,Math.min(100,pct))}%;background:${color}"></div></div>`;
+const bar=(pct,color,h)=>`<div class="track" style="height:${h||6}px"><div class="fill" style="width:${Math.max(0,Math.min(100,pct))}%;background:${color}"></div></div>`;
 const exTag=e=>{const[c,t]=MODE_TAG[e.mode];return `<span class="tag ${c}">${t}</span>`;};
-const qualList=(list,head,note)=>`<div class="expand">
-  <div class="qhead">${head}</div>
-  ${note?`<div class="muted" style="margin-bottom:8px">${esc(note)}</div>`:""}
-  <div>${list.map(e=>`<button class="qchip" data-a="jump" data-e="${e.id}">${esc(e.n)} ${exTag(e)}</button>`).join("")}</div>
-  <div class="tapme">Tap any of these to load it into the logger.</div></div>`;
+const hasEx=id=>EX.some(e=>e.id===id);
+const initial=n=>(String(n||"?").trim()[0]||"?").toUpperCase();
+const fmtK=n=>Math.abs(n)>=10000?Math.round(n/1000)+"k":fmt(n);
+const kgs=n=>Math.abs(n)>=10000?fmtK(n)+" kg":fmt(n)+"kg";
+
+/* ══════════════════ ICONS ══════════════════
+   One line-drawing per section so a screen is recognisable before a word of
+   it is read. 24×24, stroked in the section's accent colour. */
+const ICONS={
+  target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/>',
+  skull:'<path d="M5.2 11.2a6.8 6.8 0 1 1 13.6 0v3a1.8 1.8 0 0 1-1 1.6l-1.1.6V19a1 1 0 0 1-1 1H8.3a1 1 0 0 1-1-1v-2.6l-1.1-.6a1.8 1.8 0 0 1-1-1.6Z"/><circle cx="9.2" cy="11.2" r="1.7" fill="currentColor" stroke="none"/><circle cx="14.8" cy="11.2" r="1.7" fill="currentColor" stroke="none"/><path d="M12 14.6v2.2"/>',
+  dumbbell:'<path d="M3.5 10v4M6.5 8v8M17.5 8v8M20.5 10v4M6.5 12h11"/>',
+  receipt:'<path d="M6 3.5h12v17l-2.4-1.5-2.4 1.5-2.4-1.5L8.4 20.5 6 19Z"/><path d="M9.2 8.5h5.6M9.2 12.5h5.6"/>',
+  users:'<circle cx="9.3" cy="8.8" r="3.2"/><path d="M3.8 19.5a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3.2 3.2 0 0 1 0 5.6"/><path d="M17.4 15.4a5.5 5.5 0 0 1 2.8 4.1"/>',
+  cal:'<rect x="3.8" y="5.4" width="16.4" height="14.8" rx="3"/><path d="M3.8 10h16.4M8.5 3.3v4M15.5 3.3v4"/>',
+  flame:'<path d="M12 3.2s5.2 4.2 5.2 8.9a5.2 5.2 0 0 1-10.4 0c0-1.8.8-3.1 1.7-4.1.2 1.2.9 2.1 1.7 2.1 1.2 0 1.8-1.1 1.8-2.5 0-1.7-.9-3.1-1-4.4Z"/>',
+  bolt:'<path d="M13.6 2.8 6.2 13.4h5L10.4 21.2l7.4-10.6h-5Z"/>',
+  weight:'<path d="M9.3 7.6a2.7 2.7 0 1 1 5.4 0"/><path d="M6.6 20.4a5.7 5.7 0 0 1 1.8-9.4h7.2a5.7 5.7 0 0 1 1.8 9.4Z"/>',
+  trophy:'<path d="M7.2 3.8h9.6v5.1a4.8 4.8 0 0 1-9.6 0Z"/><path d="M7.2 5.4H4.5v1.1a3.4 3.4 0 0 0 3.2 3.4"/><path d="M16.8 5.4h2.7v1.1a3.4 3.4 0 0 1-3.2 3.4"/><path d="M12 13.7v3.1M9 20.2h6M10.4 16.8h3.2"/>',
+  gauge:'<path d="M4.2 17.4a8 8 0 1 1 15.6 0"/><path d="m12 17.4 4.2-5.1"/><circle cx="12" cy="17.4" r="1.5" fill="currentColor" stroke="none"/>',
+  spark:'<path d="M12 3.2 13.9 9l5.8 1.9-5.8 1.9L12 18.6l-1.9-5.8L4.3 10.9 10.1 9Z"/><path d="M18.6 16.4l.7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7Z"/>',
+  gear:'<path d="M3.8 7.4h8.4M16.6 7.4h3.6M3.8 16.6h3.6M11.8 16.6h8.4"/><circle cx="14.4" cy="7.4" r="2.3"/><circle cx="9.6" cy="16.6" r="2.3"/>',
+  bars:'<path d="M4.5 20V10.5M12 20V4M19.5 20v-6.5"/>',
+  flag:'<path d="M6 21.2V3.4"/><path d="M6 4.4h11.6l-2.1 3.6 2.1 3.6H6Z"/>',
+  alert:'<path d="M12 3.6 21 19.4H3Z"/><path d="M12 9.6v4.2"/><circle cx="12" cy="16.6" r="1.1" fill="currentColor" stroke="none"/>',
+  clock:'<circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12l3.2 2.1"/>'
+};
+const ico=n=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||""}</svg>`;
+
+/* "2h", "3d" — the crew feed needs shorter stamps than agoText gives */
+function relT(ms){
+  if(!ms) return "";
+  const s=(Date.now()-ms)/1000;
+  if(s<90) return "now";
+  if(s<5400) return Math.max(1,Math.round(s/60))+"m";
+  if(s<172800) return Math.round(s/3600)+"h";
+  return Math.round(s/86400)+"d";
+}
+/* "4×12 @ 16kg" — one line that describes a logged set anywhere it appears */
+function setDesc(r){
+  const e=byId(r.ex);
+  return `${r.sets}×${e.mode==="time"?r.reps+"s":r.reps}`
+    + (hasLoad(e)?` @ ${r.load}kg`:"")
+    + (r.sd==="each"?" /side":"");
+}
+
+/* Every card is one icon, one title, and content. Prose lives behind the ?
+   and is shut by default — that is what keeps the screens from being walls. */
+function card(o){
+  return `<section class="card" style="--accent:${o.accent||"var(--gold)"}">
+    <div class="chead">
+      ${o.icon?`<span class="cicon">${ico(o.icon)}</span>`:""}
+      <h2 class="ctitle${o.big?" big":""}">${esc(o.title)}</h2>
+      ${o.meta?`<div class="cmeta">${o.meta}</div>`:""}
+      ${o.help?`<button class="hbtn ${U.help[o.k]?"on":""}" data-a="help" data-k="${o.k}" title="What is this?" aria-label="What is this?">?</button>`:""}
+    </div>
+    ${o.sub?`<div class="csub">${o.sub}</div>`:""}
+    ${o.help&&U.help[o.k]?`<div class="help">${o.help}</div>`:""}
+    ${o.body?`<div class="body">${o.body}</div>`:""}
+  </section>`;
+}
+const cols=(a,b)=>`<div class="cols"><div class="col">${a}</div><div class="col">${b}</div></div>`;
+const qualList=(list,note)=>`<div class="expand">
+  ${note?`<div class="mini" style="margin-bottom:9px">${esc(note)}</div>`:""}
+  <div>${list.map(e=>`<button class="qchip" data-a="jump" data-e="${e.id}">${esc(e.n)} ${exTag(e)}</button>`).join("")}</div></div>`;
 const stepper=(label,field,step,min)=>`
- <div class="stepper"><div class="eyebrow">${label}</div><div class="srow">
+ <div class="stepper"><span class="slabel">${label}</span><div class="srow">
    <button class="sbtn" data-a="dec" data-f="${field}" data-s="${step}" data-min="${min}">−</button>
    <input class="sval" id="st_${field}" inputmode="decimal" autocomplete="off" value="${U[field]}">
    <button class="sbtn" data-a="inc" data-f="${field}" data-s="${step}">+</button>
  </div></div>`;
 
+/* ══════════════════ ACTIVITY ══════════════════
+   Everyone's last few sets ride along inside the board card they already
+   push, so the feed needs no extra table and no extra request. */
+function feedItems(withMe){
+  const out=[];
+  Object.values(MP.board).forEach(pl=>{
+    const mine=MP.me&&pl.id===MP.me.id;
+    if(mine&&!withMe) return;
+    (pl.recent||[]).forEach(r=>{ if(hasEx(r.ex)) out.push(Object.assign({},r,{who:pl.name||pl.id,mine})); });
+  });
+  return out.sort((a,b)=>(b.t||0)-(a.t||0));
+}
+function feedRow(it){
+  const e=byId(it.ex);
+  return `<div class="fr">
+    <div class="av ${it.mine?"me":""}">${esc(initial(it.who))}</div>
+    <div class="ftxt"><b>${esc(it.mine?"You":it.who)}</b> · ${esc(e.n)}
+      <span class="lsub">${setDesc(it)} · ${fmt(it.ton||0)}kg${it.pr&&it.pr.length?`<span class="prbadge">PR ${esc(it.pr.join(" · "))}</span>`:""}</span></div>
+    <div class="ftime">${relT(it.t)}</div>
+  </div>`;
+}
+const todaySets=()=>{const k=dayKey();return (S.log||[]).filter(r=>r.d===k);};
+
 /* ══════════════════ RENDER ══════════════════ */
+const TABS=[["train","TRAIN","dumbbell"],["week","WEEK","cal"],["bosses","BOSSES","skull"],
+            ["crew","CREW","users"],["you","YOU","trophy"]];
+
 function render(){
   rollDaily();
   const ex=byId(U.ex), boss=bossAt(S.ci), p=PLAN[S.daily.dow];
-  const cs=computeSet(ex,S.bw,U.sets,U.reps,U.load,sidesNow());
-  const tabs=["train","daily","bosses","league","body","save"];
-  const labels={train:"TRAIN",daily:"DAILY",bosses:"BOSSES",league:"LEAGUE",body:"BODY",save:"SAVE"};
+  let h=topBar()+tabBar()+alerts();
+  if(U.tab==="train")  h+=tabTrain(ex,boss,p);
+  else if(U.tab==="week")   h+=tabWeek();
+  else if(U.tab==="bosses") h+=tabBosses();
+  else if(U.tab==="crew")   h+=tabCrew();
+  else if(U.tab==="you")    h+=tabYou();
+  document.getElementById("app").innerHTML=h;
+  wireInputs();
+  paintRest();
+}
 
-  let h=`<header>
-    <div><div class="disp" style="font-size:25px">LIFTMANIA</div>
-      <div class="eyebrow">${esc((MP.me&&MP.me.name)||"")} · 100 bosses</div></div>
-    <div style="text-align:right">
-      <div class="mono" style="font-size:15px;color:var(--magenta)">×${flowMult(S.streak).toFixed(2)}</div>
-      <div class="eyebrow">streak ${S.streak}d · pwr ${S.power}</div></div>
-  </header>
-  <div class="tabs">${tabs.map(t=>`<button class="tab ${U.tab===t?"on":""}" data-a="tab" data-t="${t}">${labels[t]}</button>`).join("")}</div>`;
-
+function topBar(){
+  return `<header class="topbar">
+    <div class="brandline">
+      <div class="brand">LIFTMANIA</div>
+      <div class="mini" style="margin-top:3px">${esc((MP.me&&MP.me.name)||"guest")}</div>
+    </div>
+    <div class="themebox">${THEMES.map(t=>
+      `<button class="theme-pill ${U.theme===t.id?"active":""}" data-a="theme" data-v="${t.id}" title="${t.title}" aria-label="${t.title}">${t.label}</button>`).join("")}</div>
+    <div class="statstrip">
+      <div class="stat" style="--accent:var(--gold)">${ico("flame")}
+        <span class="sv"><b>${S.streak}d <i>×${flowMult(S.streak).toFixed(2)}</i></b><span class="k">streak</span></span></div>
+      <div class="stat" style="--accent:var(--green)">${ico("bolt")}
+        <span class="sv"><b>${S.power} <i>+${Math.min(S.power,60)}%</i></b><span class="k">power</span></span></div>
+      <div class="stat" style="--accent:var(--cobalt)">${ico("weight")}
+        <span class="sv"><b>${fmtK(S.totalTon)} <i>kg</i></b><span class="k">lifted</span></span></div>
+    </div>
+  </header>`;
+}
+function tabBar(){
+  return `<nav class="tabs">${TABS.map(t=>
+    `<button class="tab ${U.tab===t[0]?"on":""}" data-a="tab" data-t="${t[0]}">${ico(t[2])}<span>${t[1]}</span></button>`).join("")}</nav>`;
+}
+/* only genuinely urgent things sit above the content; everything else has a home */
+function alerts(){
+  let h="";
   if(S.away){const w=S.away;
-    h+=`<div class="banner" style="background:var(--red);color:#2A0A08">
-      <b>DETRAINED — ${w.days} days off.</b> ${esc(bossAt(S.ci).name)} regained ${fmt(w.healed)} HP.
-      ${w.revived.length?` You were pushed back onto ${esc(w.revived[w.revived.length-1])}.`:""}
-      ${w.atFloor?" You've hit the floor of this act — you can't fall further than that.":""}
-      Log one set today to stop it.
-      <button class="ghost" data-a="dismissaway" style="display:block;margin-top:8px;color:#2A0A08;border-color:#2A0A08">got it</button></div>`;}
-  const rs=restStatus();
-  if(rs.t==="grace") h+=`<div class="banner" style="background:var(--panel2);color:var(--cream)">${esc(rs.msg)}</div>`;
-
-  const daysSinceExport=(Date.now()-(S.lastExport||0))/864e5;
-  if(S.log.length>5 && daysSinceExport>7)
-    h+=`<div class="banner">Back up your progress — it's been ${Math.floor(daysSinceExport)} days. <b>SAVE tab → Download save file.</b></div>`;
-  if(MP.status==="error")
-    h+=`<div class="banner" style="background:var(--red)">Not syncing: ${esc(MP.err||"server unreachable")} — your training is still saving on this device. <b>LEAGUE → refresh</b> to retry.</div>`;
-  else if(!cloudOn())
-    h+=`<div class="banner">Offline mode — no server connected, so there's no shared board yet. <b>SAVE tab → connect server.</b></div>`;
+    h+=`<div class="banner warn">${ico("alert")}<div><b>Detrained — ${w.days} days off.</b> ${esc(bossAt(S.ci).name)} regained ${fmt(w.healed)} HP${w.revived.length?`, pushing you back onto ${esc(w.revived[w.revived.length-1])}`:""}. Log one set today to stop it.
+      <button class="ghost" data-a="dismissaway">got it</button></div></div>`;}
   if(STORE.mode==="memory")
-    h+=`<div class="banner" style="background:var(--red)">This browser is blocking storage. Progress will vanish when you close the tab — export from the SAVE tab after every session.</div>`;
+    h+=`<div class="banner warn">${ico("alert")}<div>This browser is blocking storage. Progress will vanish when you close the tab — download a backup from YOU after every session.</div></div>`;
+  else if(MP.status==="error")
+    h+=`<div class="banner warn">${ico("alert")}<div>Not syncing: ${esc(MP.err||"server unreachable")}. Your training is still saved on this device.</div></div>`;
+  return h;
+}
 
-  /* ─── TRAIN ─── */
-  if(U.tab==="train"){
-    const doneCount=S.daily.objs.filter(o=>o.done).length;
-    h+=`<div class="panel">
-      <div class="row"><div class="eyebrow" style="color:var(--gold)">${DOWL[S.daily.dow]} · ${esc(p.name)} · week ${S.daily.week+1}</div>
-      <div class="mono" style="font-size:11px;color:var(--dim)">${doneCount}/3</div></div>
-      ${S.daily.objs.map((o,i)=>{const v=progressOf(o,S.daily.acc), open=U.openObj===i;return `
-        <div class="obj"><div class="box ${o.done?"done":""}">${o.done?"✓":""}</div>
-        <div style="flex:1;min-width:0">
-          <button class="objbtn" data-a="obj" data-i="${i}" style="color:var(--cream)">
-            <div style="font-size:14px">${esc(o.label)}</div>
-            <div class="mono" style="font-size:11px;color:${o.done?"var(--green)":"var(--dim)"};margin-top:3px">
-              ${fmtProg(o,v)} · +${fmt(o.reward)} bounty · ${open?"hide":"which exercises?"}</div>
-          </button>
-          <div style="margin-top:6px">${bar(o.t==="pr"?(v?100:0):v/o.target*100, o.done?"var(--green)":GROUPS[p.gs[0]].c,6)}</div>
-          ${open?qualList(objQualifiers(o,p,S.bw),"counts toward this",OBJ_HINT[o.t]):""}
-        </div></div>`;}).join("")}
-      <div class="muted" style="margin-top:9px">All three today → +${fmt(Math.round(S.daily.quota/2))} perfect-day bonus.</div>
-    </div>`;
+/* ══════════════════ TAB · TRAIN ══════════════════ */
+function tabTrain(ex,boss,p){
+  /* ── today's three missions ── */
+  const done=S.daily.objs.filter(o=>o.done).length;
+  const missions=card({
+    title:"Today's missions", icon:"target", k:"daily", accent:"var(--gold)",
+    meta:`${done}/3`,
+    sub:`${DOWL[S.daily.dow]} · ${esc(p.name)} · ${esc(p.label)}`,
+    help:`Three missions refresh every day and follow the muscle groups on today's plan. Each one you finish pays a <b>bounty</b> straight into the boss's health bar. Tap a mission to see exactly which exercises count toward it.`,
+    body:`<div class="list">${S.daily.objs.map((o,i)=>{
+      const v=progressOf(o,S.daily.acc), open=U.openObj===i;
+      return `<button class="objrow ${o.done?"done":""}" data-a="obj" data-i="${i}">
+        <span class="objbox">${o.done?"✓":i+1}</span>
+        <span class="objtxt">
+          <span class="objlab">${esc(o.label)}</span>
+          <span class="objbar">${bar(o.t==="pr"?(v?100:0):v/o.target*100,o.done?"var(--greenF)":gcol(p.gs[0]),5)}</span>
+          <span class="lsub">${fmtProg(o,v)} · +${fmt(o.reward)} bounty · ${open?"hide":"what counts?"}</span>
+        </span>
+      </button>${open?qualList(objQualifiers(o,p,S.bw),OBJ_HINT[o.t]):""}`;
+    }).join("")}</div>
+    <div class="mini" style="margin-top:12px">All three → <b>+${fmt(Math.round(S.daily.quota/2))}</b> perfect-day bonus.</div>`
+  });
 
-    h+=`<div class="panel">
-      <div class="row"><div class="eyebrow" style="color:var(--cobalt)">boss ${S.ci+1} / 100 · act ${esc(boss.act)}</div>
-      <div class="mono" style="font-size:11px;color:var(--dim)">${fmt(boss.hp-S.cd)} / ${fmt(boss.hp)}</div></div>
-      <div class="disp" style="font-size:21px;margin:5px 0 4px">${esc(boss.name.toUpperCase())}</div>
-      <div class="muted" style="margin-bottom:10px">${esc(boss.flavor)}</div>
-      ${bar((boss.hp-S.cd)/boss.hp*100,"linear-gradient(90deg,var(--cobalt),#6FA0FF)",14)}
-      ${(()=>{const out=weeklyOut(), eta=bossEta(), need=Math.round(boss.hp/paceDays()*7);
-        const ok=out>=need;
-        return `<div class="mono" style="font-size:11px;margin-top:9px;display:flex;flex-direction:column;gap:3px">
-          <span style="color:var(--dim)">asks ${fmt(need)}/week · you're making <b style="color:${ok?"var(--green)":"var(--gold)"}">${out?fmt(out):"—"}</b>/week</span>
-          <span style="color:${eta&&eta<=paceDays()+2?"var(--green)":"var(--gold)"}">${eta?`about ${eta} day${eta===1?"":"s"} left at this rate`:"log a few sets to get an estimate"}</span>
-        </div>`;})()}
-      ${!S.calLocked?`<div class="mono" style="font-size:11px;color:var(--magenta);margin-top:7px">calibrating · ${calDaysDone()}/${CAL_DAYS} training days — boss sizes are still settling</div>`:""}
-      <button class="gate" data-a="gate" style="color:${boss.gate?"var(--magenta)":"var(--dim)"};border:1px solid var(--line)">
-        ${gateText(boss.gate)} · ${U.openGate?"hide":"what hits it?"}</button>
-      ${U.openGate?qualList(gateQualifiers(boss.gate,S.bw),"damages this boss",
-        boss.gate?(boss.gate.minReps?`Only sets of ${boss.gate.minReps}+ reps land. Anything shorter chips for 25%.`
+  /* ── the boss ── */
+  const out=weeklyOut(), eta=bossEta(), need=Math.round(boss.hp/paceDays()*7), ok=out>=need;
+  const bossCard=card({
+    title:boss.name, big:true, icon:"skull", k:"boss", accent:"var(--cobalt)",
+    meta:`${S.ci+1}/100`,
+    sub:`${esc(boss.act)} · ${esc(boss.flavor)}`,
+    help:`Boss health is a week of <b>your</b> output, measured over your first six training days and then locked. Every kilo you move chips it down; mission bounties hit it too. Miss two days in a row and it starts healing.`,
+    body:`
+      <div class="mathrow"><span>hp remaining</span><span><b>${fmt(boss.hp-S.cd)}</b> / ${fmt(boss.hp)}</span></div>
+      <div style="margin-top:10px">${bar((boss.hp-S.cd)/boss.hp*100,"linear-gradient(90deg,var(--cobaltF),var(--cobalt))",10)}</div>
+      <div class="kv" style="margin-top:12px">
+        <div class="kvi"><span class="k">asks</span><b>${fmtK(need)}</b><span class="k2">kg / week</span></div>
+        <div class="kvi"><span class="k">you make</span><b style="color:${ok?"var(--green)":"var(--gold)"}">${out?fmtK(out):"—"}</b><span class="k2">kg / week</span></div>
+        <div class="kvi"><span class="k">falls in</span><b style="color:${eta&&eta<=paceDays()+2?"var(--green)":"var(--gold)"}">${eta?eta+"d":"—"}</b><span class="k2">${eta?"at this rate":"log some sets"}</span></div>
+      </div>
+      ${!S.calLocked?`<div class="mini" style="margin-top:10px;color:var(--magenta)">Calibrating · ${calDaysDone()}/${CAL_DAYS} training days.</div>`:""}
+      <button class="gatechip" data-a="gate" style="margin-top:11px">
+        <span style="color:var(--dim)">${boss.gate?"full damage only from":"every set lands in full"}</span>
+        <b style="display:block;color:${boss.gate?"var(--magenta)":"var(--green)"}">${gateText(boss.gate)}</b>
+        <span style="color:var(--dim)">${U.openGate?"tap to hide":"tap to see what hits it"}</span></button>
+      ${U.openGate?qualList(gateQualifiers(boss.gate,S.bw),
+        boss.gate?(boss.gate.minReps?`Only sets of ${boss.gate.minReps}+ reps land in full. Anything shorter chips for 25%.`
         :boss.gate.minLoad?`Each rep must carry ${boss.gate.minLoad}kg or more. Lighter sets chip for 25%.`
-        :boss.gate.time?"Only timed holds land. Everything else chips for 25%. Holds can't produce the tonnage a dynamic lift does, so this boss carries about a quarter of the usual HP.":"Anything else chips for 25%.")
-        :"No restriction — every set lands in full."):""}
-    </div>`;
+        :boss.gate.time?"Only timed holds land in full. Holds can't move the tonnage a dynamic lift does, so this boss carries about a quarter of the usual HP."
+        :"Anything else chips for 25%.")
+        :"No restriction — every set lands in full."):""}`
+  });
 
-    h+=`<div class="panel">
-      <div class="eyebrow" style="color:var(--green)">log a set</div>
-      <div class="chips" style="margin-top:8px">${GK.map(g=>{
-        const flag=EX.some(e=>e.g===g&&countsNow(e));
-        return `<button class="gchip" data-a="group" data-g="${g}"
-        style="${U.group===g?`background:${GROUPS[g].c};color:var(--night)`:""}">${GROUPS[g].name}${flag?" •":""}</button>`;}).join("")}</div>
-      <div style="display:flex;gap:6px;margin-top:8px">
-        <button class="filt ${U.only?"on":""}" data-a="only">${U.only?"showing only what counts":"show only what counts now"}</button>
-      </div>
-      ${(()=>{const gq=gateQualifiers(bossAt(S.ci).gate,S.bw);
-        let list=EX.filter(e=>e.g===U.group);
-        if(U.only) list=list.filter(countsNow);
-        if(!list.length) return `<div class="muted" style="margin-top:9px">Nothing in ${GROUPS[U.group].name} counts toward today's challenges or this boss. Groups with a • do.</div>`;
-        return `<div class="exwrap">${list.map(e=>`<button class="exchip ${U.ex===e.id?"on":""} ${gq.includes(e)?"hit":""}" data-a="ex" data-e="${e.id}">${esc(e.n)} ${exTag(e)}${sideMode(e)==="each"?`<span class="side">×2</span>`:""}</button>`).join("")}</div>`;})()}
-      <div class="legend">
-        <span><span class="tag hold">HOLD</span> timed, logged in seconds</span>
-        <span><span class="tag kg">KG</span> you set the weight</span>
-        <span><span class="tag bw">BW</span> bodyweight × leverage</span>
-        <span style="color:var(--magenta)">×2 = log one side, both counted</span>
-        <span style="color:var(--gold)">gold outline = damages this boss</span>
-      </div>
-      <div class="steppers">
-        ${stepper("sets","sets",1,1)}
-        ${stepper(ex.mode==="time"?(U.sd==="each"?"sec / side":"seconds"):(U.sd==="each"?"reps / side":"reps"),"reps",ex.mode==="time"?5:1,1)}
-        ${hasLoad(ex)?stepper(ex.mode==="bwload"?"added kg":(U.sd==="each"?"kg / side":"kg"),"load",S.wstep,0):""}
-      </div>
-      ${hasLoad(ex)?`<div class="row" style="align-items:center;margin-top:8px">
-        <div class="eyebrow">± step · or just type it</div>
-        <div style="display:flex;gap:4px">${[0.5,1,2.5,5].map(v=>
-          `<button class="filt ${S.wstep===v?"on":""}" data-a="wstep" data-v="${v}">${v}</button>`).join("")}</div>
-      </div>`:""}
-      ${(()=>{const each=U.sd==="each", opt=ex.s==="opt";
-        const rule=each
-          ? `<b>One side at a time.</b> Enter ${ex.mode==="time"?"seconds":"reps"} for a <b>single</b> side${hasLoad(ex)?" and the weight on that one side":""} — both sides are counted automatically (×2).`
-          : `<b>Both sides together.</b> Enter the total ${ex.mode==="time"?"hold":"reps"}${hasLoad(ex)?" and the total weight on the implement":""} for the whole set (×1).`;
-        return `<div class="sidebox" style="border-color:${each?"var(--magenta)":"var(--line)"}">
-          <div class="row" style="align-items:center">
-            <div class="eyebrow" style="color:${each?"var(--magenta)":"var(--dim)"}">how to log this${opt?"":" · fixed"}</div>
-            ${opt?`<div style="display:flex;gap:5px">
-              <button class="filt ${!each?"on":""}" data-a="side" data-v="both">both</button>
-              <button class="filt ${each?"on":""}" data-a="side" data-v="each">per side</button></div>`:""}
+  /* ── the logger ── */
+  const logger=card({
+    title:"Log a set", icon:"dumbbell", k:"logger", accent:"var(--green)",
+    meta:esc(GROUPS[U.group].name),
+    help:`<div class="legend">
+      <span><span class="tag hold">HOLD</span> timed — you log seconds, not reps</span>
+      <span><span class="tag kg">KG</span> you set the weight yourself</span>
+      <span><span class="tag bw">BW</span> your bodyweight, scaled by leverage</span>
+      <span><span class="side" style="color:var(--magenta);font-family:var(--m)">×2</span> log one side only — both get counted</span>
+      <span><span class="swatch"></span> gold outline — damages the current boss</span>
+      <span><span style="color:var(--gold);font-weight:700">●</span> on a muscle — something in it counts today</span></div>`,
+    body:loggerBody(ex)
+  });
+
+  /* ── what you logged today ── */
+  const ts=todaySets(), tton=ts.reduce((a,r)=>a+r.ton,0);
+  const logged=card({
+    title:"Logged today", icon:"receipt", k:"logged", accent:"var(--magenta)",
+    meta:ts.length?`${ts.length} · ${kgs(tton)}`:"none yet",
+    body:ts.length?`<div class="list">${ts.slice(0,8).map(r=>{
+      const e=byId(r.ex);
+      return `<button class="li" data-a="jump" data-e="${r.ex}">
+        <span class="ldot" style="background:${gcol(e.g)}"></span>
+        <span class="lmain"><span class="lname">${esc(e.n)}${r.pr&&r.pr.length?`<span class="prbadge">PR</span>`:""}</span>
+          <span class="lsub">${setDesc(r)} · ${r.prk}kg per rep</span></span>
+        <span class="lval">${fmt(r.ton)}<span class="u">kg</span></span></button>`;}).join("")}</div>
+      ${ts.length>8?`<div class="mini" style="margin-top:10px">+ ${ts.length-8} more — full log in WEEK.</div>`:""}`
+      :`<div class="empty">Nothing yet today. Your first set starts the streak.</div>`
+  });
+
+  /* ── what the crew just did ── */
+  const feed=feedItems(false).slice(0,3);
+  const crew=feed.length?card({
+    title:"Crew, just now", icon:"users", accent:"var(--cobalt)",
+    meta:`<button class="ghost" data-a="tab" data-t="crew" style="padding:4px 9px">see all</button>`,
+    body:`<div class="list">${feed.map(feedRow).join("")}</div>`
+  }):"";
+
+  const rest=`<button id="restBtn" class="ghost wide" style="display:${U.rest>0?"block":"none"}" data-a="skiprest">rest</button>`;
+  return cols(missions+bossCard+crew, logger+logged) + rest + (U.flash?flashCard(U.flash):"");
+}
+
+function loggerBody(ex){
+  const cs=computeSet(ex,S.bw,U.sets,U.reps,U.load,sidesNow());
+  const gq=gateQualifiers(bossAt(S.ci).gate,S.bw);
+  let list=EX.filter(e=>e.g===U.group);
+  if(U.only) list=list.filter(countsNow);
+  const each=U.sd==="each", opt=ex.s==="opt";
+  const pv=prPreview(ex,U.sets,U.reps,U.load), r=S.records[ex.id]||{};
+
+  let status;
+  if(pv.fresh) status=`<div class="prline" style="border-color:var(--green);color:var(--green)">First entry — this sets all four records.</div>`;
+  else if(pv.hits.length) status=`<div class="prline" style="border-color:var(--gold);color:var(--gold)"><b>PR incoming:</b> ${pv.hits.map(x=>`${x.label} ${x.cur}${x.u}`).join(" · ")}</div>`;
+  else{ const c=pv.closest, gap=Math.round((c.best-c.cur)*10)/10;
+    status=gap<=0
+      ? `<div class="prline" style="border-color:var(--cobalt)">Level with your <b>${c.label}</b> PB of ${c.best}${c.u}. One more and it's yours.</div>`
+      : `<div class="prline">Closest record: <b style="color:var(--cream)">${c.label}</b> — need ${c.k==="reps"?`${gap+1} more`:`${gap}${c.u} more`} to beat ${c.best}${c.u}</div>`; }
+
+  return `
+    <div class="gchips">${GK.map(g=>{
+      const flag=EX.some(e=>e.g===g&&countsNow(e));
+      return `<button class="gchip" data-a="group" data-g="${g}"
+        style="${U.group===g?`background:${gcol(g)};color:var(--onGroup)`:""}">${GROUPS[g].name}${flag?`<span class="cnt" style="${U.group===g?"color:var(--onGroup)":""}">●</span>`:""}</button>`;}).join("")}</div>
+
+    <div class="chiprow" style="margin-top:10px">
+      <button class="filt ${U.only?"on":""}" data-a="only">${U.only?"✓ only what counts today":"only what counts today"}</button>
+    </div>
+
+    <div class="exwrap" style="margin-top:10px">${
+      list.length?list.map(e=>`<button class="exchip ${U.ex===e.id?"on":""} ${gq.includes(e)?"hit":""}" data-a="ex" data-e="${e.id}">${esc(e.n)} ${exTag(e)}${sideMode(e)==="each"?`<span class="side">×2</span>`:""}</button>`).join("")
+      :`<div class="empty">Nothing in ${GROUPS[U.group].name} counts right now. Muscles with a ● do.</div>`}</div>
+
+    <div class="steppers" style="margin-top:15px">
+      ${stepper("sets","sets",1,1)}
+      ${stepper(ex.mode==="time"?(each?"sec / side":"seconds"):(each?"reps / side":"reps"),"reps",ex.mode==="time"?5:1,1)}
+      ${hasLoad(ex)?stepper(ex.mode==="bwload"?"added kg":(each?"kg / side":"kg"),"load",S.wstep,0):""}
+    </div>
+
+    <div class="chiprow" style="margin-top:10px">
+      ${hasLoad(ex)?`<span class="mini">step</span>${[0.5,1,2.5,5].map(v=>
+        `<button class="filt ${S.wstep===v?"on":""}" data-a="wstep" data-v="${v}">${v}</button>`).join("")}`:""}
+      ${opt?`<div class="seg" style="margin-left:auto">
+        <button class="${!each?"on":""}" data-a="side" data-v="both">both sides</button>
+        <button class="${each?"on":""}" data-a="side" data-v="each">per side</button></div>`:""}
+    </div>
+    <div class="mini" style="margin-top:8px">${each
+      ? `Enter one side only — both are counted (×2).`
+      : `Enter the whole set together (×1).`}${opt?"":" This exercise is always logged this way."}</div>
+
+    <div class="mathrow" style="margin-top:12px">
+      <span>${U.sets}×${ex.mode==="time"?U.reps+"s":U.reps}${hasLoad(ex)?` @ ${U.load}kg`:""}</span>
+      <span><b>${fmt(cs.ton)}</b> kg</span></div>
+
+    <div class="kv" style="margin-top:10px">
+      <div class="kvi"><span class="k">per rep</span><b>${cs.prk}kg</b><span class="k2">${each?"one side":"whole set"}</span></div>
+      <div class="kvi"><span class="k">your PB</span><b>${r.load||0}kg</b><span class="k2">${r.reps||0}${ex.mode==="time"?"s":" reps"} · ${r.last?agoText(r.last):"never"}</span></div>
+      <div class="kvi"><span class="k">e1RM</span><b>${r.e1rm||0}kg</b><span class="k2">best set ${kgs(r.vol||0)}</span></div>
+    </div>
+
+    <div style="margin-top:10px">${status}</div>
+    <div class="mini" style="margin-top:9px;color:var(--gold)">Next target · ${esc(nextTarget(ex))}</div>
+    <button class="cta" data-a="log" style="margin-top:13px">LOG SET</button>`;
+}
+
+function flashCard(f){
+  return `<section class="card pop" style="--accent:var(--green);background:var(--panel2)">
+    <div class="chead"><span class="cicon">${ico("bolt")}</span>
+      <h2 class="ctitle big" style="color:var(--green)">${fmt(f.ton)} KG MOVED</h2>
+      <div class="cmeta" style="color:var(--magenta);font-size:15px">−${fmt(f.applied)}</div></div>
+    <div class="body">
+      <div class="mini" style="color:${f.pass?"var(--cream)":"var(--red)"}">→ ${fmt(f.dmg*(f.pass?1:.25))} damage to ${esc(f.boss)}${f.pass?"":" (gate missed — 25% chip)"}</div>
+      ${f.bounty?`<div class="mini" style="color:var(--gold);margin-top:4px">→ ${fmt(f.bounty)} mission bounty</div>`:""}
+      ${f.broke.length?`<div class="banner" style="margin-top:10px;font-family:var(--d);font-size:11.5px">NEW RECORD · ${esc(f.broke.join(", "))}</div>`:""}
+      ${f.finished.map(t=>`<div class="banner info" style="margin-top:8px">✓ ${esc(t)}</div>`).join("")}
+      ${f.perfect?`<div class="banner pop" style="margin-top:8px;background:var(--greenF);color:var(--onGreen);font-family:var(--d);font-size:12px">PERFECT DAY</div>`:""}
+      ${f.weekBonus?`<div class="banner pop" style="margin-top:8px;font-family:var(--d);font-size:12px">PERFECT WEEK · +2 POWER</div>`:""}
+      ${f.cleared.map(n=>`<div class="banner pop" style="margin-top:8px;background:var(--greenF);color:var(--onGreen);font-family:var(--d);font-size:12px">${esc(n.toUpperCase())} DOWN</div>`).join("")}
+    </div></section>`;
+}
+
+/* ══════════════════ TAB · WEEK ══════════════════ */
+function tabWeek(){
+  const wk=mondayOf(dayKey()), w=S.weeks[wk]||[0,0,0,0,0,0,0], rs=restStatus();
+
+  const weekCard=card({
+    title:"This week", icon:"cal", k:"week", accent:"var(--gold)",
+    meta:`${S.perfectWeeks} perfect`,
+    help:`Seven days, each muscle group trained exactly twice. One tick is a day you trained, two is a day you cleared all three missions. All seven doubled is a <b>Perfect Week</b>: triple bounty and +2 permanent Power.`,
+    body:`<div class="week">${DOWL.map((d,i)=>
+      `<div class="wday ${w[i]===2?"f":w[i]===1?"p":""} ${i===S.daily.dow?"today":""}">${d}<br>${w[i]===2?"✓✓":w[i]===1?"✓":"·"}</div>`).join("")}</div>
+      <div class="mini" style="margin-top:12px;color:${rs.t==="decay"?"var(--red)":rs.t==="ok"?"var(--green)":"var(--dim)"}">${esc(rs.msg)}</div>`
+  });
+
+  const ws={}; GK.forEach(g=>ws[g]=0);
+  const t0=dayNum(dayKey());
+  S.log.forEach(r=>{ if(t0-dayNum(r.d)<7) ws[byId(r.ex).g]+=r.sets; });
+  const volCard=card({
+    title:"Hard sets", icon:"bars", k:"vol", accent:"var(--magenta)", meta:"last 7 days",
+    help:`10–20 hard sets per muscle per week is the range that actually builds size. Under 10 is maintenance. The bar fills toward 20.`,
+    body:`<div class="list">${GK.map(g=>`<div class="li" style="display:block;padding:10px 0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px">
+        <span>${GROUPS[g].name}</span>
+        <span class="mini" style="color:${ws[g]>=10?"var(--green)":"var(--dim)"}">${ws[g]} / 10+</span></div>
+      <div style="margin-top:7px">${bar(ws[g]/20*100,gcol(g),5)}</div></div>`).join("")}</div>`
+  });
+
+  const days=[]; const byDay={};
+  (S.log||[]).forEach(r=>{ if(!byDay[r.d]){byDay[r.d]=[];days.push(r.d);} byDay[r.d].push(r); });
+  const show=days.slice(0,U.logDays||5);
+  const logCard=card({
+    title:"Your log", icon:"receipt", k:"log", accent:"var(--green)",
+    meta:`${(S.log||[]).length} sets`,
+    body:show.length?`${show.map(d=>{
+      const rows=byDay[d], ton=rows.reduce((a,r)=>a+r.ton,0), cut=rows.slice(0,12);
+      return `<div class="daysep"><span>${d===dayKey()?"today":agoText(d)}</span><span class="ln"></span><span>${rows.length} sets · ${kgs(ton)}</span></div>
+        <div class="list">${cut.map(r=>{const e=byId(r.ex);
+          return `<button class="li" data-a="jump" data-e="${r.ex}">
+            <span class="ldot" style="background:${gcol(e.g)}"></span>
+            <span class="lmain"><span class="lname">${esc(e.n)}${r.pr&&r.pr.length?`<span class="prbadge">PR</span>`:""}</span>
+              <span class="lsub">${setDesc(r)} · ${r.prk}kg per rep</span></span>
+            <span class="lval">${fmt(r.ton)}<span class="u">kg</span></span></button>`;}).join("")}</div>
+        ${rows.length>cut.length?`<div class="mini" style="margin-top:8px">+ ${rows.length-cut.length} more that day</div>`:""}`;
+    }).join("")}
+    ${days.length>show.length?`<button class="ghost wide" data-a="logmore" style="margin-top:13px">show more days</button>`:""}`
+    :`<div class="empty">Nothing logged yet.</div>`
+  });
+
+  const rotCard=card({
+    title:"The rotation", icon:"flag", k:"rot", accent:"var(--cobalt)",
+    help:`Mission difficulty steps up every second week — rep targets, hold times, distinct-exercise counts and the load bar all climb. The volume quota tracks your own rolling 21-day median, so it stays hard as you get stronger without ever asking for a boss-sized session.`,
+    body:`<div class="list">${PLAN.map((pl,i)=>`<div class="li">
+      <span class="ldot" style="background:${gcol(pl.gs[0])}"></span>
+      <span class="lmain"><span class="lname">${DOWL[i]} · ${esc(pl.name)}</span>
+        <span class="lsub">${pl.gs.map(g=>GROUPS[g].name).join(" · ")}</span></span>
+      ${i===S.daily.dow?`<span class="lval" style="color:var(--gold);font-size:10.5px">TODAY</span>`:""}</div>`).join("")}</div>`
+  });
+
+  const decayCard=card({
+    title:"Detraining", icon:"clock", k:"decay", accent:"var(--red)",
+    meta:`floor: boss ${Math.floor(S.ci/10)*10+1}`,
+    help:`Beaten bosses revive when the current one heals past full — but never past the first boss of the act you're in. A week away costs about a week of work.`,
+    body:`<div class="kv">
+      <div class="kvi"><span class="k">day 1 off</span><b style="color:var(--green)">free</b><span class="k2">nothing moves</span></div>
+      <div class="kvi"><span class="k">day 2+</span><b style="color:var(--red)">3–10%</b><span class="k2">healed per day</span></div>
+      <div class="kvi"><span class="k">furthest</span><b>${(S.peak||S.ci)+1}</b><span class="k2">boss reached</span></div>
+    </div>`
+  });
+
+  return cols(weekCard+volCard, logCard+rotCard+decayCard);
+}
+
+/* ══════════════════ TAB · BOSSES ══════════════════ */
+function tabBosses(){
+  let rows="";
+  ROSTER.forEach((b,i)=>{
+    if(i%10===0) rows+=`<div class="acthead">${ACT_NAMES[i/10]}</div>`;
+    const done=i<S.ci, cur=i===S.ci, hp=bossAt(i).hp;
+    rows+=`<div class="brow ${done?"done":""} ${cur?"cur":""}">
+      <span class="bnum">${pad(i+1)}</span>
+      <span class="lmain"><span class="bname">${esc(b[0].toUpperCase())}</span>
+        <span class="lsub" style="color:${b[1]?"var(--magenta)":"var(--dim)"}">${gateText(b[1])}</span>
+        ${cur?`<span style="display:block;margin-top:8px">${bar(S.cd/hp*100,"var(--cobaltF)",5)}</span>
+          <span class="lsub" style="color:var(--cream)">${esc(b[2])}</span>`:""}</span>
+      <span class="lval" style="font-size:11px;color:var(--dim)">${fmtK(hp)}<span class="u">hp</span></span>
+    </div>`;
+  });
+  return card({
+    title:"The campaign", icon:"skull", k:"camp", accent:"var(--cobalt)", meta:`${S.ci}/100 down`,
+    help:`One hundred named bosses across ten acts. Each asks for roughly a week of your own output, and the line under the name says what it takes full damage from. After the hundredth they keep generating — 12% harder each time.`,
+    body:`<div class="roster">${rows}</div>`
+  });
+}
+
+/* ══════════════════ TAB · CREW ══════════════════ */
+function tabCrew(){
+  const METRICS=[{k:"pwr",l:"power"},{k:"ci",l:"bosses"},{k:"ton",l:"kg moved"},{k:"streak",l:"streak"},{k:"prs",l:"records"}];
+  const m=METRICS.find(x=>x.k===U.metric)||METRICS[0];
+  const rows=Object.values(MP.board).sort((a,b)=>(b[m.k]||0)-(a[m.k]||0));
+  const myRank=rows.findIndex(r=>MP.me&&r.id===MP.me.id)+1;
+
+  const board=card({
+    title:"The board", icon:"trophy", k:"board", accent:"var(--gold)",
+    meta:`<button class="ghost" data-a="sync" style="padding:4px 9px">${MP.loading?"syncing…":"refresh"}</button>`,
+    sub:MP.status==="live"?`<span style="color:var(--green)">synced ${MP.synced?new Date(MP.synced).toLocaleTimeString():"just now"}</span>`
+       :MP.status==="error"?`<span style="color:var(--red)">sync failed — ${esc(MP.err)}</span>`
+       :`offline — connect a server in YOU`,
+    body:`<div class="chiprow">${METRICS.map(x=>
+        `<button class="filt ${U.metric===x.k?"on":""}" data-a="metric" data-v="${x.k}">${x.l}</button>`).join("")}</div>
+      <div style="margin-top:13px">${rows.length?rows.map((r,i)=>{
+        const mine=MP.me&&r.id===MP.me.id;
+        return `<div class="lrow ${mine?"me":""}">
+          <div class="rk ${i<3?"g"+(i+1):""}">${i+1}</div>
+          <div class="lmain">
+            <div class="pname">${esc(r.name)}${mine?`<span class="youtag">YOU</span>`:""}</div>
+            <div class="lsub">boss ${(r.ci|0)+1} · ${kgs(r.ton||0)} · ${r.streak|0}d streak · ${r.lastDay?agoText(r.lastDay):"never"}</div>
           </div>
-          <div style="font-size:12px;line-height:1.5;margin-top:6px;color:var(--cream)">${rule}</div>
-        </div>`;})()}
-      <div class="row mono" style="font-size:11px;color:var(--dim);margin-top:8px">
-        <span>${cs.prk}kg per rep${U.sd==="each"?" / side":""}</span><span>${fmt(cs.ton)}kg this entry${U.sd==="each"?" (both sides)":""}</span></div>
-      ${(()=>{const p=prPreview(ex,U.sets,U.reps,U.load), r=S.records[ex.id]||{};
-        const best=`<div class="mono" style="font-size:11px;color:var(--dim);margin-top:7px;display:flex;flex-wrap:wrap;gap:9px">
-            <span>PB</span>
-            <span>${r.load||0}kg</span>
-            <span>${r.reps||0}${ex.mode==="time"?"s":" reps"}</span>
-            <span>${fmt(r.vol||0)}kg set</span>
-            <span>${r.e1rm||0} e1RM</span>
-            <span style="opacity:.7">${r.last?agoText(r.last):"never"}</span></div>`;
-        if(p.fresh) return best+`<div class="prline" style="border-color:var(--green);color:var(--green)">First entry — this sets all four records.</div>`;
-        if(p.hits.length) return best+`<div class="prline" style="border-color:var(--gold);color:var(--gold)">
-            <b>PR incoming:</b> ${p.hits.map(x=>`${x.label} ${x.cur}${x.u} <span style="opacity:.65">(was ${x.best}${x.u})</span>`).join(" · ")}</div>`;
-        const c=p.closest, gap=Math.round((c.best-c.cur)*10)/10;
-        if(gap<=0) return best+`<div class="prline" style="border-color:var(--cobalt);color:var(--cream)">
-            Level with your <b>${c.label}</b> PB of ${c.best}${c.u}. One more and it's yours.</div>`;
-        return best+`<div class="prline" style="border-color:var(--line);color:var(--dim)">
-            Closest record: <b style="color:var(--cream)">${c.label}</b> — need ${c.k==="reps"?`${gap+1} more`:`${gap}${c.u} more`} to beat ${c.best}${c.u}</div>`;})()}
-      <div style="font-size:11px;color:var(--gold);margin-top:6px">↑ ${esc(nextTarget(ex))}</div>
-      <button class="cta" data-a="log">LOG SET</button>
-    </div>
-    <button id="restBtn" class="ghost" style="display:${U.rest>0?"block":"none"}" data-a="skiprest">rest</button>`;
-
-    if(U.flash){const f=U.flash;
-      h+=`<div class="panel pop" style="background:var(--panel2);border-color:var(--green)">
-        <div class="row"><div class="disp" style="font-size:17px;color:var(--green)">${fmt(f.ton)} KG MOVED</div>
-          <div class="mono" style="font-size:17px;color:var(--magenta)">−${fmt(f.applied)}</div></div>
-        <div class="mono" style="font-size:11px;color:var(--dim);margin-top:7px;display:flex;flex-direction:column;gap:3px">
-          <span style="color:${f.pass?"var(--cream)":"var(--red)"}">→ ${fmt(f.dmg*(f.pass?1:.25))} damage to ${esc(f.boss)}${f.pass?"":" (gate missed — 25% chip)"}</span>
-          ${f.bounty?`<span style="color:var(--gold)">→ ${fmt(f.bounty)} challenge bounty</span>`:""}
-        </div>
-        ${f.broke.length?`<div style="margin-top:8px;border-radius:8px;padding:5px 8px;background:var(--gold);color:var(--night);font-family:var(--d);font-size:11px">NEW RECORD · ${esc(f.broke.join(", "))}</div>`:""}
-        ${f.finished.map(t=>`<div style="margin-top:6px;border-radius:8px;padding:6px 8px;background:var(--cobalt);font-size:12px">✓ ${esc(t)}</div>`).join("")}
-        ${f.perfect?`<div class="pop" style="margin-top:6px;border-radius:8px;padding:8px;background:var(--green);color:var(--night);font-family:var(--d);font-size:12px">PERFECT DAY</div>`:""}
-        ${f.weekBonus?`<div class="pop" style="margin-top:6px;border-radius:8px;padding:8px;background:var(--gold);color:var(--night);font-family:var(--d);font-size:12px">PERFECT WEEK · +2 POWER</div>`:""}
-        ${f.cleared.map(n=>`<div class="pop" style="margin-top:6px;border-radius:8px;padding:8px;background:var(--green);color:var(--night)">
-          <div class="disp" style="font-size:12px">${esc(n.toUpperCase())} DOWN</div><div style="font-size:12px">Next boss loaded.</div></div>`).join("")}
-      </div>`;}
-  }
-
-  /* ─── DAILY / WEEK ─── */
-  if(U.tab==="daily"){
-    const wk=mondayOf(dayKey()), w=S.weeks[wk]||[0,0,0,0,0,0,0];
-    h+=`<div class="panel">
-      <div class="eyebrow" style="color:var(--gold)">this week</div>
-      <div class="week" style="margin-top:9px">${DOWL.map((d,i)=>`<div class="wday ${w[i]===2?"f":w[i]===1?"p":""} ${i===S.daily.dow?"today":""}">${d}<br>${w[i]===2?"✓✓":w[i]===1?"✓":"·"}</div>`).join("")}</div>
-      <div class="muted" style="margin-top:9px">Seven days, each muscle group trained exactly twice. Finish all three challenges on all seven days for a Perfect Week: triple bounty and +2 permanent Power.</div>
-      <div class="mono" style="font-size:11px;color:var(--dim);margin-top:7px">perfect weeks: ${S.perfectWeeks}</div>
-    </div>
-    <div class="panel"><div class="eyebrow" style="color:var(--cobalt)">the rotation</div>
-      ${PLAN.map((pl,i)=>`<div class="obj"><div class="box" style="border:none;color:var(--dim);font-family:var(--m);font-size:11px">${DOWL[i]}</div>
-        <div style="flex:1"><div style="font-size:13px">${esc(pl.name)}</div>
-        <div class="mono" style="font-size:10px;color:var(--dim)">${pl.gs.map(g=>GROUPS[g].name).join(" · ")}</div></div></div>`).join("")}
-      <div class="muted" style="margin-top:9px">Challenge difficulty steps up every second week: rep targets, hold times, distinct-exercise counts and the load bar all climb, and the volume quota tracks your own rolling 21-day median — so it stays hard as you get stronger, without ever asking for a boss-sized session.</div>
-    </div>
-    <div class="panel"><div class="eyebrow" style="color:var(--red)">detraining</div>
-      <div class="muted" style="margin-top:7px">${esc(restStatus().msg)}</div>
-      <div class="obj" style="margin-top:8px"><div class="box" style="border:none;color:var(--green)">1</div><div style="flex:1">
-        <div style="font-size:14px">One day off is free</div>
-        <div class="mono" style="font-size:11px;color:var(--dim);margin-top:2px">Nothing moves. Recovery is part of training.</div></div></div>
-      <div class="obj"><div class="box" style="border:none;color:var(--red)">2</div><div style="flex:1">
-        <div style="font-size:14px">From day two, the boss heals</div>
-        <div class="mono" style="font-size:11px;color:var(--dim);margin-top:2px">3% of its max HP on day two, then 4%, 5% … capped at 10% a day.</div></div></div>
-      <div class="obj"><div class="box" style="border:none;color:var(--magenta)">3</div><div style="flex:1">
-        <div style="font-size:14px">Enough healing pushes you back</div>
-        <div class="mono" style="font-size:11px;color:var(--dim);margin-top:2px">Beaten bosses revive — but never past the first boss of the act you're in. A week away costs about a week of work.</div></div></div>
-      <div class="mono" style="font-size:11px;color:var(--dim);margin-top:9px">furthest reached: boss ${(S.peak||S.ci)+1} · act floor: boss ${Math.floor(S.ci/10)*10+1}</div>
-    </div>`;
-  }
-
-  /* ─── BOSSES ─── */
-  if(U.tab==="bosses"){
-    h+=`<div class="panel"><div class="eyebrow" style="color:var(--cobalt)">the campaign · ${S.ci}/100 down</div>`;
-    ROSTER.forEach((b,i)=>{
-      if(i%10===0) h+=`<div class="acthead">${ACT_NAMES[i/10]}</div>`;
-      const done=i<S.ci, cur=i===S.ci, hp=bossAt(i).hp;
-      h+=`<div class="bosscard ${done?"done":""} ${cur?"cur":""}" style="margin-bottom:6px">
-        <div class="row"><span class="bname disp" style="font-size:12px">${pad(i+1)} ${esc(b[0].toUpperCase())}</span>
-        <span class="mono" style="font-size:10px;color:var(--dim)">${fmt(hp)}</span></div>
-        <div class="mono" style="font-size:10px;margin-top:3px;color:${b[1]?"var(--magenta)":"var(--dim)"}">${gateText(b[1])}</div>
-        ${cur?`<div style="margin-top:7px">${bar(S.cd/hp*100,"var(--cobalt)",6)}</div>
-          <div class="muted" style="margin-top:5px">${esc(b[2])}</div>`:""}
-      </div>`;
-    });
-    h+=`<div class="bosscard" style="border-style:dashed;color:var(--dim)">
-      <div class="disp" style="font-size:12px">XI · ENDLESS</div>
-      <div style="font-size:12px;margin-top:3px">After RIPPED, bosses keep generating — 12% harder each time, gates rotating forever.</div></div></div>`;
-  }
-
-  /* ─── BODY ─── */
-  if(U.tab==="body"){
-    const ws={}; GK.forEach(g=>ws[g]=0);
-    const t0=dayNum(dayKey());
-    S.log.forEach(r=>{ if(t0-dayNum(r.d)<7) ws[byId(r.ex).g]+=r.sets; });
-    h+=`<div class="panel"><div class="eyebrow" style="color:var(--magenta)">hard sets · last 7 days</div>
-      <div class="muted" style="margin:6px 0 10px">10–20 sets per muscle per week is the range that actually builds size. Under 10 is maintenance.</div>
-      ${GK.map(g=>`<div style="margin-bottom:8px">
-        <div class="row" style="font-size:12px"><span>${GROUPS[g].name}</span>
-        <span class="mono" style="color:${ws[g]>=10?"var(--green)":"var(--dim)"}">${ws[g]} / 10</span></div>
-        <div style="margin-top:3px">${bar(ws[g]/20*100,GROUPS[g].c,7)}</div></div>`).join("")}
-    </div>
-    ${(()=>{const st=staleRecords(); if(!st.length) return "";
-      return `<div class="panel" style="border-color:var(--magenta)">
-        <div class="eyebrow" style="color:var(--magenta)">going stale</div>
-        <div class="muted" style="margin:7px 0 9px">No record broken on these in three weeks or more. Pick one off — every PR is +1 Power, permanently.</div>
-        ${st.slice(0,6).map(s=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)">
-          <button class="ghost" data-a="jump" data-e="${s.id}" style="border:none;padding:0;color:var(--cream);font-family:var(--b);font-size:13px">${esc(byId(s.id).n)} →</button>
-          <span class="mono" style="font-size:11px;color:var(--magenta)">${s.days}d cold</span></div>`).join("")}
-      </div>`;})()}
-    <div class="panel"><div class="eyebrow" style="color:var(--gold)">records</div>
-      <div class="muted" style="margin:6px 0 4px">Four per exercise. Beating any one is +1 Power — you're carrying <b style="color:var(--gold)">+${Math.min(S.power,60)}%</b> damage from ${S.power} broken record${S.power===1?"":"s"}.</div>
-      ${Object.keys(S.records).length?Object.entries(S.records)
-        .sort((a,b)=>(daysAgo(a[1].last)??999)-(daysAgo(b[1].last)??999)).map(([id,r])=>{
-        const e=byId(id), cold=daysAgo(r.last)>=21;
-        return `<div class="recrow">
-          <div class="row">
-            <span style="font-size:13px;display:flex;align-items:center;gap:7px">
-              <span class="dot" style="background:${GROUPS[e.g].c}"></span>${esc(e.n)}</span>
-            <span class="mono" style="font-size:10px;color:${cold?"var(--magenta)":"var(--dim)"}">${agoText(r.last)}</span></div>
-          <div class="recstats">
-            <span>load <b>${r.load||0}kg</b></span>
-            <span>${e.mode==="time"?"hold":"reps"} <b>${r.reps||0}${e.mode==="time"?"s":""}</b></span>
-            <span>set <b>${fmt(r.vol||0)}kg</b></span>
-            <span>e1RM <b>${r.e1rm||0}kg</b></span>
-            <span style="opacity:.7">${r.n||0} PRs</span></div>
+          <div class="pbig">${fmtK(r[m.k]||0)}<span>${m.l}</span></div>
         </div>`;}).join("")
-        :`<div class="muted" style="margin-top:6px">Nothing logged yet.</div>`}
-    </div>
-    ${(S.prLog&&S.prLog.length)?`<div class="panel"><div class="eyebrow" style="color:var(--green)">pr timeline</div>
-      <div style="margin-top:8px">${S.prLog.slice(0,12).map(p=>`
-        <div class="row" style="padding:5px 0;font-family:var(--m);font-size:11px">
-          <span style="color:var(--cream)">${esc(byId(p.ex).n)}</span>
-          <span style="color:var(--dim)">${esc(p.k.join(", "))} · ${agoText(p.d)}</span></div>`).join("")}</div>
-    </div>`:""}
-    <div class="panel"><div class="eyebrow" style="color:var(--cobalt)">pace</div>
-      <div class="muted" style="margin:7px 0 10px">How long one boss should take. Boss HP is a multiple of your own weekly output, so this sets the rhythm, not the difficulty of any single session.</div>
-      <div style="display:flex;gap:6px">
-        ${[[4,"4 days","~1 year"],[7,"1 week","~2 years"],[10,"10 days","~2.7 years"]].map(([v,l,t])=>
-          `<button class="filt ${S.pace===v?"on":""}" data-a="pace" data-v="${v}" style="flex:1;padding:9px 4px;line-height:1.5">${l}<br><span style="opacity:.7">${t}</span></button>`).join("")}
-      </div>
-      <div class="mono" style="font-size:11px;color:var(--dim);margin-top:11px">
-        ${S.calLocked
-          ? `standard locked at ${fmt(baseWeek())}/week · current output ${fmt(weeklyOut())}/week`
-          : `calibrating — ${calDaysDone()}/${CAL_DAYS} training days logged`}
-      </div>
-      <div class="muted" style="margin-top:8px">The demand climbs about 2.5% a boss early on and under 1% a boss by the end — roughly 2.9× your starting output by boss 100. Standing still means bosses take longer than the pace you picked.</div>
-      ${S.calLocked?`<button class="ghost" data-a="recal" style="margin-top:10px">recalibrate to current output</button>`:""}
-    </div>
-    <div class="panel"><div class="eyebrow">lifetime</div>
-      <div class="mono" style="font-size:13px;color:var(--dim);margin-top:6px">
-        <div>${fmt(S.totalTon)} kg moved</div><div>${S.log.length} entries logged</div>
-        <div>${S.ci} bosses down · ${S.perfectWeeks} perfect weeks</div></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:12px">
-        <div class="eyebrow">bodyweight</div>
-        <input type="text" inputmode="decimal" id="bwIn" value="${S.bw}" style="width:76px;text-align:center">
-        <span class="muted">kg — sets the load on bodyweight moves</span></div>
-    </div>`;
-  }
+        :`<div class="empty">Nobody has logged a set yet. Send your friends this link, have them pick a name, and the board fills itself.</div>`}</div>
+      ${myRank?`<div class="mini" style="margin-top:13px">You rank <b>#${myRank}</b> of ${rows.length} on ${m.l}.</div>`:""}`
+  });
 
-  /* ─── LEAGUE ─── */
-  if(U.tab==="league"){
-    const METRICS=[{k:"pwr",l:"power",u:""},{k:"ci",l:"bosses",u:""},{k:"ton",l:"kg moved",u:"kg"},
-                   {k:"streak",l:"streak",u:"d"},{k:"prs",l:"records",u:""}];
-    const m=METRICS.find(x=>x.k===U.metric)||METRICS[0];
-    const rows=Object.values(MP.board).sort((a,b)=>(b[m.k]||0)-(a[m.k]||0));
-    const myRank=rows.findIndex(r=>MP.me&&r.id===MP.me.id)+1;
+  const feed=feedItems(true).slice(0,25);
+  const feedCard=card({
+    title:"Live feed", icon:"users", k:"feed", accent:"var(--cobalt)",
+    meta:feed.length?`${feed.length} sets`:"",
+    help:`The last few sets from everyone on the board, newest first. It updates whenever anyone's app syncs — hit refresh on the board to pull the latest.`,
+    body:feed.length?`<div class="list">${feed.map(feedRow).join("")}</div>`
+      :`<div class="empty">No activity yet. Once anyone logs a set it shows up here.</div>`
+  });
 
-    h+=`<div class="panel">
-      <div class="row"><div class="eyebrow" style="color:var(--gold)">the crew</div>
-        <button class="ghost" data-a="sync">${MP.loading?"syncing…":"refresh"}</button></div>
-      <div class="mono" style="font-size:10px;color:${MP.status==="live"?"var(--green)":"var(--dim)"};margin-top:6px">
-        ${MP.status==="live"?`synced ${MP.synced?new Date(MP.synced).toLocaleTimeString():"just now"}`
-          :MP.status==="error"?`sync failed — ${esc(MP.err)}`
-          :"offline — connect a server in the SAVE tab"}</div>
-      <div style="display:flex;gap:5px;overflow-x:auto;margin-top:10px;padding-bottom:3px">
-        ${METRICS.map(x=>`<button class="filt ${U.metric===x.k?"on":""}" data-a="metric" data-v="${x.k}">${x.l}</button>`).join("")}
-      </div>
-      <div style="margin-top:8px">
-        ${rows.length?rows.map((r,i)=>{
-          const mine=MP.me&&r.id===MP.me.id, ago=r.lastDay?agoText(r.lastDay):"never";
-          return `<div class="lrow ${mine?"me":""}">
-            <div class="rk ${i<3?"g"+(i+1):""}">${i+1}</div>
-            <div style="min-width:0">
-              <div class="pname">${esc(r.name)}${mine?" <span class=\"mono\" style=\"font-size:10px;color:var(--gold)\">you</span>":""}</div>
-              <div class="pstat">boss ${(r.ci|0)+1} · ${fmt(r.ton||0)}kg · ${r.streak|0}d streak · lifted ${ago}</div>
-            </div>
-            <div class="pbig">${fmt(r[m.k]||0)}<span> ${m.u||m.l}</span></div>
-          </div>`;
-        }).join(""):`<div class="muted" style="padding:10px 0">Nobody has logged a set yet. Send your friends this app, have them pick a name, and the board fills itself.</div>`}
-      </div>
-      ${myRank?`<div class="gate">you rank #${myRank} of ${rows.length} on ${m.l}</div>`:""}
-    </div>
-
-    <div class="panel">
-      <div class="eyebrow" style="color:var(--magenta)">house records</div>
-      <div class="muted" style="margin-top:6px">Best estimated 1RM on each lift, and who owns it. Beat one and it flips to your name after your next set.</div>
-      <div style="display:flex;gap:5px;overflow-x:auto;margin:10px 0 4px;padding-bottom:3px">
+  const house=card({
+    title:"House records", icon:"spark", k:"house", accent:"var(--magenta)",
+    help:`The best estimated 1RM on each lift and who owns it. Beat one and it flips to your name after your next sync.`,
+    body:`<div class="chiprow">
         <button class="filt ${U.rgroup==="all"?"on":""}" data-a="rgroup" data-v="all">all</button>
-        ${Object.keys(GROUPS).map(g=>`<button class="filt ${U.rgroup===g?"on":""}" data-a="rgroup" data-v="${g}">${GROUPS[g].name.toLowerCase()}</button>`).join("")}
-      </div>
-      ${(()=>{
+        ${GK.map(g=>`<button class="filt ${U.rgroup===g?"on":""}" data-a="rgroup" data-v="${g}">${GROUPS[g].name.toLowerCase()}</button>`).join("")}
+      </div>${(()=>{
         const recs=[];
         EX.forEach(e=>{
           if(U.rgroup!=="all" && e.g!==U.rgroup) return;
           let best=null;
-          rows.forEach(p=>{ const v=p.lifts&&p.lifts[e.id];
-            if(v&&v.e>0&&(!best||v.e>best.v)) best={v:v.e,who:p.name,id:p.id,reps:v.r,load:v.l}; });
-          if(best) recs.push({e,...best});
+          rows.forEach(pl=>{ const v=pl.lifts&&pl.lifts[e.id];
+            if(v&&v.e>0&&(!best||v.e>best.v)) best={v:v.e,who:pl.name,id:pl.id,reps:v.r,load:v.l}; });
+          if(best) recs.push(Object.assign({e},best));
         });
         recs.sort((a,b)=>b.v-a.v);
-        if(!recs.length) return `<div class="muted" style="padding:8px 0">No records on the board yet for this filter.</div>`;
-        return recs.slice(0,30).map(r=>`<div class="recrow">
-          <div class="row"><div style="font-weight:700;font-size:13px">${esc(r.e.n)}</div>
-            <div class="mono" style="font-size:12px;color:var(--gold)">${fmt(r.v)}kg 1RM</div></div>
-          <div class="recstats"><span style="color:${MP.me&&r.id===MP.me.id?"var(--green)":"var(--dim)"}">held by ${esc(r.who)}</span>
-            <span>best set <b>${r.reps}</b>${r.e.mode==="time"?"s":" reps"} @ <b>${fmt(r.load)}</b>kg</span></div>
-        </div>`).join("");
-      })()}
-    </div>`;
-  }
+        if(!recs.length) return `<div class="empty" style="margin-top:12px">No records on the board yet for this filter.</div>`;
+        return `<div class="list" style="margin-top:13px">${recs.slice(0,30).map(r=>`<div class="li">
+          <span class="ldot" style="background:${gcol(r.e.g)}"></span>
+          <span class="lmain"><span class="lname">${esc(r.e.n)}</span>
+            <span class="lsub" style="color:${MP.me&&r.id===MP.me.id?"var(--green)":"var(--dim)"}">${esc(r.who)} · ${r.reps}${r.e.mode==="time"?"s":" reps"} @ ${fmt(r.load)}kg</span></span>
+          <span class="lval" style="color:var(--gold)">${fmt(r.v)}<span class="u">kg 1RM</span></span></div>`).join("")}</div>`;
+      })()}`
+  });
 
-  /* ─── SAVE ─── */
-  if(U.tab==="save"){
-    const where={claude:"inside this preview",local:"in this browser",memory:"nowhere — storage is blocked"}[STORE.mode];
-    h+=`<div class="panel"><div class="eyebrow" style="color:var(--green)">your progress</div>
-      <div class="muted" style="margin:7px 0 12px">Auto-saving ${where}. Browser storage can be cleared without warning, so download a save file after any session you'd hate to lose. The file restores everything: bosses, records, streak, week ledger.</div>
-      <button class="cta" data-a="export">DOWNLOAD SAVE FILE</button>
-      <button class="cta" style="background:var(--cobalt);color:var(--cream)" data-a="import">RESTORE FROM FILE</button>
-      <div style="display:flex;gap:6px;margin-top:10px">
-        <button class="ghost" style="flex:1" data-a="copy">copy save as text</button>
-        <button class="ghost" style="flex:1" data-a="pastetoggle">paste save text</button>
+  return cols(board, feedCard+house);
+}
+
+/* ══════════════════ TAB · YOU ══════════════════ */
+function tabYou(){
+  const recEntries=Object.entries(S.records).sort((a,b)=>(daysAgo(a[1].last)??999)-(daysAgo(b[1].last)??999));
+  const recs=card({
+    title:"Your records", icon:"trophy", k:"recs", accent:"var(--gold)",
+    meta:`${S.power} broken`,
+    help:`Four records per exercise — heaviest rep, most reps, biggest single set and estimated 1RM. Beating any one is <b>+1 Power</b>, a permanent damage bonus capped at +60%.`,
+    body:recEntries.length?`<div class="list">${recEntries.map(([id,r])=>{
+      const e=byId(id), cold=daysAgo(r.last)>=21;
+      return `<button class="li" data-a="jump" data-e="${id}">
+        <span class="ldot" style="background:${gcol(e.g)}"></span>
+        <span class="lmain"><span class="lname">${esc(e.n)}</span>
+          <span class="lsub">${r.load||0}kg · ${r.reps||0}${e.mode==="time"?"s":" reps"} · set ${kgs(r.vol||0)} · e1RM ${r.e1rm||0}kg</span></span>
+        <span class="lval" style="font-size:11px;color:${cold?"var(--magenta)":"var(--dim)"}">${agoText(r.last)}</span></button>`;}).join("")}</div>`
+      :`<div class="empty">Nothing logged yet.</div>`
+  });
+
+  const st=staleRecords();
+  const stale=st.length?card({
+    title:"Going stale", icon:"clock", k:"stale", accent:"var(--magenta)", meta:`${st.length} lift${st.length===1?"":"s"}`,
+    help:`No record broken on these in three weeks or more. Pick one off — every PR is +1 Power, permanently.`,
+    body:`<div class="list">${st.slice(0,6).map(s=>`<button class="li" data-a="jump" data-e="${s.id}">
+      <span class="ldot" style="background:${gcol(byId(s.id).g)}"></span>
+      <span class="lmain"><span class="lname">${esc(byId(s.id).n)}</span></span>
+      <span class="lval" style="color:var(--magenta);font-size:12px">${s.days}d cold</span></button>`).join("")}</div>`
+  }):"";
+
+  const prlog=(S.prLog&&S.prLog.length)?card({
+    title:"Record history", icon:"spark", k:"prlog", accent:"var(--green)", meta:`${S.prLog.length} PRs`,
+    body:`<div class="list">${S.prLog.slice(0,14).map(p=>`<div class="li">
+      <span class="ldot" style="background:${gcol(byId(p.ex).g)}"></span>
+      <span class="lmain"><span class="lname">${esc(byId(p.ex).n)}</span>
+        <span class="lsub">${p.k.length===4?"all four records":esc(p.k.join(", "))}</span></span>
+      <span class="lval" style="font-size:11px;color:var(--dim)">${agoText(p.d)}</span></div>`).join("")}</div>`
+  }):"";
+
+  const pace=card({
+    title:"Pace", icon:"gauge", k:"pace", accent:"var(--cobalt)",
+    meta:S.calLocked?`${kgs(baseWeek())}/wk`:`calibrating ${calDaysDone()}/${CAL_DAYS}`,
+    help:`How long one boss should take. Boss HP is a multiple of your own weekly output, so this sets the rhythm, not the difficulty of any single session. The demand climbs about 2.5% a boss early and under 1% by the end — roughly 2.9× your starting output by boss 100.`,
+    body:`<div class="kv">${[[4,"4 days","~1 year"],[7,"1 week","~2 years"],[10,"10 days","~2.7 years"]].map(v=>
+      `<button class="kvi" data-a="pace" data-v="${v[0]}" style="${S.pace===v[0]?"background:var(--panel2);box-shadow:inset 0 0 0 1px var(--gold)":""}">
+        <span class="k" style="${S.pace===v[0]?"color:var(--gold)":""}">${S.pace===v[0]?"✓ current":"per boss"}</span><b>${v[1]}</b><span class="k2">${v[2]} to 100</span></button>`).join("")}</div>
+      <div class="mini" style="margin-top:12px">Current output <b>${kgs(weeklyOut())}</b> a week.</div>
+      ${S.calLocked?`<button class="ghost wide" data-a="recal" style="margin-top:11px">recalibrate to current output</button>`:""}`
+  });
+
+  const life=card({
+    title:"Lifetime", icon:"weight", k:"life", accent:"var(--dim)",
+    body:`<div class="kv">
+        <div class="kvi"><span class="k">moved</span><b>${fmtK(S.totalTon)}</b><span class="k2">kg</span></div>
+        <div class="kvi"><span class="k">sets</span><b>${S.log.length}</b><span class="k2">logged</span></div>
+        <div class="kvi"><span class="k">bosses</span><b>${S.ci}</b><span class="k2">${S.perfectWeeks} perfect wks</span></div>
       </div>
-      ${U.paste?`<div style="margin-top:9px"><textarea id="pasteBox" placeholder="Paste your save text here…">${U.pasteText?esc(U.pasteText):""}</textarea>
-        <button class="ghost" style="margin-top:6px" data-a="pasteload">restore from pasted text</button></div>`:""}
-      <div class="mono" style="font-size:10px;color:var(--dim);margin-top:10px">last backup: ${S.lastExport?new Date(S.lastExport).toLocaleDateString():"never"}</div>
-    </div>
-    <div class="panel"><div class="eyebrow">account</div>
-      <div class="muted" style="margin-top:7px">Signed in as <b>${esc((MP.me&&MP.me.name)||"—")}</b>. ${cloudOn()?"Your save syncs to the server, so the same name and PIN picks up where you left off on any device.":"No server connected — this account lives on this device only."}</div>
-      <button class="ghost" style="margin-top:9px" data-a="logout">switch account</button>
-    </div>
-    <div class="panel"><div class="eyebrow" style="color:var(--cobalt)">server</div>
-      <div class="muted" style="margin:7px 0 10px">${cloudOn()?"Connected. Everyone using this link shares one board.":"Paste your Supabase project URL and anon key to turn on cross-device saves and the shared board."}</div>
-      <input type="text" id="sbUrl" placeholder="https://xxxx.supabase.co" value="${esc((cloudCfg()&&cloudCfg().url)||"")}" style="width:100%">
-      <input type="text" id="sbKey" placeholder="anon public key" value="${esc((cloudCfg()&&cloudCfg().key)||"")}" style="width:100%;margin-top:7px">
-      <button class="ghost" style="margin-top:9px" data-a="saveserver">save server settings</button>
-      <div class="muted" style="margin-top:9px">Saved here, this only applies on your device. Paste the same two values into the top of the HTML file before you host it and everyone gets them automatically.</div>
-    </div>
-    <div class="panel"><div class="eyebrow">use it offline</div>
-      <div class="muted" style="margin-top:7px">This whole app is one file with nothing to install. Save it to your phone and open it from Files — it works with no connection. For a real home-screen icon, drop the file on <b>app.netlify.com/drop</b>, open the link it gives you, then use Share → Add to Home Screen.</div>
-    </div>
-    <button class="ghost" style="margin:0 auto" data-a="wipe">wipe save</button>`;
-  }
+      <div style="display:flex;align-items:center;gap:11px;margin-top:13px">
+        <span class="mini" style="flex:none">bodyweight</span>
+        <input type="text" inputmode="decimal" id="bwIn" value="${S.bw}" style="width:82px;text-align:center">
+        <span class="mini">kg</span></div>`
+  });
 
-  document.getElementById("app").innerHTML=h;
+  const acct=card({
+    title:"Account", icon:"gear", k:"acct", accent:"var(--dim)",
+    meta:cloudOn()?(MP.status==="live"?"synced":"offline"):"local only",
+    help:`Your name and PIN are the account. With a server connected every set syncs automatically and the same name and PIN picks up where you left off on any device — there is nothing to save by hand.`,
+    body:`<div class="mini">Signed in as <b>${esc((MP.me&&MP.me.name)||"—")}</b>. ${cloudOn()
+        ?`Syncing automatically${MP.synced?`, last ${relT(MP.synced)} ago`:""}.`
+        :`No server connected — this account lives on this device only.`}</div>
+      <div class="chiprow" style="margin-top:13px">
+        <button class="ghost" data-a="logout">switch account</button>
+        <button class="ghost" data-a="server">${U.openServer?"hide server settings":"server settings"}</button>
+      </div>
+      ${U.openServer?`<div class="expand">
+        <div class="mini" style="margin-bottom:10px">Paste your Supabase project URL and anon key to turn on cross-device saves and the shared board. Saved here it applies on this device only.</div>
+        <input type="text" id="sbUrl" placeholder="https://xxxx.supabase.co" value="${esc((cloudCfg()&&cloudCfg().url)||"")}" style="width:100%">
+        <input type="text" id="sbKey" placeholder="anon public key" value="${esc((cloudCfg()&&cloudCfg().key)||"")}" style="width:100%;margin-top:8px">
+        <button class="ghost wide" data-a="saveserver" style="margin-top:10px">save server settings</button></div>`:""}
+      ${!cloudOn()?`<div class="expand">
+        <div class="mini" style="margin-bottom:10px">With no server, this browser is the only copy. Keep a file somewhere safe.</div>
+        <div class="chiprow">
+          <button class="ghost" data-a="export">download backup</button>
+          <button class="ghost" data-a="import">restore from file</button></div>
+        <div class="mini" style="margin-top:9px">Last backup: ${S.lastExport?new Date(S.lastExport).toLocaleDateString():"never"}</div></div>`
+        :`<div class="chiprow" style="margin-top:10px">
+          <button class="ghost" data-a="export" style="opacity:.7">download a backup file</button></div>`}
+      <div style="margin-top:14px"><button class="ghost" data-a="wipe" style="color:var(--red)">wipe all progress</button></div>`
+  });
+
+  return cols(recs+stale+prlog, pace+life+acct);
+}
+
+/* ══════════════════ POST-RENDER WIRING ══════════════════ */
+function wireInputs(){
   ["sets","reps","load"].forEach(f=>{
     const el=document.getElementById("st_"+f); if(!el) return;
     const commit=()=>{
@@ -1347,11 +1753,13 @@ function render(){
   });
   const bwIn=document.getElementById("bwIn");
   if(bwIn) bwIn.addEventListener("change",e=>{ S.bw=Number(String(e.target.value).replace(/[^0-9.]/g,""))||75; persist(); render(); });
-  paintRest();
 }
 
 function countsNow(e){
-  if(gateQualifiers(bossAt(S.ci).gate,S.bw).includes(e)) return true;
+  /* an ungated boss takes everything, which would mark every muscle - only
+     a real gate narrows the field */
+  const gt=bossAt(S.ci).gate;
+  if(gt && gateQualifiers(gt,S.bw).includes(e)) return true;
   const p=PLAN[S.daily.dow];
   return S.daily.objs.some(o=>!o.done && objQualifiers(o,p,S.bw).includes(e));
 }
@@ -1367,7 +1775,9 @@ function nextTarget(ex){
 document.getElementById("app").addEventListener("click",e=>{
   const b=e.target.closest("[data-a]"); if(!b||!S) return;
   const a=b.dataset.a;
-  if(a==="tab"){ U.tab=b.dataset.t; U.flash=null; render(); }
+  if(a==="tab"){ U.tab=b.dataset.t; U.flash=null; U.logDays=5; render(); window.scrollTo(0,0); }
+  else if(a==="theme"){ U.theme=b.dataset.v||"night"; applyTheme(); render(); }
+  else if(a==="help"){ const k=b.dataset.k; U.help[k]=!U.help[k]; render(); }
   else if(a==="group"){ U.group=b.dataset.g;
     const first=(U.only?EX.filter(x=>x.g===U.group&&countsNow(x)):EX.filter(x=>x.g===U.group))[0]||EX.find(x=>x.g===U.group);
     pickEx(first.id); render(); }
@@ -1375,6 +1785,8 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="obj"){ const i=Number(b.dataset.i); U.openObj = U.openObj===i?null:i; render(); }
   else if(a==="gate"){ U.openGate=!U.openGate; render(); }
   else if(a==="only"){ U.only=!U.only; render(); }
+  else if(a==="logmore"){ U.logDays=(U.logDays||5)+10; render(); }
+  else if(a==="server"){ U.openServer=!U.openServer; render(); }
   else if(a==="wstep"){ S.wstep=Number(b.dataset.v); persist(); render(); }
   else if(a==="side"){ U.sd=b.dataset.v;
     S.last[U.ex]=Object.assign({sets:U.sets,reps:U.reps,load:U.load},S.last[U.ex],{sd:U.sd}); persist(); render(); }
@@ -1390,12 +1802,6 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="skiprest"){ U.rest=0; clearInterval(U.restT); paintRest(); }
   else if(a==="export") exportSave();
   else if(a==="import") document.getElementById("fileIn").click();
-  else if(a==="copy") copySave();
-  else if(a==="pastetoggle"){ U.paste=!U.paste; U.pasteText=""; render(); }
-  else if(a==="pasteload"){
-    const v=document.getElementById("pasteBox").value.trim();
-    try{ loadSaveObj(JSON.parse(v)); }catch(x){ alert("That text isn't a valid save."); }
-  }
   else if(a==="pace"){ S.pace=Number(b.dataset.v); persist(); render(); }
   else if(a==="recal"){
     if(confirm("Reset the standard to your current output? Future bosses get bigger. Your progress stays.")){
@@ -1404,7 +1810,7 @@ document.getElementById("app").addEventListener("click",e=>{
     } }
   else if(a==="dismissaway"){ S.away=null; persist(); render(); }
   else if(a==="saveserver"){ saveServer(document.getElementById("sbUrl").value,document.getElementById("sbKey").value,()=>{
-      MP.status="offline"; render(); if(cloudOn()) alert("Server saved. Sign out and back in with your name and PIN to link this device to it."); }); }
+      MP.status="offline"; render(); if(cloudOn()) alert("Server saved. Switch account and sign back in with your name and PIN to link this device to it."); }); }
   else if(a==="metric"){ U.metric=b.dataset.v; render(); }
   else if(a==="rgroup"){ U.rgroup=b.dataset.v; render(); }
   else if(a==="sync"){ if(!MP.loading){ MP.loading=true; render();
@@ -1412,9 +1818,10 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="logout"){ if(confirm("Switch account? This device keeps every account's training separately.")){
       MP.board={}; MP.ready=false; clearTimeout(MP.pushT);
       STORE.set("null","liftmania:me").then(()=>{ S=null; MP.me=null; U.tab="train"; renderLogin(); }); } }
-  else if(a==="wipe"){ if(confirm("Wipe all progress? Download a save file first if you're not sure.")){
+  else if(a==="wipe"){ if(confirm("Wipe all progress on this account? This cannot be undone.")){
     S=migrate(null); rollDaily(); persist(); U.tab="train"; render(); } }
 });
+
 function pickEx(id){
   U.ex=id; const l=S.last[id], e=byId(id);
   if(l){ U.sets=l.sets; U.reps=l.reps; U.load=l.load; }
@@ -1434,25 +1841,29 @@ function renderLogin(err,busy,keepName){
   document.getElementById("app").innerHTML=`<div class="login">
     <div style="text-align:center">
       <div class="disp" style="font-size:36px">LIFTMANIA</div>
-      <div class="eyebrow" style="margin-top:4px">100 bosses · one crew · one board</div>
+      <div class="mini" style="margin-top:6px">100 bosses · one crew · one board</div>
+      <div class="themebox" style="display:inline-flex;margin-top:14px">${THEMES.map(t=>`<button class="theme-pill ${U.theme===t.id?"active":""}" data-l="theme" data-v="${t.id}" title="${t.title}" aria-label="${t.title}">${t.label}</button>`).join("")}</div>
     </div>
-    <div class="panel">
-      <div class="eyebrow" style="color:var(--gold)">who's lifting</div>
-      <div class="muted" style="margin:7px 0 11px">Pick a name and a 4-digit PIN. A new name starts a new account. The same name and PIN gets you back in on any device.</div>
-      <input class="lin" id="inName" placeholder="NAME" maxlength="14" autocomplete="off" autocapitalize="characters" value="${esc(keepName||"")}">
-      <input class="lin" id="inPin" inputmode="numeric" maxlength="4" placeholder="PIN" autocomplete="off" style="margin-top:8px">
-      ${err?`<div class="prline" style="border-color:var(--red);color:var(--red)">${esc(err)}</div>`:""}
-      <button class="cta" data-l="go">${busy?"CHECKING…":"START LIFTING"}</button>
-    </div>
-    <div class="panel">
-      <div class="eyebrow" style="color:${cloudOn()?"var(--green)":"var(--dim)"}">${cloudOn()?"server connected":"no server"}</div>
-      ${cloudOn()
-        ?`<div class="muted" style="margin-top:7px">Accounts and the leaderboard live on your Supabase project.</div>`
-        :`<div class="muted" style="margin-top:7px">Without a server your account and records stay on this device. Paste your Supabase URL and anon key to share a board with friends.</div>
+    <section class="card">
+      <div class="chead"><h2 class="ctitle">Who's lifting?</h2></div>
+      <div class="body">
+        <input class="lin" id="inName" placeholder="NAME" maxlength="14" autocomplete="off" autocapitalize="characters" value="${esc(keepName||"")}">
+        <input class="lin" id="inPin" inputmode="numeric" maxlength="4" placeholder="4-DIGIT PIN" autocomplete="off" style="margin-top:8px">
+        ${err?`<div class="prline" style="margin-top:9px;border-color:var(--red);color:var(--red)">${esc(err)}</div>`:""}
+        <button class="cta" style="margin-top:11px" data-l="go">${busy?"CHECKING…":"START LIFTING"}</button>
+        <div class="mini" style="margin-top:10px">A new name starts a new account. The same name and PIN gets you back in on any device.</div>
+      </div>
+    </section>
+    <section class="card" style="--accent:${cloudOn()?"var(--green)":"var(--dim)"}">
+      <div class="chead"><h2 class="ctitle">${cloudOn()?"Server connected":"No server"}</h2></div>
+      <div class="body">${cloudOn()
+        ?`<div class="mini">Accounts, the board and the live feed all run off your Supabase project. Nothing to save by hand.</div>`
+        :`<div class="mini">Without a server your account and records stay on this device.</div>
           <input type="text" id="sbUrl" placeholder="https://xxxx.supabase.co" style="width:100%;margin-top:9px">
           <input type="text" id="sbKey" placeholder="anon public key" style="width:100%;margin-top:7px">
-          <button class="ghost" style="margin-top:9px" data-l="server">connect server</button>`}
-    </div>
+          <button class="ghost wide" style="margin-top:9px" data-l="server">connect server</button>`}
+      </div>
+    </section>
   </div>`;
   const pin=document.getElementById("inPin");
   pin.addEventListener("keydown",ev=>{ if(ev.key==="Enter") doLogin(document.getElementById("inName").value,pin.value); });
@@ -1462,6 +1873,8 @@ document.getElementById("app").addEventListener("click",e=>{
   const b=e.target.closest("[data-l]"); if(!b) return;
   if(b.dataset.l==="go") doLogin(document.getElementById("inName").value,document.getElementById("inPin").value);
   else if(b.dataset.l==="server") saveServer(document.getElementById("sbUrl").value,document.getElementById("sbKey").value,()=>renderLogin());
+  else if(b.dataset.l==="theme"){ const n=document.getElementById("inName"); const keep=n?n.value:"";
+    U.theme=b.dataset.v||"night"; applyTheme(); renderLogin("",false,keep); }
 });
 
 async function doLogin(name,pin){
@@ -1513,6 +1926,8 @@ async function startSession(){
 }
 
 (async function(){
+  try{ const savedTheme=localStorage.getItem("liftmania:theme"); if(savedTheme && THEMES.some(t=>t.id===savedTheme)) U.theme=savedTheme; }catch(e){}
+  applyTheme();
   await STORE.init();
   let me=null;
   try{ me=JSON.parse(await STORE.get("liftmania:me")||"null"); }catch(e){}
