@@ -246,7 +246,11 @@ h2{margin:0}
   border-radius:12px;padding:0 10px;transition:border-color .25s var(--ease)}
 .lin:focus{outline:none;border-color:var(--focus)}
 .lreveal{max-height:0;opacity:0;overflow:hidden;pointer-events:none;transform:translateY(10px);
-  transition:max-height .9s var(--ease),opacity 1s var(--ease),transform 1s var(--ease)}
+  transition:max-height .5s var(--ease),opacity .55s var(--ease),transform .55s var(--ease)}
+#lhint{display:flex;align-items:center;gap:9px;min-height:19px}
+.spin{width:15px;height:15px;flex:none;border-radius:50%;border:2px solid var(--line);
+  border-top-color:var(--gold);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .lreveal.on{max-height:340px;opacity:1;transform:none;pointer-events:auto}
 .lstate{display:flex;align-items:center;gap:9px;margin-top:12px;min-height:20px;
   font-family:var(--m);font-size:12px;line-height:1.4;color:var(--dim)}
@@ -2114,46 +2118,61 @@ function renderLogin(err,busy,keepName){
   const pin=document.getElementById("inPin"), nm=document.getElementById("inName");
   pin.addEventListener("keydown",ev=>{ if(ev.key==="Enter") doLogin(nm.value,pin.value); });
   /* Enter on the name skips the wait */
-  nm.addEventListener("keydown",ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); clearTimeout(LG.t); settleName(); } });
+  nm.addEventListener("keydown",ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); clearTimeout(LG.t); clearTimeout(LG.t2); startSearch(true); } });
   nm.addEventListener("input",()=>{
-    clearTimeout(LG.t);
+    clearTimeout(LG.t); clearTimeout(LG.t2);
     hideReveal();
-    LG.t=setTimeout(settleName,SETTLE_MS);
+    LG.t=setTimeout(startSearch,SETTLE_MS);
   });
   LG.mode=null;
   loadRoll();
   /* a name carried over from a failed attempt should not make you wait again */
-  if(keepName) settleName(); else hideReveal();
+  if(keepName) startSearch(true); else hideReveal();
 }
 
 /* ══════════════════ SIGN-IN REVEAL ══════════════════
-   Nothing but the name field until you stop typing. SETTLE_MS later the PIN
-   and the button fade in over a second, and the button already says which of
-   the two things it is going to do. */
-const SETTLE_MS=2200;
+   Nothing but the name field while you type. Stop, and a spinner shows the
+   lookup running; then the PIN and a button that already knows whether it is
+   a log-in or a sign-up fade in. Roughly 1.4s end to end. */
+const SETTLE_MS=420, SEARCH_MS=520;
+
+const hintEl=()=>document.getElementById("lhint");
+function setHint(html){ const h=hintEl(); if(h){ h.style.display=""; h.innerHTML=html; } }
 
 function hideReveal(){
-  const r=document.getElementById("lreveal"), hint=document.getElementById("lhint");
+  const r=document.getElementById("lreveal");
   if(r) r.classList.remove("on");
-  if(hint){ hint.style.display=""; hint.textContent="Type your name. A new one starts a new account."; }
+  LG.pending=false;
+  setHint("Type your name. A new one starts a new account.");
   LG.mode=null;
 }
-function settleName(){
-  const nm=document.getElementById("inName"), r=document.getElementById("lreveal"),
-        hint=document.getElementById("lhint");
+/* stage one: the name has settled, show that we are looking it up */
+function startSearch(now){
+  const nm=document.getElementById("inName"), r=document.getElementById("lreveal");
   if(!nm||!r) return;
   if(slugify(nm.value).length<2){
     r.classList.remove("on");
-    if(hint) hint.textContent="Names need at least two letters or numbers.";
+    setHint("Names need at least two letters or numbers.");
     return;
   }
+  setHint('<span class="spin"></span><span>Checking that name\u2026</span>');
+  clearTimeout(LG.t2);
+  LG.t2=setTimeout(openReveal, now?0:SEARCH_MS);
+}
+/* stage two: the answer is in (or the roll never arrives) */
+function openReveal(){
+  const r=document.getElementById("lreveal"), hint=hintEl();
+  if(!r) return;
+  if(cloudOn() && !LG.ids){ LG.pending=true; return; }   /* keep spinning */
+  LG.pending=false;
   paintLoginState();
-  if(hint) hint.style.display="none";
+  /* clear it, or the spinner keeps turning inside a hidden element */
+  if(hint){ hint.style.display="none"; hint.innerHTML=""; }
   r.classList.add("on");
 }
 
 /* ══════════════════ IS THAT NAME TAKEN? ══════════════════ */
-const LG={ids:null,err:false,mode:null,t:null,loading:false};
+const LG={ids:null,err:false,mode:null,t:null,t2:null,pending:false,loading:false};
 
 async function loadRoll(){
   if(LG.ids||LG.loading) return;
@@ -2166,9 +2185,9 @@ async function loadRoll(){
   }catch(e){ LG.ids=new Set(); LG.err=true; }
   LG.loading=false;
   LG.mode=null;
-  /* if the reveal is already open, refresh what the button says */
   const r=document.getElementById("lreveal");
-  if(r&&r.classList.contains("on")) paintLoginState();
+  if(LG.pending) openReveal();                       /* it was waiting on this */
+  else if(r&&r.classList.contains("on")) paintLoginState();
 }
 
 const LOGIN_COPY={
