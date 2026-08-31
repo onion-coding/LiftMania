@@ -224,6 +224,19 @@ h2{margin:0}
 .pbig{font-family:var(--m);font-size:16px;color:var(--gold);margin-left:auto;flex:none;
   text-align:right;line-height:1.15}
 .pbig span{display:block;font-size:9px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.rolebadge{font-family:var(--m);font-size:9px;letter-spacing:.1em;padding:2px 6px;border-radius:5px;
+  background:var(--row);color:var(--dim);margin-left:6px;vertical-align:2px;text-transform:uppercase}
+.rolebadge.own{background:var(--goldF);color:var(--onGold)}
+.xbtn{width:27px;height:27px;border-radius:8px;background:var(--row);color:var(--dim);font-size:14px;
+  display:flex;align-items:center;justify-content:center;flex:none;line-height:1}
+.xbtn:hover{background:var(--redF);color:var(--onRed)}
+.code{font-family:var(--m);font-size:14px;letter-spacing:.12em;background:var(--deep);border-radius:11px;
+  padding:12px;color:var(--cream);flex:1;min-width:0;text-align:center;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cta.soon{background:var(--row);color:var(--dim);cursor:default;position:relative}
+.cta.soon:active{transform:none}
+.cta.soon span{display:block;font-family:var(--m);font-size:10px;letter-spacing:.14em;
+  margin-top:5px;opacity:.8}
 
 /* ══════════════════ SIGN IN ══════════════════ */
 .login{min-height:72vh;display:flex;flex-direction:column;justify-content:center;gap:14px;
@@ -232,6 +245,9 @@ h2{margin:0}
   font-family:var(--m);background:var(--deep);color:var(--cream);border:1px solid var(--line);
   border-radius:12px;padding:0 10px;transition:border-color .25s var(--ease)}
 .lin:focus{outline:none;border-color:var(--focus)}
+.lreveal{max-height:0;opacity:0;overflow:hidden;pointer-events:none;transform:translateY(10px);
+  transition:max-height .9s var(--ease),opacity 1s var(--ease),transform 1s var(--ease)}
+.lreveal.on{max-height:340px;opacity:1;transform:none;pointer-events:auto}
 .lstate{display:flex;align-items:center;gap:9px;margin-top:12px;min-height:20px;
   font-family:var(--m);font-size:12px;line-height:1.4;color:var(--dim)}
 .lstate b{color:var(--cream);font-weight:500}
@@ -862,6 +878,8 @@ const CLOUD={
 /*  ▲▲▲ leave both empty and the app runs offline on this device only ▲▲▲  */
 
 const slugify = s => String(s).toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,20);
+/* crew codes keep their separator, so they survive a round trip through paste */
+const slugify0 = s => String(s).trim().toLowerCase().replace(/[^a-z0-9-]/g,"").slice(0,24);
 const MP={me:null,board:{},status:"offline",err:"",loading:false,synced:0,pushT:null,ready:false};
 
 function cloudCfg(){
@@ -894,7 +912,9 @@ function statsCard(){
   const recent=(S.log||[]).slice(0,8).map(r=>({t:r.t||dayNum(r.d)*864e5+432e5,ex:r.ex,sets:r.sets,
     reps:r.reps,load:r.load,sd:r.sd,ton:Math.round(r.ton||0),pr:r.pr||null}));
   return {name:MP.me.name,pwr:S.power|0,ci:S.ci|0,streak:S.streak|0,ton:Math.round(S.totalTon||0),
-          prs:(S.prLog||[]).length,pw:S.perfectWeeks|0,sets:(S.log||[]).length,lastDay:S.lastDay,lifts,recent};
+          prs:(S.prLog||[]).length,pw:S.perfectWeeks|0,sets:(S.log||[]).length,lastDay:S.lastDay,lifts,recent,
+          crew:S.crew?S.crew.id:null, crewName:S.crew?S.crew.name:null,
+          crewOwner:!!S.crewOwner, crewBans:S.crewOwner?(S.crewBans||[]):[]};
 }
 
 /* push my save + my board card to the server */
@@ -939,6 +959,7 @@ async function refreshBoard(){
 }
 
 const EMPTY={ver:4,bw:75,power:0,streak:0,lastDay:null,start:null,ci:0,cd:0,peak:0,
+  crew:null,crewOwner:false,crewBans:[],
   pace:7,baseWeek:null,calLocked:false,wstep:2.5,
   decayedThrough:null,away:null,daily:null,records:{},prLog:[],last:{},log:[],totalTon:0,weeks:{},
   lastExport:0,perfectWeeks:0,savedAt:0};
@@ -952,6 +973,9 @@ function migrate(o){
   if(!Array.isArray(s.prLog)) s.prLog=[];
   if(!s.last||typeof s.last!=="object") s.last={};
   if(!s.weeks||typeof s.weeks!=="object") s.weeks={};
+  if(!Array.isArray(s.crewBans)) s.crewBans=[];
+  if(!s.crew||typeof s.crew!=="object"||!s.crew.id) s.crew=null;
+  s.crewOwner=!!s.crewOwner&&!!s.crew;
   if(!s.pace||![4,7,10].includes(s.pace)) s.pace=7;
   if(![0.5,1,2.5,5].includes(s.wstep)) s.wstep=2.5;
   if(typeof s.bw!=="number"||!isFinite(s.bw)||s.bw<=0) s.bw=75;
@@ -964,7 +988,7 @@ function migrate(o){
 /* ══════════════════ STATE ══════════════════ */
 let S=null;
 const U={tab:"train",group:"chest",ex:"pushup",sets:3,reps:10,load:10,flash:null,rest:0,restT:null,
-  metric:"pwr",rgroup:"all",theme:"night",help:{},logDays:5,openServer:false,openObj:null,openGate:false};
+  metric:"pwr",rgroup:"all",theme:"night",help:{},logDays:5,openServer:false,openObj:null,openGate:false,scope:"all"};
 
 function applyTheme(){
   const theme=THEMES.some(t=>t.id===U.theme)?U.theme:"night";
@@ -1664,11 +1688,102 @@ function tabBosses(){
   });
 }
 
+/* ══════════════════ CREWS ══════════════════
+   A crew is an id every member carries on their own board card, so joining is
+   writing that id to your own row and membership is everyone who has it. The
+   owner's card also carries the removal list, which every client honours. */
+const crewId=()=>S.crew?S.crew.id:null;
+const newCrewCode=name=>{
+  const base=slugify(name).slice(0,12)||"crew";
+  let tail=""; for(let i=0;i<4;i++) tail+="abcdefghijkmnpqrstuvwxyz23456789"[Math.floor(Math.random()*32)];
+  return base+"-"+tail;
+};
+/* your own card, so you show up in the crew before the first sync lands */
+const selfRow=()=>({id:(MP.me&&MP.me.id)||"me",name:(MP.me&&MP.me.name)||"you",
+  pwr:S.power|0,ci:S.ci|0,ton:Math.round(S.totalTon||0),streak:S.streak|0,
+  prs:(S.prLog||[]).length,lastDay:S.lastDay,
+  crew:crewId(),crewName:S.crew&&S.crew.name,crewOwner:!!S.crewOwner,crewBans:S.crewBans||[]});
+
+/* the owner's own board card is a sync behind, so their local state wins for
+   their own view; everyone else reads the list the owner published */
+function crewBansOf(rows){
+  if(S.crewOwner) return S.crewBans||[];
+  const owner=rows.find(p=>p.crewOwner);
+  return (owner&&owner.crewBans)||[];
+}
+function crewRows(){
+  const id=crewId(); if(!id) return [];
+  const rows=Object.values(MP.board).filter(p=>p.crew===id);
+  if(!rows.some(p=>MP.me&&p.id===MP.me.id)) rows.push(selfRow());
+  const bans=crewBansOf(rows);
+  /* you always see yourself, even once you have been removed */
+  return rows.filter(p=>!bans.includes(p.id)||(MP.me&&p.id===MP.me.id))
+             .sort((a,b)=>(b.crewOwner?1:0)-(a.crewOwner?1:0)||(b.ton|0)-(a.ton|0));
+}
+function crewInfo(){
+  const rows=crewRows(), owner=rows.find(p=>p.crewOwner);
+  return {rows, owner,
+    name:(S.crewOwner&&S.crew&&S.crew.name)||(owner&&owner.crewName)||(S.crew&&S.crew.name)||crewId(),
+    removed: !!(MP.me && !S.crewOwner && crewBansOf(rows).includes(MP.me.id))};
+}
+
+function crewCard(){
+  if(!crewId()) return card({
+    title:"Your crew", icon:"users", k:"crewnew", accent:"var(--magenta)",
+    help:`A crew is a private group inside the board. Make one and share its code, or paste a code someone sent you. Everything you already track stays exactly as it is — the crew just gives it a smaller room.`,
+    body:`<div class="mini">Start a crew and invite people, or join one with a code.</div>
+      <input type="text" id="crewName" placeholder="Crew name" maxlength="22" style="width:100%;margin-top:12px">
+      <button class="cta small" data-a="crewcreate" style="margin-top:9px">CREATE CREW</button>
+      <div class="daysep"><span class="ln"></span><span>or</span><span class="ln"></span></div>
+      <input type="text" id="crewCode" placeholder="Paste an invite code" style="width:100%">
+      <button class="ghost wide" data-a="crewjoin" style="margin-top:9px">join crew</button>`
+  });
+
+  const ci=crewInfo(), rows=ci.rows, mine=MP.me&&MP.me.id;
+  const ton=rows.reduce((a,p)=>a+(p.ton|0),0), bosses=rows.reduce((a,p)=>a+(p.ci|0),0);
+  const best=rows.reduce((a,p)=>Math.max(a,p.streak|0),0);
+  return card({
+    title:ci.name, icon:"users", k:"crew", accent:"var(--magenta)",
+    meta:`${rows.length} member${rows.length===1?"":"s"}`,
+    help:`Anyone with the code below can join. Members show up here once their app syncs. ${S.crewOwner?"As the owner you can rename the crew and remove members.":"The owner can rename the crew and remove members."}`,
+    body:`
+      ${ci.removed?`<div class="banner warn" style="margin-bottom:12px">${ico("alert")}<div>You were removed from this crew. Leave to pick another.</div></div>`:""}
+      <div class="kv">
+        <div class="kvi"><span class="k">together</span><b>${fmtK(ton)}</b><span class="k2">kg moved</span></div>
+        <div class="kvi"><span class="k">bosses</span><b>${bosses}</b><span class="k2">down</span></div>
+        <div class="kvi"><span class="k">best streak</span><b>${best}d</b><span class="k2">in the crew</span></div>
+      </div>
+
+      <button class="cta soon" data-a="crewmission" style="margin-top:13px">START CREW MISSION<span>coming soon</span></button>
+
+      <div class="list" style="margin-top:14px">${rows.map(p=>`<div class="li">
+        <div class="av ${p.id===mine?"me":""}">${esc(initial(p.name))}</div>
+        <span class="lmain"><span class="lname">${esc(p.name)}${p.crewOwner?`<span class="rolebadge own">owner</span>`:""}${p.id===mine?`<span class="rolebadge">you</span>`:""}</span>
+          <span class="lsub">boss ${(p.ci|0)+1} · ${kgs(p.ton||0)} · ${p.streak|0}d · ${p.lastDay?agoText(p.lastDay):"never"}</span></span>
+        ${S.crewOwner&&p.id!==mine?`<button class="xbtn" data-a="crewkick" data-i="${esc(p.id)}" title="Remove ${esc(p.name)}" aria-label="Remove ${esc(p.name)}">×</button>`:""}
+      </div>`).join("")}</div>
+
+      <div class="mini" style="margin-top:14px">Invite code</div>
+      <div class="chiprow" style="margin-top:7px;flex-wrap:nowrap">
+        <span class="code">${esc(crewId())}</span>
+        <button class="ghost" data-a="crewcopy">copy</button>
+      </div>
+
+      <div class="chiprow" style="margin-top:13px">
+        ${S.crewOwner?`<button class="ghost" data-a="crewrename">rename crew</button>`:""}
+        <button class="ghost" data-a="crewleave" style="color:var(--red)">leave crew</button>
+      </div>`
+  });
+}
+
 /* ══════════════════ TAB · CREW ══════════════════ */
 function tabCrew(){
   const METRICS=[{k:"pwr",l:"power"},{k:"ci",l:"bosses"},{k:"ton",l:"kg moved"},{k:"streak",l:"streak"},{k:"prs",l:"records"}];
   const m=METRICS.find(x=>x.k===U.metric)||METRICS[0];
-  const rows=Object.values(MP.board).sort((a,b)=>(b[m.k]||0)-(a[m.k]||0));
+  const inCrew=!!crewId();
+  const scope=(inCrew&&U.scope==="crew")?"crew":"all";
+  const pool=scope==="crew"?crewRows():Object.values(MP.board);
+  const rows=pool.slice().sort((a,b)=>(b[m.k]||0)-(a[m.k]||0));
   const myRank=rows.findIndex(r=>MP.me&&r.id===MP.me.id)+1;
 
   const board=card({
@@ -1677,7 +1792,10 @@ function tabCrew(){
     sub:MP.status==="live"?`<span style="color:var(--green)">synced ${MP.synced?new Date(MP.synced).toLocaleTimeString():"just now"}</span>`
        :MP.status==="error"?`<span style="color:var(--red)">sync failed — ${esc(MP.err)}</span>`
        :`offline — connect a server in YOU`,
-    body:`<div class="chiprow">${METRICS.map(x=>
+    body:`${inCrew?`<div class="seg" style="margin-bottom:11px">
+        <button class="${scope==="all"?"on":""}" data-a="scope" data-v="all">everyone</button>
+        <button class="${scope==="crew"?"on":""}" data-a="scope" data-v="crew">my crew</button></div>`:""}
+      <div class="chiprow">${METRICS.map(x=>
         `<button class="filt ${U.metric===x.k?"on":""}" data-a="metric" data-v="${x.k}">${x.l}</button>`).join("")}</div>
       <div style="margin-top:13px">${rows.length?rows.map((r,i)=>{
         const mine=MP.me&&r.id===MP.me.id;
@@ -1727,7 +1845,7 @@ function tabCrew(){
       })()}`
   });
 
-  return cols(board, feedCard+house);
+  return cols(crewCard()+board, feedCard+house);
 }
 
 /* ══════════════════ TAB · YOU ══════════════════ */
@@ -1899,6 +2017,43 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="saveserver"){ saveServer(document.getElementById("sbUrl").value,document.getElementById("sbKey").value,()=>{
       MP.status="offline"; render(); if(cloudOn()) alert("Server saved. Switch account and sign back in with your name and PIN to link this device to it."); }); }
   else if(a==="metric"){ U.metric=b.dataset.v; render(); }
+  else if(a==="scope"){ U.scope=b.dataset.v; render(); }
+  else if(a==="crewcreate"){
+    const nm=String(document.getElementById("crewName").value||"").trim();
+    if(nm.length<2) return alert("Give the crew a name first.");
+    S.crew={id:newCrewCode(nm),name:nm.slice(0,22)}; S.crewOwner=true; S.crewBans=[];
+    persist(); publish(); render();
+  }
+  else if(a==="crewjoin"){
+    const code=slugify0(document.getElementById("crewCode").value);
+    if(code.length<3) return alert("Paste the invite code you were sent.");
+    const hit=Object.values(MP.board).find(p=>p.crew===code);
+    if(!hit && !confirm("Nobody with that code is on the board yet. Join anyway?")) return;
+    S.crew={id:code,name:(hit&&hit.crewName)||code}; S.crewOwner=false; S.crewBans=[];
+    persist(); publish(); render();
+  }
+  else if(a==="crewleave"){
+    if(!confirm("Leave this crew? Your training and records are untouched.")) return;
+    S.crew=null; S.crewOwner=false; S.crewBans=[]; U.scope="all";
+    persist(); publish(); render();
+  }
+  else if(a==="crewrename"){
+    const nm=(prompt("New crew name",(S.crew&&S.crew.name)||"")||"").trim();
+    if(nm.length<2) return;
+    S.crew.name=nm.slice(0,22); persist(); publish(); render();
+  }
+  else if(a==="crewkick"){
+    const id=b.dataset.i, who=(MP.board[id]&&MP.board[id].name)||id;
+    if(!confirm("Remove "+who+" from the crew?")) return;
+    if(!S.crewBans.includes(id)) S.crewBans.push(id);
+    persist(); publish(); render();
+  }
+  else if(a==="crewcopy"){
+    const code=crewId();
+    if(navigator.clipboard) navigator.clipboard.writeText(code).then(()=>alert("Invite code copied:\n"+code),()=>prompt("Invite code",code));
+    else prompt("Invite code",code);
+  }
+  else if(a==="crewmission"){ /* deliberately inert until crew missions ship */ }
   else if(a==="rgroup"){ U.rgroup=b.dataset.v; render(); }
   else if(a==="sync"){ if(!MP.loading){ MP.loading=true; render();
       publish().then(refreshBoard).then(()=>{ MP.loading=false; render(); }); } }
@@ -1935,10 +2090,13 @@ function renderLogin(err,busy,keepName){
       <div class="chead"><h2 class="ctitle">Who's lifting?</h2></div>
       <div class="body">
         <input class="lin" id="inName" placeholder="NAME" maxlength="14" autocomplete="off" autocapitalize="characters" value="${esc(keepName||"")}">
-        <div class="lstate" id="lstate"></div>
-        <input class="lin" id="inPin" inputmode="numeric" maxlength="4" placeholder="4-DIGIT PIN" autocomplete="off" style="margin-top:12px">
-        ${err?`<div class="prline" style="margin-top:9px;border-color:var(--red);color:var(--red)">${esc(err)}</div>`:""}
-        <button class="cta" id="loginCta" style="margin-top:12px" data-l="go">${busy?"CHECKING…":"START LIFTING"}</button>
+        <div class="lreveal" id="lreveal">
+          <div class="lstate" id="lstate"></div>
+          <input class="lin" id="inPin" inputmode="numeric" maxlength="4" placeholder="4-DIGIT PIN" autocomplete="off" style="margin-top:12px">
+          ${err?`<div class="prline" style="margin-top:9px;border-color:var(--red);color:var(--red)">${esc(err)}</div>`:""}
+          <button class="cta" id="loginCta" style="margin-top:12px" data-l="go">${busy?"CHECKING…":"START LIFTING"}</button>
+        </div>
+        <div class="mini" id="lhint" style="margin-top:12px">Type your name. A new one starts a new account.</div>
       </div>
     </section>
     <section class="card" style="--accent:${cloudOn()?"var(--green)":"var(--dim)"}">
@@ -1955,11 +2113,43 @@ function renderLogin(err,busy,keepName){
   document.getElementById("app").className="enter";
   const pin=document.getElementById("inPin"), nm=document.getElementById("inName");
   pin.addEventListener("keydown",ev=>{ if(ev.key==="Enter") doLogin(nm.value,pin.value); });
-  nm.addEventListener("keydown",ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); pin.focus(); } });
-  /* a name is only a few characters, so debounce lightly and check locally */
-  nm.addEventListener("input",()=>{ clearTimeout(LG.t); LG.t=setTimeout(paintLoginState,180); });
+  /* Enter on the name skips the wait */
+  nm.addEventListener("keydown",ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); clearTimeout(LG.t); settleName(); } });
+  nm.addEventListener("input",()=>{
+    clearTimeout(LG.t);
+    hideReveal();
+    LG.t=setTimeout(settleName,SETTLE_MS);
+  });
   LG.mode=null;
-  if(!busy){ paintLoginState(); loadRoll(); }
+  loadRoll();
+  /* a name carried over from a failed attempt should not make you wait again */
+  if(keepName) settleName(); else hideReveal();
+}
+
+/* ══════════════════ SIGN-IN REVEAL ══════════════════
+   Nothing but the name field until you stop typing. SETTLE_MS later the PIN
+   and the button fade in over a second, and the button already says which of
+   the two things it is going to do. */
+const SETTLE_MS=2200;
+
+function hideReveal(){
+  const r=document.getElementById("lreveal"), hint=document.getElementById("lhint");
+  if(r) r.classList.remove("on");
+  if(hint){ hint.style.display=""; hint.textContent="Type your name. A new one starts a new account."; }
+  LG.mode=null;
+}
+function settleName(){
+  const nm=document.getElementById("inName"), r=document.getElementById("lreveal"),
+        hint=document.getElementById("lhint");
+  if(!nm||!r) return;
+  if(slugify(nm.value).length<2){
+    r.classList.remove("on");
+    if(hint) hint.textContent="Names need at least two letters or numbers.";
+    return;
+  }
+  paintLoginState();
+  if(hint) hint.style.display="none";
+  r.classList.add("on");
 }
 
 /* ══════════════════ IS THAT NAME TAKEN? ══════════════════ */
@@ -1975,11 +2165,14 @@ async function loadRoll(){
     LG.err=false;
   }catch(e){ LG.ids=new Set(); LG.err=true; }
   LG.loading=false;
-  LG.mode=null; paintLoginState();
+  LG.mode=null;
+  /* if the reveal is already open, refresh what the button says */
+  const r=document.getElementById("lreveal");
+  if(r&&r.classList.contains("on")) paintLoginState();
 }
 
 const LOGIN_COPY={
-  empty:  ["START LIFTING","","Pick a name to begin.","var(--dim)"],
+  empty:  ["START LIFTING","","","var(--dim)"],
   looking:["CHECKING…","clock",'Looking that name up<span class="dots"></span>',"var(--dim)"],
   known:  ["LOG IN","users","<b>NAME</b> already has an account — enter its PIN.","var(--cobalt)"],
   fresh:  ["MAKE ACCOUNT","spark","<b>NAME</b> is free — pick a PIN to claim it.","var(--gold)"],
