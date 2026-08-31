@@ -252,10 +252,12 @@ h2{margin:0}
   border-top-color:var(--gold);animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .lreveal.on{max-height:340px;opacity:1;transform:none;pointer-events:auto}
-.lstate{display:flex;align-items:center;gap:9px;margin-top:12px;min-height:20px;
-  font-family:var(--m);font-size:12px;line-height:1.4;color:var(--dim)}
-.lstate b{color:var(--cream);font-weight:500}
-.lstate .ic{width:17px;height:17px}
+.lstate{display:flex;align-items:flex-start;gap:11px;margin-top:12px;padding:12px 13px;
+  border-radius:12px;background:var(--row);font-size:13px;line-height:1.4;color:var(--dim);
+  box-shadow:inset 3px 0 0 var(--accent,var(--line))}
+.lstate b{display:block;color:var(--cream);font-weight:700;font-size:14px}
+.lstate em{display:block;margin-top:4px;font-style:normal;font-family:var(--m);font-size:11.5px}
+.lstate .ic{width:19px;height:19px;margin-top:1px;color:var(--accent,var(--dim))}
 .lstate.swap{animation:lstatein .3s var(--easeout) both}
 @keyframes lstatein{from{opacity:0;transform:translateY(-6px)}}
 .cta.swap{animation:ctaswap .34s var(--easeout) both}
@@ -2190,13 +2192,18 @@ async function loadRoll(){
   else if(r&&r.classList.contains("on")) paintLoginState();
 }
 
+/* [button, icon, headline, detail, accent] */
 const LOGIN_COPY={
-  empty:  ["START LIFTING","","","var(--dim)"],
-  looking:["CHECKING…","clock",'Looking that name up<span class="dots"></span>',"var(--dim)"],
-  known:  ["LOG IN","users","<b>NAME</b> already has an account — enter its PIN.","var(--cobalt)"],
-  fresh:  ["MAKE ACCOUNT","spark","<b>NAME</b> is free — pick a PIN to claim it.","var(--gold)"],
-  local:  ["START LIFTING","gear","No server connected — this account stays on this device.","var(--dim)"],
-  unknown:["START LIFTING","alert","Couldn't reach the server to check the name.","var(--red)"]
+  empty:  ["START LIFTING","","","","var(--line)"],
+  looking:["CHECKING…","clock","Checking that name","One moment.","var(--line)"],
+  known:  ["LOG IN","users","NAME already has an account",
+           "Welcome back. Enter the 4-digit PIN you set for it.","var(--cobalt)"],
+  fresh:  ["CREATE ACCOUNT","spark","NAME is not taken yet",
+           "This will be a brand new account. Choose a 4-digit PIN for it — you'll need it to sign in anywhere else.","var(--green)"],
+  local:  ["START LIFTING","gear","No server connected",
+           "This account stays on this device only.","var(--line)"],
+  unknown:["START LIFTING","alert","Couldn't check that name",
+           "The server didn't answer. Signing in will still work.","var(--red)"]
 };
 
 function paintLoginState(){
@@ -2213,12 +2220,13 @@ function paintLoginState(){
 
   if(mode===LG.mode) return;          /* nothing changed, do not replay */
   LG.mode=mode;
-  const c=LOGIN_COPY[mode];
+  const c=LOGIN_COPY[mode], who=esc(raw.toUpperCase());
   cta.textContent=c[0];
   cta.className="cta"+(mode==="known"?" alt":"");
-  st.style.color=c[3];
-  st.innerHTML=(c[1]?ico(c[1]):"")+"<span>"+c[2].replace("NAME",esc(raw.toUpperCase()))+"</span>";
-  if(pin) pin.placeholder = mode==="known" ? "YOUR PIN" : mode==="fresh" ? "CHOOSE A PIN" : "4-DIGIT PIN";
+  st.style.setProperty("--accent",c[4]);
+  st.innerHTML=(c[1]?ico(c[1]):"")
+    +`<div><b>${c[2].replace("NAME",who)}</b><em>${c[3].replace("NAME",who)}</em></div>`;
+  if(pin) pin.placeholder = mode==="known" ? "YOUR PIN" : mode==="fresh" ? "CHOOSE A NEW PIN" : "4-DIGIT PIN";
   /* restart both animations from the top */
   [cta,st].forEach(el=>{ el.classList.remove("swap"); void el.offsetWidth; el.classList.add("swap"); });
 }
@@ -2250,7 +2258,7 @@ async function doLogin(name,pin){
     }catch(e){
       const m=String(e.message||e);
       return renderLogin(/bad pin/i.test(m)
-        ? `That name is taken and the PIN doesn't match. Use your PIN, or pick another name.`
+        ? `${name.toUpperCase()} already has an account and that isn't its PIN. Try again, or pick a different name to start a new account.`
         : `Couldn't reach the server: ${m}`, false, name);
     }
   } else {
