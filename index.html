@@ -345,8 +345,9 @@ input.sval:focus{border-color:var(--focus);outline:none;background:var(--panel2)
 
 /* ══════════════════ WEEK ══════════════════ */
 /* medal metals are literal, so they are the same in every theme */
-.medalrow{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-.medal{text-align:center;padding:8px 2px;border-radius:9px;font-family:var(--m);font-size:9.5px;
+.medalrow{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.medal.now{box-shadow:0 0 0 2px var(--cream)}
+.medal{text-align:center;padding:8px 1px;border-radius:9px;font-family:var(--m);font-size:9px;
   letter-spacing:.09em;text-transform:uppercase;background:var(--row);color:var(--dim);line-height:1.1;
   transition:background-color .3s var(--ease),color .3s var(--ease)}
 .medal.on{background:var(--mc);color:var(--mi)}
@@ -354,6 +355,9 @@ input.sval:focus{border-color:var(--focus);outline:none;background:var(--panel2)
 .medal.silver{--mc:#AEB6C6;--mi:#1A1D26}
 .medal.gold{--mc:#E8B33C;--mi:#241900}
 .medal.author{--mc:#12A176;--mi:#FFFFFF}
+.medal.champion{--mc:#7C4DE0;--mi:#FFFFFF}
+.mbadge{display:inline-block;font-family:var(--m);font-size:9px;letter-spacing:.06em;padding:2px 5px;
+  border-radius:5px;background:var(--mc);color:var(--mi);margin-left:6px;text-transform:uppercase}
 .medal b{display:block;font-size:13px;letter-spacing:0;margin-bottom:3px}
 
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
@@ -678,17 +682,61 @@ const ROSTER = [
 ];
 
 /* ══════════════════ MEDALS ══════════════════
-   Multiples of the day's quota. The quota tracks your own 21-day median, so
-   Author is always about 2.25x a normal day of yours - it stays hard as you
-   get stronger, and it is never someone else's standard. */
-const MEDALS=[{k:"bronze",n:"Bronze",m:0.60},{k:"silver",n:"Silver",m:1.00},
-              {k:"gold",n:"Gold",m:1.50},{k:"author",n:"Author",m:2.25}];
-const medalTier=(v,q)=>{ let t=-1; for(let i=0;i<MEDALS.length;i++) if(q>0&&v>=q*MEDALS[i].m) t=i; return t; };
+   A medal belongs to a SET, not to a day, and it is a standard rather than a
+   multiplier: estimated 1RM divided by bodyweight, judged against a per-lift
+   figure. Nothing about it moves when you have an easy week.
+
+   EX_STD[id] is the ratio a roughly one-year lifter hits - the Gold line. The
+   other four tiers are fixed fractions of it, pinned so the push-up ladder
+   lands on 3 / 17 / 30 / 45 / 61 reps for a 75kg lifter: untrained, about
+   three months in, about a year, about two years, and genuinely elite.
+
+   The figures are calibrated to a typical male lifter; S.stdScale shifts the
+   whole ladder for a typical female one (YOU > Lifetime). */
+const MEDALS=[{k:"bronze",n:"Bronze"},{k:"silver",n:"Silver"},{k:"gold",n:"Gold"},
+              {k:"author",n:"Author"},{k:"champion",n:"Champion"}];
+const MED_MULT=[0.55,0.78,1.00,1.25,1.52];
+const EX_STD={
+  pushup:1.28, incpush:1.08, decpush:1.37, defpush:1.30, archer:1.13, cpress:0.85, cfly:0.45,
+  crow:0.90, clat:0.85, csap:0.45, cpullover:0.50, trow:1.28, sman:0.40,
+  pike:1.00, cohp:0.60, lat:0.18, front:0.18, face:0.45, upright:0.45,
+  curl:0.30, hammer:0.32, ccurl:0.30, conc:0.25, rcurl:0.24, "21s":0.20,
+  diamond:1.17, dip:1.45, pdown:0.55, ohext:0.40, kickback:0.15,
+  squat:1.17, goblet:1.26, split:1.42, bulg:1.43, lunge:1.10, rdl:1.10, pthru:0.90,
+  nordic:0.98, calf:1.95, bridge:0.80, wallsit:1.17, burpee:1.28, jsquat:1.28, stepup:0.98,
+  plank:0.80, splank:0.84, hollow:0.64, lsit:0.90, lraise:0.55, ccrunch:0.60,
+  chop:0.25, pallof:0.20, twist:0.25, mclimb:0.67, deadbug:0.47
+};
+EX.forEach(e=>{ e.std=EX_STD[e.id]||0.60; });
+
+const stdScale=()=>(S&&S.stdScale)||1;
+const unitsOf=(ex,reps)=>ex.mode==="time"?reps/SEC_PER_REP:reps;
+/* the medal a single set is worth, -1 for none */
+function setMedal(ex,prk,reps,bw){
+  const st=ex.std*stdScale();
+  if(!st||!bw||!prk) return -1;
+  const ratio=e1rm(prk,unitsOf(ex,reps))/bw;
+  let t=-1; for(let i=0;i<MED_MULT.length;i++) if(ratio>=st*MED_MULT[i]) t=i;
+  return t;
+}
+/* what one more notch would cost, in the unit you actually control */
+function medalGap(ex,prk,reps,bw,tier){
+  const next=tier+1; if(next>=MED_MULT.length||!prk) return null;
+  const target=ex.std*stdScale()*MED_MULT[next]*bw, u=unitsOf(ex,reps);
+  if(hasLoad(ex)){
+    const need=target/(1+u/30), d=Math.ceil((need-prk)*2)/2;
+    return d>0?`+${d}kg per rep`:null;
+  }
+  const need=Math.ceil(30*(target/prk-1)), d=need-u;
+  if(d<=0) return null;
+  return ex.mode==="time" ? `+${d*SEC_PER_REP}s` : `+${d} rep${d===1?"":"s"}`;
+}
 function medalCounts(){
-  const c=[0,0,0,0];
-  Object.values(S.medals||{}).forEach(t=>{ if(t>=0&&t<4) c[t]++; });
+  const c=[0,0,0,0,0];
+  Object.values(S.medals||{}).forEach(t=>{ if(t>=0&&t<5) c[t]++; });
   return c;
 }
+const medBadge=t=>(t>=0&&t<5)?`<span class="mbadge medal ${MEDALS[t].k}">${MEDALS[t].n}</span>`:"";
 
 const HOLD_HP=0.28;
 const ENDLESS=[null,G("legs"),G("chest"),G("back"),RA(25),L("biceps",32),T("core"),G("shoulders"),LA(35),R("legs",30)];
@@ -942,7 +990,7 @@ function statsCard(){
   Object.keys(S.records||{}).forEach(id=>{ const r=S.records[id];
     if(r&&(r.e1rm>0||r.reps>0)) lifts[id]={e:Math.round(r.e1rm||0),l:Math.round((r.load||0)*10)/10,r:r.reps||0}; });
   const recent=(S.log||[]).slice(0,8).map(r=>({t:r.t||dayNum(r.d)*864e5+432e5,ex:r.ex,sets:r.sets,
-    reps:r.reps,load:r.load,sd:r.sd,ton:Math.round(r.ton||0),pr:r.pr||null}));
+    reps:r.reps,load:r.load,sd:r.sd,ton:Math.round(r.ton||0),pr:r.pr||null,md:r.md==null?-1:r.md}));
   return {name:MP.me.name,pwr:S.power|0,ci:S.ci|0,streak:S.streak|0,ton:Math.round(S.totalTon||0),
           prs:(S.prLog||[]).length,pw:S.perfectWeeks|0,sets:(S.log||[]).length,lastDay:S.lastDay,lifts,recent,
           crew:S.crew?S.crew.id:null, crewName:S.crew?S.crew.name:null,
@@ -991,7 +1039,7 @@ async function refreshBoard(){
 }
 
 const EMPTY={ver:4,bw:75,power:0,streak:0,lastDay:null,start:null,ci:0,cd:0,peak:0,
-  crew:null,crewOwner:false,crewBans:[],medals:{},
+  crew:null,crewOwner:false,crewBans:[],medals:{},stdScale:1,
   pace:7,baseWeek:null,calLocked:false,wstep:2.5,
   decayedThrough:null,away:null,daily:null,records:{},prLog:[],last:{},log:[],totalTon:0,weeks:{},
   lastExport:0,perfectWeeks:0,savedAt:0};
@@ -1007,6 +1055,7 @@ function migrate(o){
   if(!s.weeks||typeof s.weeks!=="object") s.weeks={};
   if(!Array.isArray(s.crewBans)) s.crewBans=[];
   if(!s.medals||typeof s.medals!=="object") s.medals={};
+  if(![1,0.73].includes(s.stdScale)) s.stdScale=1;
   if(!s.crew||typeof s.crew!=="object"||!s.crew.id) s.crew=null;
   s.crewOwner=!!s.crewOwner&&!!s.crew;
   if(!s.pace||![4,7,10].includes(s.pace)) s.pace=7;
@@ -1137,7 +1186,7 @@ function logSet(){
   const objFrom=S.daily.objs.map(o=>{const v=progressOf(o,S.daily.acc);
     return o.t==="pr"?(v?100:0):Math.min(100,v/o.target*100);});
   const popObj=[];
-  const medFrom=medalTier(S.daily.acc.focusTon,S.daily.quota);
+  const medFrom=Math.max(-1,S.medals[dayKey()]==null?-1:S.medals[dayKey()]);
 
   /* records */
   const rec=S.records[ex.id]||{};
@@ -1182,10 +1231,10 @@ function logSet(){
     S.daily.perfect=true; perfect=true; bounty+=Math.round(S.daily.quota/2);
   }
 
-  /* medal for the day, recomputed from the running total */
-  const medNow=medalTier(a.focusTon,S.daily.quota);
+  /* the set's own medal; the day keeps the best one taken in it */
+  const medNow=setMedal(ex,prk,U.reps,S.bw);
   if(medNow>=0){
-    S.medals[today]=medNow;
+    S.medals[today]=Math.max(medFrom,medNow);
     const days=Object.keys(S.medals);
     if(days.length>200) days.sort().slice(0,days.length-200).forEach(d=>delete S.medals[d]);
   }
@@ -1216,7 +1265,7 @@ function logSet(){
 
   S.last[ex.id]={sets:U.sets,reps:U.reps,load:U.load,sd:U.sd};
   S.log.unshift({d:today,t:Date.now(),ex:ex.id,sets:U.sets,reps:U.reps,load:U.load,sd:U.sd,prk,ton,dmg,ap:applied,
-    pr:broke.length?broke.slice():null});
+    pr:broke.length?broke.slice():null,md:medNow});
   S.log=S.log.slice(0,900);
 
   U.flash={ton,dmg,applied,pass,bounty,cleared,broke,finished,perfect,weekBonus,boss:boss.name,
@@ -1394,11 +1443,14 @@ function feedItems(withMe){
   return out.sort((a,b)=>(b.t||0)-(a.t||0));
 }
 function feedRow(it){
-  const e=byId(it.ex);
+  const e=byId(it.ex), who=esc(it.mine?"You":it.who), md=it.md;
+  const head = md>=0&&md!=null
+    ? `<b>${who}</b> took ${/^[aeiou]/i.test(MEDALS[md].n)?"an":"a"} <b class="medal ${MEDALS[md].k}" style="background:none;color:var(--mc);padding:0;font-family:inherit">${MEDALS[md].n}</b> medal`
+    : `<b>${who}</b> logged ${esc(e.n)}`;
   return `<div class="fr">
     <div class="av ${it.mine?"me":""}">${esc(initial(it.who))}</div>
-    <div class="ftxt"><b>${esc(it.mine?"You":it.who)}</b> · ${esc(e.n)}
-      <span class="lsub">${setDesc(it)} · ${fmt(it.ton||0)}kg${it.pr&&it.pr.length?`<span class="prbadge">PR ${esc(it.pr.join(" · "))}</span>`:""}</span></div>
+    <div class="ftxt">${head}
+      <span class="lsub">${esc(e.n)} · ${setDesc(it)} · ${fmt(it.ton||0)}kg${it.pr&&it.pr.length?`<span class="prbadge">PR</span>`:""}</span></div>
     <div class="ftime">${relT(it.t)}</div>
   </div>`;
 }
@@ -1467,16 +1519,6 @@ function alerts(){
   return h;
 }
 
-/* today's medal ladder — one row, four cutoffs, and the gap to the next */
-function medalStrip(p){
-  const q=S.daily.quota, v=S.daily.acc.focusTon, t=medalTier(v,q), next=MEDALS[t+1];
-  return `<div class="medalrow" style="margin-top:11px">${MEDALS.map((m,i)=>
-      `<span class="medal ${m.k} ${i<=t?"on":""}">${m.n}</span>`).join("")}</div>
-    <div class="mini" style="margin-top:8px">${
-      next ? `${kgs(Math.max(0,Math.round(q*next.m-v)))} more ${esc(p.label)} for <b>${next.n}</b>.`
-           : `<b>Author medal.</b> There is nothing above this one.`}</div>`;
-}
-
 /* ══════════════════ TAB · TRAIN ══════════════════ */
 function tabTrain(ex,boss,p){
   /* ── today's three missions ── */
@@ -1498,7 +1540,7 @@ function tabTrain(ex,boss,p){
       </button>${open?qualList(objQualifiers(o,p,S.bw),OBJ_HINT[o.t]):""}`;
     }).join("")}</div>
     <div class="mini" style="margin-top:12px">All three → <b>+${fmt(Math.round(S.daily.quota/2))}</b> perfect-day bonus.</div>
-    ${medalStrip(p)}`
+`
   });
 
   /* ── the boss ── */
@@ -1552,7 +1594,7 @@ function tabTrain(ex,boss,p){
       const e=byId(r.ex);
       return `<button class="li" data-a="jump" data-e="${r.ex}">
         <span class="ldot" style="background:${gcol(e.g)}"></span>
-        <span class="lmain"><span class="lname">${esc(e.n)}${r.pr&&r.pr.length?`<span class="prbadge">PR</span>`:""}</span>
+        <span class="lmain"><span class="lname">${esc(e.n)}${medBadge(r.md)}${r.pr&&r.pr.length?`<span class="prbadge">PR</span>`:""}</span>
           <span class="lsub">${setDesc(r)} · ${r.prk}kg per rep</span></span>
         <span class="lval">${fmt(r.ton)}<span class="u">kg</span></span></button>`;}).join("")}</div>
       ${ts.length>8?`<div class="mini" style="margin-top:10px">+ ${ts.length-8} more — full log in WEEK.</div>`:""}`
@@ -1562,7 +1604,7 @@ function tabTrain(ex,boss,p){
   /* ── what the crew just did ── */
   const feed=feedItems(false).slice(0,3);
   const crew=feed.length?card({
-    title:"Crew, just now", icon:"users", accent:"var(--cobalt)",
+    title:"Crew feed", icon:"users", accent:"var(--cobalt)",
     meta:`<button class="ghost" data-a="tab" data-t="crew" style="padding:4px 9px">see all</button>`,
     body:`<div class="list">${feed.map(feedRow).join("")}</div>`
   }):"";
@@ -1630,6 +1672,16 @@ function loggerBody(ex){
 
     <div style="margin-top:10px">${status}</div>
     <div class="mini" style="margin-top:9px;color:var(--gold)">Next target · ${esc(nextTarget(ex))}</div>
+
+    ${(()=>{const t=setMedal(ex,cs.prk,U.reps,S.bw), gap=medalGap(ex,cs.prk,U.reps,S.bw,t);
+      return `<div class="mini" style="margin-top:14px">This set would take</div>
+      <div class="medalrow" style="margin-top:7px">${MEDALS.map((m,i)=>
+        `<span class="medal ${m.k} ${i<=t?"on":""} ${i===t?"now":""}">${m.n}</span>`).join("")}</div>
+      <div class="mini" style="margin-top:7px">${
+        t<0 ? `Not yet a medal — <b>${esc(gap||"a little more")}</b> takes Bronze.`
+        : t>=4 ? `<b>Champion.</b> There is nothing above this one.`
+        : `<b>${esc(gap||"")}</b> would take ${MEDALS[t+1].n}.`}</div>`;})()}
+
     <button class="cta" data-a="log" style="margin-top:13px">LOG SET</button>`;
 }
 
@@ -1657,7 +1709,7 @@ function tabWeek(){
   const weekCard=card({
     title:"This week", icon:"cal", k:"week", accent:"var(--gold)",
     meta:`${S.perfectWeeks} perfect`,
-    help:`Seven days, each muscle group trained exactly twice. One tick is a day you trained, two is a day you cleared all three missions. All seven doubled is a <b>Perfect Week</b>: triple bounty and +2 permanent Power.<br><br>The coloured bar under a day is the <b>medal</b> you took that day — bronze, silver, gold, then author for a day worth about 2.25 normal ones.`,
+    help:`Seven days, each muscle group trained exactly twice. One tick is a day you trained, two is a day you cleared all three missions. All seven doubled is a <b>Perfect Week</b>: triple bounty and +2 permanent Power.<br><br>The coloured bar under a day is the best <b>medal</b> you took that day.`,
     body:`<div class="week">${DOWL.map((d,i)=>{
       const dk=(()=>{const dt=toDate(wk); dt.setDate(dt.getDate()+i); return dayKey(dt);})();
       const md=S.medals[dk];
@@ -1692,7 +1744,7 @@ function tabWeek(){
         <div class="list">${cut.map(r=>{const e=byId(r.ex);
           return `<button class="li" data-a="jump" data-e="${r.ex}">
             <span class="ldot" style="background:${gcol(e.g)}"></span>
-            <span class="lmain"><span class="lname">${esc(e.n)}${r.pr&&r.pr.length?`<span class="prbadge">PR</span>`:""}</span>
+            <span class="lmain"><span class="lname">${esc(e.n)}${medBadge(r.md)}${r.pr&&r.pr.length?`<span class="prbadge">PR</span>`:""}</span>
               <span class="lsub">${setDesc(r)} · ${r.prk}kg per rep</span></span>
             <span class="lval">${fmt(r.ton)}<span class="u">kg</span></span></button>`;}).join("")}</div>
         ${rows.length>cut.length?`<div class="mini" style="margin-top:8px">+ ${rows.length-cut.length} more that day</div>`:""}`;
@@ -1970,7 +2022,12 @@ function tabYou(){
       <div style="display:flex;align-items:center;gap:11px;margin-top:14px">
         <span class="mini" style="flex:none">bodyweight</span>
         <input type="text" inputmode="decimal" id="bwIn" value="${S.bw}" style="width:82px;text-align:center">
-        <span class="mini">kg</span></div>`
+        <span class="mini">kg</span></div>
+      <div class="mini" style="margin-top:13px">Medal standards calibrated for</div>
+      <div class="seg" style="margin-top:7px">
+        <button class="${stdScale()===1?"on":""}" data-a="std" data-v="1">a male lifter</button>
+        <button class="${stdScale()!==1?"on":""}" data-a="std" data-v="0.73">a female lifter</button>
+      </div>`
   });
 
   const acct=card({
@@ -2070,6 +2127,7 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="export") exportSave();
   else if(a==="import") document.getElementById("fileIn").click();
   else if(a==="pace"){ S.pace=Number(b.dataset.v); persist(); render(); }
+  else if(a==="std"){ S.stdScale=Number(b.dataset.v); persist(); publish(); render(); }
   else if(a==="recal"){
     if(confirm("Reset the standard to your current output? Future bosses get bigger. Your progress stays.")){
       const r=dailyRate(); if(r>0){ S.baseWeek=Math.max(2500,Math.round(r*7/10)*10); persist(); render(); }
