@@ -344,9 +344,22 @@ input.sval:focus{border-color:var(--focus);outline:none;background:var(--panel2)
 .bname{font-family:var(--d);font-size:12px;line-height:1.3}
 
 /* ══════════════════ WEEK ══════════════════ */
+/* medal metals are literal, so they are the same in every theme */
+.medalrow{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.medal{text-align:center;padding:8px 2px;border-radius:9px;font-family:var(--m);font-size:9.5px;
+  letter-spacing:.09em;text-transform:uppercase;background:var(--row);color:var(--dim);line-height:1.1;
+  transition:background-color .3s var(--ease),color .3s var(--ease)}
+.medal.on{background:var(--mc);color:var(--mi)}
+.medal.bronze{--mc:#A9722F;--mi:#FFFFFF}
+.medal.silver{--mc:#AEB6C6;--mi:#1A1D26}
+.medal.gold{--mc:#E8B33C;--mi:#241900}
+.medal.author{--mc:#12A176;--mi:#FFFFFF}
+.medal b{display:block;font-size:13px;letter-spacing:0;margin-bottom:3px}
+
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.wday{text-align:center;border-radius:11px;padding:10px 1px;background:var(--row);
-  font-family:var(--m);font-size:10.5px;color:var(--dim);line-height:1.7}
+.wday{position:relative;overflow:hidden;text-align:center;border-radius:11px;padding:10px 1px 12px;
+  background:var(--row);font-family:var(--m);font-size:10.5px;color:var(--dim);line-height:1.7}
+.wday .mbar{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--mc)}
 .wday.p{background:var(--panel2);color:var(--cream)}
 .wday.f{background:var(--greenF);color:var(--onGreen)}
 .wday.today{outline:2px solid var(--gold);outline-offset:1px;color:var(--cream)}
@@ -664,6 +677,19 @@ const ROSTER = [
 ["RIPPED",null,"No flavour text. You know what this is."]
 ];
 
+/* ══════════════════ MEDALS ══════════════════
+   Multiples of the day's quota. The quota tracks your own 21-day median, so
+   Author is always about 2.25x a normal day of yours - it stays hard as you
+   get stronger, and it is never someone else's standard. */
+const MEDALS=[{k:"bronze",n:"Bronze",m:0.60},{k:"silver",n:"Silver",m:1.00},
+              {k:"gold",n:"Gold",m:1.50},{k:"author",n:"Author",m:2.25}];
+const medalTier=(v,q)=>{ let t=-1; for(let i=0;i<MEDALS.length;i++) if(q>0&&v>=q*MEDALS[i].m) t=i; return t; };
+function medalCounts(){
+  const c=[0,0,0,0];
+  Object.values(S.medals||{}).forEach(t=>{ if(t>=0&&t<4) c[t]++; });
+  return c;
+}
+
 const HOLD_HP=0.28;
 const ENDLESS=[null,G("legs"),G("chest"),G("back"),RA(25),L("biceps",32),T("core"),G("shoulders"),LA(35),R("legs",30)];
 /* Boss HP is not an absolute number — it's a week of YOUR output.
@@ -920,7 +946,7 @@ function statsCard(){
   return {name:MP.me.name,pwr:S.power|0,ci:S.ci|0,streak:S.streak|0,ton:Math.round(S.totalTon||0),
           prs:(S.prLog||[]).length,pw:S.perfectWeeks|0,sets:(S.log||[]).length,lastDay:S.lastDay,lifts,recent,
           crew:S.crew?S.crew.id:null, crewName:S.crew?S.crew.name:null,
-          crewOwner:!!S.crewOwner, crewBans:S.crewOwner?(S.crewBans||[]):[]};
+          crewOwner:!!S.crewOwner, crewBans:S.crewOwner?(S.crewBans||[]):[], med:medalCounts()};
 }
 
 /* push my save + my board card to the server */
@@ -965,7 +991,7 @@ async function refreshBoard(){
 }
 
 const EMPTY={ver:4,bw:75,power:0,streak:0,lastDay:null,start:null,ci:0,cd:0,peak:0,
-  crew:null,crewOwner:false,crewBans:[],
+  crew:null,crewOwner:false,crewBans:[],medals:{},
   pace:7,baseWeek:null,calLocked:false,wstep:2.5,
   decayedThrough:null,away:null,daily:null,records:{},prLog:[],last:{},log:[],totalTon:0,weeks:{},
   lastExport:0,perfectWeeks:0,savedAt:0};
@@ -980,6 +1006,7 @@ function migrate(o){
   if(!s.last||typeof s.last!=="object") s.last={};
   if(!s.weeks||typeof s.weeks!=="object") s.weeks={};
   if(!Array.isArray(s.crewBans)) s.crewBans=[];
+  if(!s.medals||typeof s.medals!=="object") s.medals={};
   if(!s.crew||typeof s.crew!=="object"||!s.crew.id) s.crew=null;
   s.crewOwner=!!s.crewOwner&&!!s.crew;
   if(!s.pace||![4,7,10].includes(s.pace)) s.pace=7;
@@ -1110,6 +1137,7 @@ function logSet(){
   const objFrom=S.daily.objs.map(o=>{const v=progressOf(o,S.daily.acc);
     return o.t==="pr"?(v?100:0):Math.min(100,v/o.target*100);});
   const popObj=[];
+  const medFrom=medalTier(S.daily.acc.focusTon,S.daily.quota);
 
   /* records */
   const rec=S.records[ex.id]||{};
@@ -1154,6 +1182,14 @@ function logSet(){
     S.daily.perfect=true; perfect=true; bounty+=Math.round(S.daily.quota/2);
   }
 
+  /* medal for the day, recomputed from the running total */
+  const medNow=medalTier(a.focusTon,S.daily.quota);
+  if(medNow>=0){
+    S.medals[today]=medNow;
+    const days=Object.keys(S.medals);
+    if(days.length>200) days.sort().slice(0,days.length-200).forEach(d=>delete S.medals[d]);
+  }
+
   /* week ledger */
   const wk=mondayOf(today);
   if(!S.weeks[wk]) S.weeks[wk]=[0,0,0,0,0,0,0];
@@ -1183,7 +1219,8 @@ function logSet(){
     pr:broke.length?broke.slice():null});
   S.log=S.log.slice(0,900);
 
-  U.flash={ton,dmg,applied,pass,bounty,cleared,broke,finished,perfect,weekBonus,boss:boss.name};
+  U.flash={ton,dmg,applied,pass,bounty,cleared,broke,finished,perfect,weekBonus,boss:boss.name,
+    medal:medNow>medFrom?medNow:null};
   /* a cleared boss swaps the bar for a different fight, so do not travel it */
   U.fx={objFrom,popObj,hpFrom:cleared.length?null:hpFrom};
   startRest(90);
@@ -1430,6 +1467,16 @@ function alerts(){
   return h;
 }
 
+/* today's medal ladder — one row, four cutoffs, and the gap to the next */
+function medalStrip(p){
+  const q=S.daily.quota, v=S.daily.acc.focusTon, t=medalTier(v,q), next=MEDALS[t+1];
+  return `<div class="medalrow" style="margin-top:11px">${MEDALS.map((m,i)=>
+      `<span class="medal ${m.k} ${i<=t?"on":""}">${m.n}</span>`).join("")}</div>
+    <div class="mini" style="margin-top:8px">${
+      next ? `${kgs(Math.max(0,Math.round(q*next.m-v)))} more ${esc(p.label)} for <b>${next.n}</b>.`
+           : `<b>Author medal.</b> There is nothing above this one.`}</div>`;
+}
+
 /* ══════════════════ TAB · TRAIN ══════════════════ */
 function tabTrain(ex,boss,p){
   /* ── today's three missions ── */
@@ -1450,7 +1497,8 @@ function tabTrain(ex,boss,p){
         </span>
       </button>${open?qualList(objQualifiers(o,p,S.bw),OBJ_HINT[o.t]):""}`;
     }).join("")}</div>
-    <div class="mini" style="margin-top:12px">All three → <b>+${fmt(Math.round(S.daily.quota/2))}</b> perfect-day bonus.</div>`
+    <div class="mini" style="margin-top:12px">All three → <b>+${fmt(Math.round(S.daily.quota/2))}</b> perfect-day bonus.</div>
+    ${medalStrip(p)}`
   });
 
   /* ── the boss ── */
@@ -1595,6 +1643,7 @@ function flashCard(f){
       ${f.bounty?`<div class="mini" style="color:var(--gold);margin-top:4px">→ ${fmt(f.bounty)} mission bounty</div>`:""}
       ${f.broke.length?`<div class="banner" style="margin-top:10px;font-family:var(--d);font-size:11.5px">NEW RECORD · ${esc(f.broke.join(", "))}</div>`:""}
       ${f.finished.map(t=>`<div class="banner info" style="margin-top:8px">✓ ${esc(t)}</div>`).join("")}
+      ${f.medal!=null?`<div class="banner pop medal ${MEDALS[f.medal].k}" style="margin-top:8px;background:var(--mc);color:var(--mi);font-family:var(--d);font-size:12px;display:block;text-align:center">${MEDALS[f.medal].n.toUpperCase()} MEDAL</div>`:""}
       ${f.perfect?`<div class="banner pop" style="margin-top:8px;background:var(--greenF);color:var(--onGreen);font-family:var(--d);font-size:12px">PERFECT DAY</div>`:""}
       ${f.weekBonus?`<div class="banner pop" style="margin-top:8px;font-family:var(--d);font-size:12px">PERFECT WEEK · +2 POWER</div>`:""}
       ${f.cleared.map(n=>`<div class="banner pop" style="margin-top:8px;background:var(--greenF);color:var(--onGreen);font-family:var(--d);font-size:12px">${esc(n.toUpperCase())} DOWN</div>`).join("")}
@@ -1608,9 +1657,13 @@ function tabWeek(){
   const weekCard=card({
     title:"This week", icon:"cal", k:"week", accent:"var(--gold)",
     meta:`${S.perfectWeeks} perfect`,
-    help:`Seven days, each muscle group trained exactly twice. One tick is a day you trained, two is a day you cleared all three missions. All seven doubled is a <b>Perfect Week</b>: triple bounty and +2 permanent Power.`,
-    body:`<div class="week">${DOWL.map((d,i)=>
-      `<div class="wday ${w[i]===2?"f":w[i]===1?"p":""} ${i===S.daily.dow?"today":""}">${d}<br>${w[i]===2?"✓✓":w[i]===1?"✓":"·"}</div>`).join("")}</div>
+    help:`Seven days, each muscle group trained exactly twice. One tick is a day you trained, two is a day you cleared all three missions. All seven doubled is a <b>Perfect Week</b>: triple bounty and +2 permanent Power.<br><br>The coloured bar under a day is the <b>medal</b> you took that day — bronze, silver, gold, then author for a day worth about 2.25 normal ones.`,
+    body:`<div class="week">${DOWL.map((d,i)=>{
+      const dk=(()=>{const dt=toDate(wk); dt.setDate(dt.getDate()+i); return dayKey(dt);})();
+      const md=S.medals[dk];
+      return `<div class="wday ${w[i]===2?"f":w[i]===1?"p":""} ${i===S.daily.dow?"today":""}">${d}<br>${w[i]===2?"✓✓":w[i]===1?"✓":"·"}`
+        + (md>=0&&md!=null?`<span class="mbar medal ${MEDALS[md].k}" style="background:var(--mc)"></span>`:"")
+        + `</div>`;}).join("")}</div>
       <div class="mini" style="margin-top:12px;color:${rs.t==="decay"?"var(--red)":rs.t==="ok"?"var(--green)":"var(--dim)"}">${esc(rs.msg)}</div>`
   });
 
@@ -1911,7 +1964,10 @@ function tabYou(){
         <div class="kvi"><span class="k">power</span><b>${S.power}</b><span class="k2">+${Math.min(S.power,60)}% damage</span></div>
         <div class="kvi"><span class="k">perfect</span><b>${S.perfectWeeks}</b><span class="k2">weeks</span></div>
       </div>
-      <div style="display:flex;align-items:center;gap:11px;margin-top:13px">
+      <div class="mini" style="margin-top:14px">Medals taken</div>
+      <div class="medalrow" style="margin-top:7px">${(()=>{const c=medalCounts();
+        return MEDALS.map((m,i)=>`<span class="medal ${m.k} ${c[i]?"on":""}"><b>${c[i]}</b>${m.n}</span>`).join("");})()}</div>
+      <div style="display:flex;align-items:center;gap:11px;margin-top:14px">
         <span class="mini" style="flex:none">bodyweight</span>
         <input type="text" inputmode="decimal" id="bwIn" value="${S.bw}" style="width:82px;text-align:center">
         <span class="mini">kg</span></div>`
