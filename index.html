@@ -200,7 +200,12 @@ h2{margin:0}
 .fr:first-child{padding-top:0}
 .fr:last-child{padding-bottom:0;border-bottom:none}
 .av{width:28px;height:28px;flex:none;border-radius:9px;background:var(--row);
-  display:flex;align-items:center;justify-content:center;font-family:var(--d);font-size:11px}
+  display:flex;align-items:center;justify-content:center;font-family:var(--d);font-size:11px;
+  background-size:cover;background-position:center;overflow:hidden}
+.bigav{width:104px;height:104px;flex:none;border-radius:26px;background:var(--row);
+  background-size:cover;background-position:center;display:flex;align-items:center;
+  justify-content:center;font-family:var(--d);font-size:38px;color:var(--dim)}
+.bigav.set{box-shadow:inset 0 0 0 2px var(--line)}
 .av.me{background:var(--goldF);color:var(--onGold)}
 .ftxt{flex:1;min-width:0;font-size:13.5px;line-height:1.3}
 .ftxt b{font-weight:700}
@@ -479,6 +484,7 @@ button.li:active,.objrow:active{transform:scale(.995)}
 <div id="fx"></div>
 <a id="dl" style="display:none"></a>
 <input id="fileIn" type="file" accept=".json,application/json" style="display:none">
+<input id="picIn" type="file" accept="image/*" style="display:none">
 
 <script>
 "use strict";
@@ -1017,7 +1023,8 @@ function statsCard(){
   return {name:MP.me.name,pwr:S.power|0,ci:S.ci|0,streak:S.streak|0,ton:Math.round(S.totalTon||0),
           prs:(S.prLog||[]).length,pw:S.perfectWeeks|0,sets:(S.log||[]).length,lastDay:S.lastDay,lifts,recent,
           crew:S.crew?S.crew.id:null, crewName:S.crew?S.crew.name:null,
-          crewOwner:!!S.crewOwner, crewBans:S.crewOwner?(S.crewBans||[]):[], med:medalCounts()};
+          crewOwner:!!S.crewOwner, crewBans:S.crewOwner?(S.crewBans||[]):[], med:medalCounts(),
+          pic:S.pic||null};
 }
 
 /* push my save + my board card to the server */
@@ -1062,7 +1069,7 @@ async function refreshBoard(){
 }
 
 const EMPTY={ver:4,bw:75,power:0,streak:0,lastDay:null,start:null,ci:0,cd:0,peak:0,
-  crew:null,crewOwner:false,crewBans:[],medals:{},stdScale:1,
+  crew:null,crewOwner:false,crewBans:[],medals:{},stdScale:1,pic:null,
   wstep:2.5,
   decayedThrough:null,away:null,daily:null,records:{},prLog:[],last:{},log:[],totalTon:0,weeks:{},
   lastExport:0,perfectWeeks:0,savedAt:0};
@@ -1079,6 +1086,7 @@ function migrate(o){
   if(!Array.isArray(s.crewBans)) s.crewBans=[];
   if(!s.medals||typeof s.medals!=="object") s.medals={};
   if(![1,0.73].includes(s.stdScale)) s.stdScale=1;
+  s.pic=safePic(s.pic);
   if(!s.crew||typeof s.crew!=="object"||!s.crew.id) s.crew=null;
   s.crewOwner=!!s.crewOwner&&!!s.crew;
   if(!s.pace||![4,7,10].includes(s.pace)) s.pace=7;
@@ -1352,6 +1360,32 @@ function loadSaveObj(o){
   S=migrate(o); applyDecay(); rollDaily(); persist(); U.tab="train"; render();
   alert("Save restored.");
 }
+/* square-crop and squeeze until it is small enough to ride along with the
+   stats blob that syncs to everyone else */
+function setAvatar(file){
+  if(!file) return;
+  const fr=new FileReader();
+  fr.onerror=()=>alert("Couldn't read that file.");
+  fr.onload=()=>{
+    const img=new Image();
+    img.onerror=()=>alert("That doesn't look like an image.");
+    img.onload=()=>{
+      const N=128, cv=document.createElement("canvas");
+      cv.width=cv.height=N;
+      const ctx=cv.getContext("2d"), side=Math.min(img.width,img.height);
+      ctx.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,N,N);
+      let q=0.72, out=cv.toDataURL("image/jpeg",q);
+      while(out.length>12000 && q>0.34){ q-=0.08; out=cv.toDataURL("image/jpeg",q); }
+      if(!safePic(out)) return alert("Couldn't use that image. Try a different one.");
+      S.pic=out; persist(); publish(); render();
+    };
+    img.src=fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+document.getElementById("picIn").addEventListener("change",e=>{
+  setAvatar(e.target.files[0]); e.target.value="";
+});
 document.getElementById("fileIn").addEventListener("change",e=>{
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader();
@@ -1370,6 +1404,17 @@ const bar=(pct,color,h,from)=>{
 const exTag=e=>{const[c,t]=MODE_TAG[e.mode];return `<span class="tag ${c}">${t}</span>`;};
 const hasEx=id=>EX.some(e=>e.id===id);
 const initial=n=>(String(n||"?").trim()[0]||"?").toUpperCase();
+
+/* Board rows come from other players, so a picture is only ever used after it
+   matches a plain base64 data URL - it ends up inside a style attribute. */
+const PIC_OK=/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$/;
+const safePic=p=>(typeof p==="string"&&p.length<20000&&PIC_OK.test(p))?p:null;
+/* one avatar, with a face if there is one and the initial if there is not */
+function ava(pic,name,cls){
+  const p=safePic(pic);
+  return p ? `<span class="av ${cls||""}" style="background-image:url('${p}')" aria-label="${esc(name||"")}"></span>`
+           : `<span class="av ${cls||""}">${esc(initial(name))}</span>`;
+}
 const fmtK=n=>Math.abs(n)>=10000?Math.round(n/1000)+"k":fmt(n);
 const kgs=n=>Math.abs(n)>=10000?fmtK(n)+" kg":fmt(n)+"kg";
 
@@ -1452,7 +1497,7 @@ function feedItems(withMe){
   Object.values(MP.board).forEach(pl=>{
     const mine=MP.me&&pl.id===MP.me.id;
     if(mine&&!withMe) return;
-    (pl.recent||[]).forEach(r=>{ if(hasEx(r.ex)) out.push(Object.assign({},r,{who:pl.name||pl.id,mine})); });
+    (pl.recent||[]).forEach(r=>{ if(hasEx(r.ex)) out.push(Object.assign({},r,{who:pl.name||pl.id,pic:pl.pic,mine})); });
   });
   return out.sort((a,b)=>(b.t||0)-(a.t||0));
 }
@@ -1462,7 +1507,7 @@ function feedRow(it){
     ? `<b>${who}</b> took ${/^[aeiou]/i.test(MEDALS[md].n)?"an":"a"} <b class="medal ${MEDALS[md].k}" style="background:none;color:var(--mc);padding:0;font-family:inherit">${MEDALS[md].n}</b> medal`
     : `<b>${who}</b> logged ${esc(e.n)}`;
   return `<div class="fr">
-    <div class="av ${it.mine?"me":""}">${esc(initial(it.who))}</div>
+    ${ava(it.mine?S.pic:it.pic, it.who, it.mine?"me":"")}
     <div class="ftxt">${head}
       <span class="lsub">${esc(e.n)} · ${setDesc(it)} · ${fmt(it.ton||0)}kg${it.pr&&it.pr.length?`<span class="prbadge">PR</span>`:""}</span></div>
     <div class="ftime">${relT(it.t)}</div>
@@ -1835,7 +1880,7 @@ function tabFeed(){
     meta:`${all.length}`,
     help:`Everyone signed in to this board, most recently active first. Not a ranking — the ranking lives on CREW.`,
     body:all.length?`<div class="list">${all.map(pl=>`<div class="li">
-        <div class="av ${pl.id===mine?"me":""}">${esc(initial(pl.name))}</div>
+        ${ava(pl.id===mine?S.pic:pl.pic, pl.name, pl.id===mine?"me":"")}
         <span class="lmain"><span class="lname">${esc(pl.name)}${pl.id===mine?`<span class="rolebadge">you</span>`:
             (myCrew&&pl.crew===myCrew?`<span class="rolebadge">crew</span>`:"")}</span>
           <span class="lsub">boss ${(pl.ci|0)+1} · ${kgs(pl.ton||0)} · ${pl.streak|0}d streak</span></span>
@@ -1915,7 +1960,7 @@ function crewCard(){
       <button class="cta soon" data-a="crewmission" style="margin-top:13px">START CREW MISSION<span>coming soon</span></button>
 
       <div class="list" style="margin-top:14px">${rows.map(p=>`<div class="li">
-        <div class="av ${p.id===mine?"me":""}">${esc(initial(p.name))}</div>
+        ${ava(p.id===mine?S.pic:p.pic, p.name, p.id===mine?"me":"")}
         <span class="lmain"><span class="lname">${esc(p.name)}${p.crewOwner?`<span class="rolebadge own">owner</span>`:""}${p.id===mine?`<span class="rolebadge">you</span>`:""}</span>
           <span class="lsub">boss ${(p.ci|0)+1} · ${kgs(p.ton||0)} · ${p.streak|0}d · ${p.lastDay?agoText(p.lastDay):"never"}</span></span>
         ${S.crewOwner&&p.id!==mine?`<button class="xbtn" data-a="crewkick" data-i="${esc(p.id)}" title="Remove ${esc(p.name)}" aria-label="Remove ${esc(p.name)}">×</button>`:""}
@@ -1999,6 +2044,22 @@ function tabCrew(){
 
 /* ══════════════════ TAB · YOU ══════════════════ */
 function tabYou(){
+  const c=medalCounts(), best=c.reduce((a,n,i)=>n?i:a,-1);
+  const profile=card({
+    title:"Profile", icon:"trophy", k:"profile", accent:"var(--gold)",
+    body:`<div style="display:flex;align-items:center;gap:17px">
+        <span class="bigav ${S.pic?"set":""}" ${S.pic?`style="background-image:url('${S.pic}')"`:""}>${S.pic?"":esc(initial((MP.me&&MP.me.name)||"?"))}</span>
+        <div style="min-width:0">
+          <div class="disp" style="font-size:21px;overflow:hidden;text-overflow:ellipsis">${esc((MP.me&&MP.me.name)||"guest")}</div>
+          <div class="mini" style="margin-top:5px">Boss ${S.ci+1} of 100${best>=0?` · best medal <b>${MEDALS[best].n}</b>`:""}</div>
+          <div class="chiprow" style="margin-top:10px">
+            <button class="ghost" data-a="pic">${S.pic?"change photo":"upload photo"}</button>
+            ${S.pic?`<button class="ghost" data-a="picdel">remove</button>`:""}
+          </div>
+        </div>
+      </div>
+      <div class="mini" style="margin-top:12px">Your photo shows up next to your name in the feed, the roster and your crew.</div>`
+  });
   const recEntries=Object.entries(S.records).sort((a,b)=>(daysAgo(a[1].last)??999)-(daysAgo(b[1].last)??999));
   const recs=card({
     title:"Your records", icon:"trophy", k:"recs", accent:"var(--gold)",
@@ -2084,7 +2145,7 @@ function tabYou(){
       <div style="margin-top:14px"><button class="ghost" data-a="wipe" style="color:var(--red)">wipe all progress</button></div>`
   });
 
-  return cols(recs+stale+prlog, life+acct);
+  return cols(profile+recs+stale+prlog, life+acct);
 }
 
 /* ══════════════════ POST-RENDER WIRING ══════════════════ */
@@ -2153,6 +2214,8 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="skiprest"){ U.rest=0; clearInterval(U.restT); paintRest(); }
   else if(a==="export") exportSave();
   else if(a==="import") document.getElementById("fileIn").click();
+  else if(a==="pic") document.getElementById("picIn").click();
+  else if(a==="picdel"){ if(confirm("Remove your photo?")){ S.pic=null; persist(); publish(); render(); } }
   else if(a==="std"){ S.stdScale=Number(b.dataset.v); persist(); publish(); render(); }
   else if(a==="dismissaway"){ S.away=null; persist(); render(); }
   else if(a==="saveserver"){ saveServer(document.getElementById("sbUrl").value,document.getElementById("sbKey").value,()=>{
