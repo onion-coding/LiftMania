@@ -121,15 +121,15 @@ h2{margin:0}
   text-transform:uppercase;color:var(--dim);margin-top:2px}
 
 /* ══════════════════ TABS ══════════════════ */
-.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:5px;
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:5px;
   background:var(--panel);border:1px solid var(--line);border-radius:15px}
 .tab{display:flex;flex-direction:column;align-items:center;gap:5px;border-radius:11px;
-  padding:9px 2px 8px;background:transparent;color:var(--dim);
-  font-family:var(--m);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;line-height:1}
+  padding:9px 1px 8px;background:transparent;color:var(--dim);
+  font-family:var(--m);font-size:9px;letter-spacing:.06em;text-transform:uppercase;line-height:1}
 .tab .ic{width:21px;height:21px}
 .tab.on{background:var(--goldF);color:var(--onGold)}
 @media (min-width:900px){
-  .tabs{max-width:560px}
+  .tabs{max-width:680px}
   .tab{flex-direction:row;gap:8px;font-size:11px;padding:10px 4px}
 }
 
@@ -765,15 +765,14 @@ const medBadge=t=>(t>=0&&t<5)?`<span class="mbadge medal ${MEDALS[t].k}">${MEDAL
 const HOLD_HP=0.28;
 const ENDLESS=[null,G("legs"),G("chest"),G("back"),RA(25),L("biceps",32),T("core"),G("shoulders"),LA(35),R("legs",30)];
 /* Boss HP is not an absolute number — it's a week of YOUR output.
-   baseWeek is calibrated from your first six training days, then locked.
+   Every boss is the same size for everyone.
    The demand then climbs on a decelerating curve: ~2.5% per boss early,
    under 1% per boss late, reaching ~2.9× your starting output by boss 100.
    Keep up and each boss falls in about a week. Coast and they don't. */
-const DEMAND_BASE=6000;
+const DEMAND_BASE=20000;
 const demandMult = i => Math.pow(1+i*0.035, 0.72);
-const baseWeek = () => Math.max(2500, (S && S.baseWeek) || DEMAND_BASE);
-const paceDays = () => (S && S.pace) || 7;
-const bossHp = i => Math.round(baseWeek()*(paceDays()/7)*demandMult(i)/10)*10;
+/* the same number for every player, on every device */
+const bossHp = i => Math.round(DEMAND_BASE*demandMult(i)/100)*100;
 function bossAt(i){
   if(i<ROSTER.length){
     const [name,gate,flavor]=ROSTER[i];
@@ -1064,7 +1063,7 @@ async function refreshBoard(){
 
 const EMPTY={ver:4,bw:75,power:0,streak:0,lastDay:null,start:null,ci:0,cd:0,peak:0,
   crew:null,crewOwner:false,crewBans:[],medals:{},stdScale:1,
-  pace:7,baseWeek:null,calLocked:false,wstep:2.5,
+  wstep:2.5,
   decayedThrough:null,away:null,daily:null,records:{},prLog:[],last:{},log:[],totalTon:0,weeks:{},
   lastExport:0,perfectWeeks:0,savedAt:0};
 const THEMES=[{id:"night",label:"☾",title:"Night"},{id:"foresty",label:"🌿",title:"Foresty"},{id:"bright",label:"☀",title:"Bright"}];
@@ -1143,15 +1142,6 @@ function staleRecords(){
 }
 
 /* ══════════════════ CALIBRATION & PACE ══════════════════ */
-const CAL_DAYS=6;
-const calDaysDone = () => new Set(S.log.map(r=>r.d)).size;
-function updateCalibration(){
-  if(S.calLocked || !S.log.length) return;
-  const span=Math.max(1, dayNum(dayKey())-dayNum(S.start||dayKey())+1);
-  const total=S.log.reduce((a,r)=>a+(r.ap||r.dmg||0),0);
-  S.baseWeek=Math.max(2500, Math.round(total/span*7/10)*10);
-  if(calDaysDone()>=CAL_DAYS) S.calLocked=true;
-}
 function dailyRate(){
   const t=dayNum(dayKey());
   const w=S.log.filter(r=>t-dayNum(r.d)<14);
@@ -1203,7 +1193,6 @@ function logSet(){
   const today=dayKey();
   if(S.lastDay!==today) S.streak = S.lastDay===yKey() ? S.streak+1 : 1;
   S.lastDay=today; S.decayedThrough=dayNum(today); S.away=null;
-  updateCalibration();
   rollDaily();
   /* snapshot the bars before any of this lands, so they animate the distance */
   const hpFrom=(bossAt(S.ci).hp-S.cd)/bossAt(S.ci).hp*100;
@@ -1404,7 +1393,8 @@ const ICONS={
   bars:'<path d="M4.5 20V10.5M12 20V4M19.5 20v-6.5"/>',
   flag:'<path d="M6 21.2V3.4"/><path d="M6 4.4h11.6l-2.1 3.6 2.1 3.6H6Z"/>',
   alert:'<path d="M12 3.6 21 19.4H3Z"/><path d="M12 9.6v4.2"/><circle cx="12" cy="16.6" r="1.1" fill="currentColor" stroke="none"/>',
-  clock:'<circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12l3.2 2.1"/>'
+  clock:'<circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12l3.2 2.1"/>',
+  news:'<path d="M3.6 5.8h12.8v13.4H5.6a2 2 0 0 1-2-2Z"/><path d="M16.4 9.4H20.4v7.8a2 2 0 0 1-2 2h-2Z"/><path d="M6.6 9.2h6.8M6.6 12.4h6.8M6.6 15.6h4.4"/>'
 };
 const ico=n=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||""}</svg>`;
 
@@ -1481,15 +1471,16 @@ function feedRow(it){
 const todaySets=()=>{const k=dayKey();return (S.log||[]).filter(r=>r.d===k);};
 
 /* ══════════════════ RENDER ══════════════════ */
-const TABS=[["train","TRAIN","dumbbell"],["week","WEEK","cal"],["bosses","BOSSES","skull"],
-            ["crew","CREW","users"],["you","YOU","trophy"]];
+const TABS=[["feed","FEED","news"],["train","TRAIN","dumbbell"],["week","WEEK","cal"],
+            ["bosses","BOSSES","skull"],["crew","CREW","users"],["you","YOU","trophy"]];
 
 function render(){
   rollDaily();
   FX=U.fx||{}; U.fx=null;
   const ex=byId(U.ex), boss=bossAt(S.ci), p=PLAN[S.daily.dow];
   let h=topBar()+tabBar()+alerts();
-  if(U.tab==="train")  h+=tabTrain(ex,boss,p);
+  if(U.tab==="feed")   h+=tabFeed();
+  else if(U.tab==="train")  h+=tabTrain(ex,boss,p);
   else if(U.tab==="week")   h+=tabWeek();
   else if(U.tab==="bosses") h+=tabBosses();
   else if(U.tab==="crew")   h+=tabCrew();
@@ -1568,21 +1559,20 @@ function tabTrain(ex,boss,p){
   });
 
   /* ── the boss ── */
-  const out=weeklyOut(), eta=bossEta(), need=Math.round(boss.hp/paceDays()*7), ok=out>=need;
+  const out=weeklyOut(), eta=bossEta(), need=boss.hp, ok=out>=need;
   const bossCard=card({
     title:boss.name, big:true, icon:"skull", k:"boss", accent:"var(--cobalt)",
     meta:`${S.ci+1}/100`,
     sub:`${esc(boss.act)} · ${esc(boss.flavor)}`,
-    help:`Boss health is a week of <b>your</b> output, measured over your first six training days and then locked. Every kilo you move chips it down; mission bounties hit it too. Miss two days in a row and it starts healing.`,
+    help:`Every boss has the same health for everyone — the roster is one fixed ladder, so boss 40 means the same thing to you as it does to anyone else on the board. Every kilo you move chips it down; mission bounties hit it too. Miss two days in a row and it starts healing.`,
     body:`
       <div class="mathrow"><span>hp remaining</span><span><b>${fmt(boss.hp-S.cd)}</b> / ${fmt(boss.hp)}</span></div>
       <div style="margin-top:10px">${bar((boss.hp-S.cd)/boss.hp*100,"linear-gradient(90deg,var(--cobaltF),var(--cobalt))",10,FX.hpFrom)}</div>
       <div class="kv" style="margin-top:12px">
         <div class="kvi"><span class="k">asks</span><b>${fmtK(need)}</b><span class="k2">kg / week</span></div>
         <div class="kvi"><span class="k">you make</span><b style="color:${ok?"var(--green)":"var(--gold)"}">${out?fmtK(out):"—"}</b><span class="k2">kg / week</span></div>
-        <div class="kvi"><span class="k">falls in</span><b style="color:${eta&&eta<=paceDays()+2?"var(--green)":"var(--gold)"}">${eta?eta+"d":"—"}</b><span class="k2">${eta?"at this rate":"log some sets"}</span></div>
+        <div class="kvi"><span class="k">falls in</span><b style="color:${eta&&eta<=9?"var(--green)":"var(--gold)"}">${eta?eta+"d":"—"}</b><span class="k2">${eta?"at this rate":"log some sets"}</span></div>
       </div>
-      ${!S.calLocked?`<div class="mini" style="margin-top:10px;color:var(--magenta)">Calibrating · ${calDaysDone()}/${CAL_DAYS} training days.</div>`:""}
       <button class="gatechip" data-a="gate" style="margin-top:11px">
         <span style="color:var(--dim)">${boss.gate?"full damage only from":"every set lands in full"}</span>
         <b style="display:block;color:${boss.gate?"var(--magenta)":"var(--green)"}">${gateText(boss.gate)}</b>
@@ -1629,7 +1619,7 @@ function tabTrain(ex,boss,p){
   const feed=feedItems(false).slice(0,3);
   const crew=feed.length?card({
     title:"Crew feed", icon:"users", accent:"var(--cobalt)",
-    meta:`<button class="ghost" data-a="tab" data-t="crew" style="padding:4px 9px">see all</button>`,
+    meta:`<button class="ghost" data-a="tab" data-t="feed" style="padding:4px 9px">see all</button>`,
     body:`<div class="list">${feed.map(feedRow).join("")}</div>`
   }):"";
 
@@ -1818,9 +1808,42 @@ function tabBosses(){
   });
   return card({
     title:"The campaign", icon:"skull", k:"camp", accent:"var(--cobalt)", meta:`${S.ci}/100 down`,
-    help:`One hundred named bosses across ten acts. Each asks for roughly a week of your own output, and the line under the name says what it takes full damage from. After the hundredth they keep generating — 12% harder each time.`,
+    help:`One hundred named bosses across ten acts, the same health for every player. The line under a name says what it takes full damage from, and the demand climbs about 2.5% a boss early and under 1% by the end. After the hundredth they keep generating — 12% harder each time.`,
     body:`<div class="roster">${rows}</div>`
   });
+}
+
+/* ══════════════════ TAB · FEED ══════════════════ */
+function tabFeed(){
+  const feed=feedItems(true).slice(0,40);
+  const feedCard=card({
+    title:"Feed", icon:"news", k:"feed", accent:"var(--cobalt)",
+    meta:feed.length?`${feed.length} sets`:"",
+    help:`Every set anyone has logged recently, newest first, with the medal it took. It refreshes whenever an app syncs — pull the latest from the refresh button on CREW.`,
+    body:feed.length?`<div class="list">${feed.map(feedRow).join("")}</div>`
+      :`<div class="empty">Nothing yet. The moment anyone logs a set it lands here.</div>`
+  });
+
+  /* a roster rather than a ranking - who is here and when they last lifted */
+  const all=Object.values(MP.board).slice().sort((a,b)=>{
+    const la=a.lastDay?dayNum(a.lastDay):-9e9, lb=b.lastDay?dayNum(b.lastDay):-9e9;
+    return lb-la || (b.ton|0)-(a.ton|0);
+  });
+  const mine=MP.me&&MP.me.id, myCrew=crewId();
+  const players=card({
+    title:"Players", icon:"users", k:"players", accent:"var(--magenta)",
+    meta:`${all.length}`,
+    help:`Everyone signed in to this board, most recently active first. Not a ranking — the ranking lives on CREW.`,
+    body:all.length?`<div class="list">${all.map(pl=>`<div class="li">
+        <div class="av ${pl.id===mine?"me":""}">${esc(initial(pl.name))}</div>
+        <span class="lmain"><span class="lname">${esc(pl.name)}${pl.id===mine?`<span class="rolebadge">you</span>`:
+            (myCrew&&pl.crew===myCrew?`<span class="rolebadge">crew</span>`:"")}</span>
+          <span class="lsub">boss ${(pl.ci|0)+1} · ${kgs(pl.ton||0)} · ${pl.streak|0}d streak</span></span>
+        <span class="lval" style="font-size:11px;color:var(--dim)">${pl.lastDay?agoText(pl.lastDay):"never"}</span>
+      </div>`).join("")}</div>`
+      :`<div class="empty">Nobody on the board yet. Share the link and it fills itself.</div>`
+  });
+  return cols(feedCard, players);
 }
 
 /* ══════════════════ CREWS ══════════════════
@@ -1946,15 +1969,6 @@ function tabCrew(){
       ${myRank?`<div class="mini" style="margin-top:13px">You rank <b>#${myRank}</b> of ${rows.length} on ${m.l}.</div>`:""}`
   });
 
-  const feed=feedItems(true).slice(0,25);
-  const feedCard=card({
-    title:"Live feed", icon:"users", k:"feed", accent:"var(--cobalt)",
-    meta:feed.length?`${feed.length} sets`:"",
-    help:`The last few sets from everyone on the board, newest first. It updates whenever anyone's app syncs — hit refresh on the board to pull the latest.`,
-    body:feed.length?`<div class="list">${feed.map(feedRow).join("")}</div>`
-      :`<div class="empty">No activity yet. Once anyone logs a set it shows up here.</div>`
-  });
-
   const house=card({
     title:"House records", icon:"spark", k:"house", accent:"var(--magenta)",
     help:`The best estimated 1RM on each lift and who owns it. Beat one and it flips to your name after your next sync.`,
@@ -1980,7 +1994,7 @@ function tabCrew(){
       })()}`
   });
 
-  return cols(crewCard()+board, feedCard+house);
+  return cols(crewCard()+board, house);
 }
 
 /* ══════════════════ TAB · YOU ══════════════════ */
@@ -2018,17 +2032,6 @@ function tabYou(){
         <span class="lsub">${p.k.length===4?"all four records":esc(p.k.join(", "))}</span></span>
       <span class="lval" style="font-size:11px;color:var(--dim)">${agoText(p.d)}</span></div>`).join("")}</div>`
   }):"";
-
-  const pace=card({
-    title:"Pace", icon:"gauge", k:"pace", accent:"var(--cobalt)",
-    meta:S.calLocked?`${kgs(baseWeek())}/wk`:`calibrating ${calDaysDone()}/${CAL_DAYS}`,
-    help:`How long one boss should take. Boss HP is a multiple of your own weekly output, so this sets the rhythm, not the difficulty of any single session. The demand climbs about 2.5% a boss early and under 1% by the end — roughly 2.9× your starting output by boss 100.`,
-    body:`<div class="kv">${[[4,"4 days","~1 year"],[7,"1 week","~2 years"],[10,"10 days","~2.7 years"]].map(v=>
-      `<button class="kvi" data-a="pace" data-v="${v[0]}" style="${S.pace===v[0]?"background:var(--panel2);box-shadow:inset 0 0 0 1px var(--gold)":""}">
-        <span class="k" style="${S.pace===v[0]?"color:var(--gold)":""}">${S.pace===v[0]?"✓ current":"per boss"}</span><b>${v[1]}</b><span class="k2">${v[2]} to 100</span></button>`).join("")}</div>
-      <div class="mini" style="margin-top:12px">Current output <b>${kgs(weeklyOut())}</b> a week.</div>
-      ${S.calLocked?`<button class="ghost wide" data-a="recal" style="margin-top:11px">recalibrate to current output</button>`:""}`
-  });
 
   const life=card({
     title:"Lifetime", icon:"weight", k:"life", accent:"var(--dim)",
@@ -2081,7 +2084,7 @@ function tabYou(){
       <div style="margin-top:14px"><button class="ghost" data-a="wipe" style="color:var(--red)">wipe all progress</button></div>`
   });
 
-  return cols(recs+stale+prlog, pace+life+acct);
+  return cols(recs+stale+prlog, life+acct);
 }
 
 /* ══════════════════ POST-RENDER WIRING ══════════════════ */
@@ -2150,13 +2153,7 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="skiprest"){ U.rest=0; clearInterval(U.restT); paintRest(); }
   else if(a==="export") exportSave();
   else if(a==="import") document.getElementById("fileIn").click();
-  else if(a==="pace"){ S.pace=Number(b.dataset.v); persist(); render(); }
   else if(a==="std"){ S.stdScale=Number(b.dataset.v); persist(); publish(); render(); }
-  else if(a==="recal"){
-    if(confirm("Reset the standard to your current output? Future bosses get bigger. Your progress stays.")){
-      const r=dailyRate(); if(r>0){ S.baseWeek=Math.max(2500,Math.round(r*7/10)*10); persist(); render(); }
-      else alert("Log a couple of sessions first.");
-    } }
   else if(a==="dismissaway"){ S.away=null; persist(); render(); }
   else if(a==="saveserver"){ saveServer(document.getElementById("sbUrl").value,document.getElementById("sbKey").value,()=>{
       MP.status="offline"; render(); if(cloudOn()) alert("Server saved. Switch account and sign back in with your name and PIN to link this device to it."); }); }
