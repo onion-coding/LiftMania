@@ -695,7 +695,21 @@ const ROSTER = [
    whole ladder for a typical female one (YOU > Lifetime). */
 const MEDALS=[{k:"bronze",n:"Bronze"},{k:"silver",n:"Silver"},{k:"gold",n:"Gold"},
               {k:"author",n:"Author"},{k:"champion",n:"Champion"}];
-const MED_MULT=[0.55,0.78,1.00,1.25,1.52];
+const MED_MULT=[0.55,0.78,1.00,1.25,1.52];   /* on the 1RM ratio, loaded lifts */
+const REP_MULT=[0.32,0.60,1.00,1.44,2.00];   /* on the rep/second figure below */
+
+/* Gold = a solid working set for a lifter about a year in - the sort of set
+   you can put in three times on a normal day, not an all-out AMRAP. Reps for
+   bodyweight moves, seconds for holds, per side where the exercise is. */
+const EX_WORK={
+  pushup:25, incpush:32, decpush:20, defpush:20, archer:10,
+  trow:20, sman:60,
+  pike:15,
+  diamond:18, dip:20,
+  squat:35, split:15, bulg:12, lunge:20, nordic:8, calf:30, bridge:25,
+  wallsit:90, burpee:20, jsquat:20,
+  plank:90, splank:60, hollow:45, lsit:30, lraise:20, mclimb:40, deadbug:24
+};
 const EX_STD={
   pushup:1.28, incpush:1.08, decpush:1.37, defpush:1.30, archer:1.13, cpress:0.85, cfly:0.45,
   crow:0.90, clat:0.85, csap:0.45, cpullover:0.50, trow:1.28, sman:0.40,
@@ -707,12 +721,20 @@ const EX_STD={
   plank:0.80, splank:0.84, hollow:0.64, lsit:0.90, lraise:0.55, ccrunch:0.60,
   chop:0.25, pallof:0.20, twist:0.25, mclimb:0.67, deadbug:0.47
 };
-EX.forEach(e=>{ e.std=EX_STD[e.id]||0.60; });
+EX.forEach(e=>{ e.std=EX_STD[e.id]||0.60; e.work=EX_WORK[e.id]||0; });
+/* reps and holds are scored on their own count; anything you load is scored
+   on what it estimates your one-rep max to be */
+const byReps=ex=>(ex.mode==="bw"||ex.mode==="time")&&ex.work>0;
 
 const stdScale=()=>(S&&S.stdScale)||1;
 const unitsOf=(ex,reps)=>ex.mode==="time"?reps/SEC_PER_REP:reps;
 /* the medal a single set is worth, -1 for none */
 function setMedal(ex,prk,reps,bw){
+  if(byReps(ex)){
+    const g=ex.work*stdScale();
+    let t=-1; for(let i=0;i<REP_MULT.length;i++) if(reps>=Math.round(g*REP_MULT[i])) t=i;
+    return t;
+  }
   const st=ex.std*stdScale();
   if(!st||!bw||!prk) return -1;
   const ratio=e1rm(prk,unitsOf(ex,reps))/bw;
@@ -721,15 +743,17 @@ function setMedal(ex,prk,reps,bw){
 }
 /* what one more notch would cost, in the unit you actually control */
 function medalGap(ex,prk,reps,bw,tier){
-  const next=tier+1; if(next>=MED_MULT.length||!prk) return null;
-  const target=ex.std*stdScale()*MED_MULT[next]*bw, u=unitsOf(ex,reps);
-  if(hasLoad(ex)){
-    const need=target/(1+u/30), d=Math.ceil((need-prk)*2)/2;
-    return d>0?`+${d}kg per rep`:null;
+  const next=tier+1;
+  if(byReps(ex)){
+    if(next>=REP_MULT.length) return null;
+    const d=Math.round(ex.work*stdScale()*REP_MULT[next])-reps;
+    if(d<=0) return null;
+    return ex.mode==="time" ? `+${d}s` : `+${d} rep${d===1?"":"s"}`;
   }
-  const need=Math.ceil(30*(target/prk-1)), d=need-u;
-  if(d<=0) return null;
-  return ex.mode==="time" ? `+${d*SEC_PER_REP}s` : `+${d} rep${d===1?"":"s"}`;
+  if(next>=MED_MULT.length||!prk) return null;
+  const target=ex.std*stdScale()*MED_MULT[next]*bw, u=unitsOf(ex,reps);
+  const need=target/(1+u/30), d=Math.ceil((need-prk)*2)/2;
+  return d>0?`+${d}kg per rep`:null;
 }
 function medalCounts(){
   const c=[0,0,0,0,0];
