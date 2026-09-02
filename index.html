@@ -1092,7 +1092,6 @@ async function refreshBoard(){
 
 const EMPTY={ver:4,bw:75,power:0,streak:0,lastDay:null,start:null,ci:0,cd:0,peak:0,
   crew:null,crewOwner:false,crewBans:[],medals:{},stdScale:1,pic:null,
-  wstep:2.5,
   decayedThrough:null,away:null,daily:null,records:{},prLog:[],last:{},log:[],totalTon:0,weeks:{},
   lastExport:0,perfectWeeks:0,savedAt:0};
 const THEMES=[{id:"night",label:"☾",title:"Night"},{id:"foresty",label:"🌿",title:"Foresty"},{id:"bright",label:"☀",title:"Bright"}];
@@ -1112,7 +1111,6 @@ function migrate(o){
   if(!s.crew||typeof s.crew!=="object"||!s.crew.id) s.crew=null;
   s.crewOwner=!!s.crewOwner&&!!s.crew;
   if(!s.pace||![4,7,10].includes(s.pace)) s.pace=7;
-  if(![0.5,1,2.5,5].includes(s.wstep)) s.wstep=2.5;
   if(typeof s.bw!=="number"||!isFinite(s.bw)||s.bw<=0) s.bw=75;
   s.ci=Math.max(0,s.ci|0); s.cd=Math.max(0,s.cd||0);
   s.peak=Math.max(s.peak|0,s.ci);
@@ -1729,16 +1727,14 @@ function loggerBody(ex){
     <div class="steppers" style="margin-top:15px">
       ${stepper("sets","sets",1,1)}
       ${stepper(ex.mode==="time"?(each?"sec / side":"seconds"):(each?"reps / side":"reps"),"reps",ex.mode==="time"?5:1,1)}
-      ${hasLoad(ex)?stepper(ex.mode==="bwload"?"added kg":(each?"kg / side":"kg"),"load",S.wstep,0):""}
+      ${hasLoad(ex)?stepper(ex.mode==="bwload"?"added kg":(each?"kg / side":"kg"),"load",1,0):""}
     </div>
 
-    <div class="chiprow" style="margin-top:10px">
-      ${hasLoad(ex)?`<span class="mini">step</span>${[0.5,1,2.5,5].map(v=>
-        `<button class="filt ${S.wstep===v?"on":""}" data-a="wstep" data-v="${v}">${v}</button>`).join("")}`:""}
-      ${opt?`<div class="seg" style="margin-left:auto">
+    ${opt?`<div class="chiprow" style="margin-top:11px">
+      <div class="seg">
         <button class="${!each?"on":""}" data-a="side" data-v="both">both sides</button>
-        <button class="${each?"on":""}" data-a="side" data-v="each">per side</button></div>`:""}
-    </div>
+        <button class="${each?"on":""}" data-a="side" data-v="each">per side</button></div>
+    </div>`:""}
     <div class="mini" style="margin-top:8px">${each
       ? `Enter one side only — both are counted (×2).`
       : `Enter the whole set together (×1).`}${opt?"":" This exercise is always logged this way."}</div>
@@ -2203,7 +2199,7 @@ function nextTarget(ex){
   if(!l) return "First entry sets your baseline.";
   if(ex.mode==="time") return `Beat ${l.reps}s. Past 60s, pick a harder hold.`;
   if(ex.mode==="bw") return l.reps>=15?"Switch to a harder variation.":`Target ${l.reps+1} reps.`;
-  return l.reps>=12?`Go to ${l.load+2.5}kg and drop back to 8 reps.`:`Target ${l.reps+1} reps at ${l.load}kg.`;
+  return l.reps>=12?`Go to ${l.load+1}kg and drop back to 8 reps.`:`Target ${l.reps+1} reps at ${l.load}kg.`;
 }
 
 /* ══════════════════ EVENTS ══════════════════ */
@@ -2222,7 +2218,6 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="only"){ U.only=!U.only; render(); }
   else if(a==="logmore"){ U.logDays=(U.logDays||5)+10; render(); }
   else if(a==="server"){ U.openServer=!U.openServer; render(); }
-  else if(a==="wstep"){ S.wstep=Number(b.dataset.v); persist(); render(); }
   else if(a==="side"){ U.sd=b.dataset.v;
     S.last[U.ex]=Object.assign({sets:U.sets,reps:U.reps,load:U.load},S.last[U.ex],{sd:U.sd}); persist(); render(); }
   else if(a==="jump"){ const e=byId(b.dataset.e); U.group=e.g; pickEx(e.id); U.openObj=null; U.openGate=false;
