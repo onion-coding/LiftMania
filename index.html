@@ -199,13 +199,15 @@ h2{margin:0}
 .fr{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
 .fr:first-child{padding-top:0}
 .fr:last-child{padding-bottom:0;border-bottom:none}
-.av{width:28px;height:28px;flex:none;border-radius:9px;background:var(--row);
-  display:flex;align-items:center;justify-content:center;font-family:var(--d);font-size:11px;
-  background-size:cover;background-position:center;overflow:hidden}
-.bigav{width:104px;height:104px;flex:none;border-radius:26px;background:var(--row);
-  background-size:cover;background-position:center;display:flex;align-items:center;
-  justify-content:center;font-family:var(--d);font-size:38px;color:var(--dim)}
+.av{width:56px;height:56px;flex:none;border-radius:16px;background:var(--row);
+  display:flex;align-items:center;justify-content:center;font-family:var(--d);font-size:20px;
+  overflow:hidden}
+.av img,.bigav img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
+.bigav{width:168px;height:168px;flex:none;border-radius:36px;background:var(--row);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+  font-family:var(--d);font-size:62px;color:var(--dim)}
 .bigav.set{box-shadow:inset 0 0 0 2px var(--line)}
+@media (max-width:420px){ .bigav{width:132px;height:132px;border-radius:30px;font-size:50px} }
 .av.me{background:var(--goldF);color:var(--onGold)}
 .ftxt{flex:1;min-width:0;font-size:13.5px;line-height:1.3}
 .ftxt b{font-weight:700}
@@ -350,6 +352,8 @@ input.sval:focus{border-color:var(--focus);outline:none;background:var(--panel2)
 
 /* ══════════════════ WEEK ══════════════════ */
 /* medal metals are literal, so they are the same in every theme */
+.profrow{display:flex;align-items:center;gap:20px}
+@media (max-width:420px){ .profrow{flex-direction:column;align-items:flex-start;gap:14px} }
 .medalrow{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
 .medal.now{box-shadow:0 0 0 2px var(--cream)}
 .medal{text-align:center;padding:8px 1px;border-radius:9px;font-family:var(--m);font-size:9px;
@@ -1370,12 +1374,12 @@ function setAvatar(file){
     const img=new Image();
     img.onerror=()=>alert("That doesn't look like an image.");
     img.onload=()=>{
-      const N=128, cv=document.createElement("canvas");
+      const N=192, cv=document.createElement("canvas");
       cv.width=cv.height=N;
       const ctx=cv.getContext("2d"), side=Math.min(img.width,img.height);
       ctx.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,N,N);
-      let q=0.72, out=cv.toDataURL("image/jpeg",q);
-      while(out.length>12000 && q>0.34){ q-=0.08; out=cv.toDataURL("image/jpeg",q); }
+      let q=0.74, out=cv.toDataURL("image/jpeg",q);
+      while(out.length>16000 && q>0.32){ q-=0.07; out=cv.toDataURL("image/jpeg",q); }
       if(!safePic(out)) return alert("Couldn't use that image. Try a different one.");
       S.pic=out; persist(); publish(); render();
     };
@@ -1408,11 +1412,13 @@ const initial=n=>(String(n||"?").trim()[0]||"?").toUpperCase();
 /* Board rows come from other players, so a picture is only ever used after it
    matches a plain base64 data URL - it ends up inside a style attribute. */
 const PIC_OK=/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$/;
-const safePic=p=>(typeof p==="string"&&p.length<20000&&PIC_OK.test(p))?p:null;
-/* one avatar, with a face if there is one and the initial if there is not */
+const safePic=p=>(typeof p==="string"&&p.length<26000&&PIC_OK.test(p))?p:null;
+/* One avatar, with a face if there is one and the initial if there is not.
+   Drawn as <img> rather than a CSS background: a data URL in url() has to get
+   past the CSS tokeniser too, and that is where engines disagree. */
 function ava(pic,name,cls){
   const p=safePic(pic);
-  return p ? `<span class="av ${cls||""}" style="background-image:url('${p}')" aria-label="${esc(name||"")}"></span>`
+  return p ? `<span class="av ${cls||""}"><img src="${p}" alt="${esc(name||"")}" loading="lazy"></span>`
            : `<span class="av ${cls||""}">${esc(initial(name))}</span>`;
 }
 const fmtK=n=>Math.abs(n)>=10000?Math.round(n/1000)+"k":fmt(n);
@@ -2047,8 +2053,8 @@ function tabYou(){
   const c=medalCounts(), best=c.reduce((a,n,i)=>n?i:a,-1);
   const profile=card({
     title:"Profile", icon:"trophy", k:"profile", accent:"var(--gold)",
-    body:`<div style="display:flex;align-items:center;gap:17px">
-        <span class="bigav ${S.pic?"set":""}" ${S.pic?`style="background-image:url('${S.pic}')"`:""}>${S.pic?"":esc(initial((MP.me&&MP.me.name)||"?"))}</span>
+    body:`<div class="profrow">
+        <span class="bigav ${S.pic?"set":""}">${S.pic?`<img src="${S.pic}" alt="Your profile picture">`:esc(initial((MP.me&&MP.me.name)||"?"))}</span>
         <div style="min-width:0">
           <div class="disp" style="font-size:21px;overflow:hidden;text-overflow:ellipsis">${esc((MP.me&&MP.me.name)||"guest")}</div>
           <div class="mini" style="margin-top:5px">Boss ${S.ci+1} of 100${best>=0?` · best medal <b>${MEDALS[best].n}</b>`:""}</div>
@@ -2058,7 +2064,7 @@ function tabYou(){
           </div>
         </div>
       </div>
-      <div class="mini" style="margin-top:12px">Your photo shows up next to your name in the feed, the roster and your crew.</div>`
+      <div class="mini" style="margin-top:14px">Your photo shows up next to your name in the feed, the roster and your crew.</div>`
   });
   const recEntries=Object.entries(S.records).sort((a,b)=>(daysAgo(a[1].last)??999)-(daysAgo(b[1].last)??999));
   const recs=card({
