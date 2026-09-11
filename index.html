@@ -387,6 +387,18 @@ input.sval:focus{border-color:var(--focus);outline:none;background:var(--panel2)
 .attbox .steppers{margin:0}
 .attbox .cta{margin-top:12px}
 .crule{font-size:13px;line-height:1.5;color:var(--cream)}
+.restbox{margin-top:13px}
+.restrow{display:flex;align-items:baseline;gap:10px}
+.restclock{font-family:var(--m);font-size:30px;line-height:1;color:var(--cream);
+  background:none;border:none;padding:0;letter-spacing:.01em}
+.restlab{font-family:var(--m);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.restplus{margin-left:auto;flex:none;font-family:var(--m);font-size:11px;letter-spacing:.04em;
+  color:var(--dim);background:var(--row);border:1px solid var(--line);border-radius:8px;padding:5px 9px}
+.restplus:hover{color:var(--cream);border-color:var(--dim)}
+.resttrack{height:4px;border-radius:99px;background:var(--row);overflow:hidden;margin-top:8px}
+.restfill{height:100%;border-radius:99px;background:var(--greenF);transition:width 1s linear}
+.restbox.done .restclock{color:var(--green)}
+.restbox.done .restfill{transition:none}
 .verdict{margin-top:11px;font-size:13px;line-height:1.4;color:var(--dim);text-align:center}
 .attbadge{display:inline-block;font-family:var(--m);font-size:9.5px;letter-spacing:.07em;padding:2px 5px;
   border-radius:5px;background:var(--cobaltF);color:var(--onCobalt);margin-left:6px}
@@ -1080,7 +1092,7 @@ async function refreshBoard(){
 }
 
 const EMPTY={ver:5,bw:75,power:0,streak:0,lastDay:null,start:null,
-  crew:null,crewOwner:false,crewBans:[],chal:{},rot:null,stdScale:1,pic:null,
+  crew:null,crewOwner:false,crewBans:[],chal:{},rot:null,stdScale:1,pic:null,restLen:30,
   away:null,daily:null,records:{},prLog:[],last:{},log:[],totalTon:0,weeks:{},
   lastExport:0,perfectWeeks:0,savedAt:0};
 
@@ -1104,6 +1116,7 @@ function migrate(o){
   if(!s.crew||typeof s.crew!=="object"||!s.crew.id) s.crew=null;
   s.crewOwner=!!s.crewOwner&&!!s.crew;
   if(typeof s.bw!=="number"||!isFinite(s.bw)||s.bw<=0) s.bw=75;
+  s.restLen=Math.max(15,Math.min(600,Math.round(s.restLen)||30));
   delete s.pace;
   s.ver=5;
   return s;
@@ -1283,9 +1296,10 @@ function logSet(att){
     pr:broke.length?broke.slice():null,md:medNow,att:att?1:0});
   S.log=S.log.slice(0,900);
 
-  U.flash={ton,broke,finished,perfect,weekDone,chal:got,run:runV,chId:ch?ch.id:null,att:!!att};
+  U.flash={ton,broke,finished,perfect,weekDone,chal:got,run:runV,chId:ch?ch.id:null,att:!!att,
+    rep:{ex:ex.id,sets,reps,load,sd}};
   U.fx={objFrom,popObj};
-  startRest(90);
+  startRest(S.restLen||30);
   persist(); publish(); render();
   if(FXQ.length) playFx();
 }
@@ -1301,11 +1315,45 @@ function submitAttempt(id){
   logSet({c,reps,load,sd});
 }
 
-function startRest(n){ U.rest=n; clearInterval(U.restT);
-  U.restT=setInterval(()=>{ U.rest--; if(U.rest<=0){clearInterval(U.restT);U.rest=0;} paintRest(); },1000); }
-function paintRest(){ const e=document.getElementById("restBtn"); if(!e) return;
-  if(U.rest<=0){ e.style.display="none"; return; }
-  e.textContent=`rest ${Math.floor(U.rest/60)}:${pad(U.rest%60)} — tap to skip`; }
+/* The clock ticks in place: painting it must never re-render the app, or every
+   second would throw away whatever the steppers or a focused field were doing. */
+/* Longer, and longer from now on: tapping this after every set would be worse
+   than the wrong default, so the new length is remembered. */
+function restPlus(){
+  S.restLen=Math.min(600,(S.restLen||30)+30);
+  const left=Math.max(0,U.rest)+30;
+  startRest(Math.max(left,(U.restTotal||0)+30));
+  U.rest=left;
+  paintRest(); persist();      /* paint in place — a render would reset the steppers */
+}
+
+/* Do that again. The set is replayed from what the receipt recorded, never
+   from the picker, which may have wandered somewhere else since. */
+function againSet(){
+  const f=U.flash; if(!f) return;
+  if(f.att&&f.chId) return submitAttempt(f.chId);
+  if(!f.rep) return;
+  pickEx(f.rep.ex);
+  U.sets=f.rep.sets; U.reps=f.rep.reps; U.load=f.rep.load; U.sd=f.rep.sd;
+  logSet();
+}
+
+function startRest(n){
+  U.restTotal=Math.max(1,n); U.rest=U.restTotal;
+  clearInterval(U.restT);
+  U.restT=setInterval(()=>{ U.rest--; if(U.rest<=0){clearInterval(U.restT);U.rest=0;} paintRest(); },1000);
+}
+function paintRest(){
+  const box=document.getElementById("restBox"); if(!box) return;
+  const c=document.getElementById("restClock"), f=document.getElementById("restFill"),
+        l=document.getElementById("restLen");
+  const total=Math.max(1,U.restTotal||S.restLen||30);
+  const done=U.rest<=0;
+  box.classList.toggle("done",done);
+  if(c) c.textContent = done ? "go" : `${Math.floor(U.rest/60)}:${pad(U.rest%60)}`;
+  if(f) f.style.width = done ? "0%" : (U.rest/total*100)+"%";
+  if(l) l.textContent = S.restLen+"s";
+}
 
 /* ══════════════════ DEFEAT SEQUENCE ══════════════════ */
 const FXQ=[]; let FXT=null;
@@ -1596,8 +1644,7 @@ function render(){
   else if(U.tab==="chal")   h+=tabChal();
   else if(U.tab==="crew")   h+=tabCrew();
   else if(U.tab==="you")    h+=tabYou();
-  /* the receipt for a set belongs under whichever screen you logged it from */
-  if(U.flash && (U.tab==="train"||U.tab==="chal")) h+=flashCard(U.flash);
+
   const app=document.getElementById("app");
   /* only a genuine view change earns the entrance run - otherwise every tap on
      a stepper would replay the whole page */
@@ -1758,8 +1805,8 @@ function tabTrain(ex){
     body:`<div class="list">${feed.map(feedRow).join("")}</div>`
   }):"";
 
-  const rest=`<button id="restBtn" class="ghost wide" style="display:${U.rest>0?"block":"none"}" data-a="skiprest">rest</button>`;
-  return statStrip() + todayCard() + cols(missions+crew, logger+logged) + rest;
+  const receipt = U.flash && !U.flash.att ? flashCard(U.flash) : "";
+  return statStrip() + todayCard() + cols(missions+crew, logger+receipt+logged);
 }
 
 function loggerBody(ex){
@@ -1833,11 +1880,18 @@ function loggerBody(ex){
     <button class="cta" data-a="log" style="margin-top:13px">LOG SET</button>`;
 }
 
+/* What you just did, how long until the next one, and the one button that
+   does it again. It sits directly under whatever you pressed to get here —
+   the log button on TRAIN, the attempt button on CHALLENGES — because a
+   receipt at the bottom of the page is a receipt nobody reads. */
 function flashCard(f){
   const c=f.chId?chalOf(f.chId):null;
+  const r=f.rep, again = r ? `${r.sets}×${byId(r.ex).mode==="time"?r.reps+"s":r.reps}`
+    + (hasLoad(byId(r.ex))?` @ ${r.load}kg`:"") : "";
   return `<section class="card pop" style="--accent:var(--green);background:var(--panel2)">
     <div class="chead"><span class="cicon">${ico("bolt")}</span>
-      <h2 class="ctitle big" style="color:var(--green)">${fmt(f.ton)} KG MOVED</h2></div>
+      <h2 class="ctitle big" style="color:var(--green)">${fmt(f.ton)} KG MOVED</h2>
+      <button class="hbtn" data-a="flashoff" title="Dismiss" aria-label="Dismiss">×</button></div>
     <div class="body">
       ${f.chal?`<div class="banner ${f.chal.up?"pop":"info"}" style="margin-bottom:8px;align-items:center;gap:11px">
           ${f.chal.tier>=0?medalImg(f.chal.tier,"fbig"):""}
@@ -1852,6 +1906,21 @@ function flashCard(f){
       ${f.finished.map(t=>`<div class="banner info" style="margin-top:8px">✓ ${esc(t)}</div>`).join("")}
       ${f.perfect?`<div class="banner pop" style="margin-top:8px;background:var(--greenF);color:var(--onGreen);font-family:var(--d);font-size:12px">PERFECT DAY</div>`:""}
       ${f.weekDone?`<div class="banner pop" style="margin-top:8px;font-family:var(--d);font-size:12px">PERFECT WEEK</div>`:""}
+
+      <div id="restBox" class="restbox${U.rest<=0?" done":""}">
+        <div class="restrow">
+          <button id="restClock" class="restclock" data-a="skiprest" title="Skip the rest">${
+            U.rest>0?`${Math.floor(U.rest/60)}:${pad(U.rest%60)}`:"go"}</button>
+          <span class="restlab">rest</span>
+          <button class="restplus" data-a="restplus" title="Longer rest, and remember it">+30s</button>
+        </div>
+        <div class="resttrack"><div id="restFill" class="restfill" style="width:${
+          U.rest>0?(U.rest/Math.max(1,U.restTotal||S.restLen||30)*100):0}%"></div></div>
+      </div>
+
+      ${r?`<button class="cta alt" data-a="again" style="margin-top:11px">${
+          f.att?"ATTEMPT AGAIN":"ANOTHER SET"} · ${esc(again)}</button>`:""}
+      <div class="mini" style="margin-top:8px">Resting <b id="restLen">${S.restLen}s</b> between sets — <b>+30s</b> makes that the new default.</div>
     </div></section>`;
 }
 
@@ -1957,7 +2026,8 @@ function attemptBox(c){
               :`No medal — Bronze is ${esc(chalFmt(c,chalCut(c,0)))}`}${
           mine>pb&&pb?` · beats your ${esc(chalFmt(c,pb))}`:""}`}</div>
     <button class="cta" data-a="attempt" data-c="${c.id}">SUBMIT ATTEMPT</button>
-  </div>`;
+  </div>
+  ${U.flash&&U.flash.att&&U.flash.chId===c.id?flashCard(U.flash):""}`;
 }
 
 function chalDetail(c){
@@ -2425,6 +2495,9 @@ document.getElementById("app").addEventListener("click",e=>{
   }
   else if(a==="log") logSet();
   else if(a==="skiprest"){ U.rest=0; clearInterval(U.restT); paintRest(); }
+  else if(a==="restplus") restPlus();
+  else if(a==="flashoff"){ U.flash=null; render(); }
+  else if(a==="again") againSet();
   else if(a==="export") exportSave();
   else if(a==="import") document.getElementById("fileIn").click();
   else if(a==="pic") document.getElementById("picIn").click();
