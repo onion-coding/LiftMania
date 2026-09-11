@@ -569,7 +569,7 @@ const GROUPS = {
 /* Pages caches the file for ten minutes and browsers hold it longer, so
    "am I looking at the new one?" needs an answer you can read off the screen
    instead of guessing. Bump this with any change worth noticing. */
-const BUILD="2026-09-11 · rest timer";
+const BUILD="2026-09-11 · one set at a time";
 
 const GK = Object.keys(GROUPS);
 const gcol = g => U.theme==="night" ? GROUPS[g].c : GROUPS[g].l;
@@ -1142,6 +1142,20 @@ function applyTheme(){
   try{ localStorage.setItem("liftmania:theme",theme); }catch(e){}
 }
 
+/* Pages sends max-age=600 and browsers keep it far longer than that, so a
+   push can be live while the phone in your hand still runs last week's code.
+   Nothing can change those headers from here — but the page can fetch its own
+   source on a URL the cache has never seen, read the BUILD out of it, and say
+   so. One tap then loads the new one, and the address bar stays clean. */
+async function checkBuild(){
+  try{
+    const r=await fetch(location.pathname+"?b="+Date.now(),{cache:"no-store"});
+    if(!r.ok) return;
+    const m=(await r.text()).match(/const BUILD="([^"]*)"/);
+    if(m && m[1] && m[1]!==BUILD){ U.newBuild=m[1]; if(S) render(); }
+  }catch(e){}
+}
+
 async function persist(){ S.savedAt=Date.now();
   const ok=await STORE.set(JSON.stringify(S)); if(!ok) U.saveWarn=true; queuePush(); }
 
@@ -1211,7 +1225,7 @@ function restStatus(){
    you can do" survives being spread over three of them. */
 function logSet(att){
   const ex=att?chalEx(att.c):byId(U.ex);
-  const sets=att?1:U.sets, reps=att?att.reps:U.reps, load=att?att.load:U.load;
+  const sets=1, reps=att?att.reps:U.reps, load=att?att.load:U.load;
   const sd=att?att.sd:U.sd, sides=sd==="each"?2:1;
   const {ton,prk}=computeSet(ex,S.bw,sets,reps,load,sides);
   if(ton<=0) return;
@@ -1339,7 +1353,7 @@ function againSet(){
   if(f.att&&f.chId) return submitAttempt(f.chId);
   if(!f.rep) return;
   pickEx(f.rep.ex);
-  U.sets=f.rep.sets; U.reps=f.rep.reps; U.load=f.rep.load; U.sd=f.rep.sd;
+  U.reps=f.rep.reps; U.load=f.rep.load; U.sd=f.rep.sd;
   logSet();
 }
 
@@ -1514,8 +1528,9 @@ function relT(ms){
 }
 /* "4×12 @ 16kg" — one line that describes a logged set anywhere it appears */
 function setDesc(r){
-  const e=byId(r.ex);
-  return `${r.sets}×${e.mode==="time"?r.reps+"s":r.reps}`
+  const e=byId(r.ex), n=r.sets||1;
+  return (n>1?`${n}×`:"")                       /* only saves from before one-set-at-a-time */
+    + (e.mode==="time"?r.reps+"s":r.reps)
     + (hasLoad(e)?` @ ${r.load}kg`:"")
     + (r.sd==="each"?" /side":"");
 }
@@ -1694,6 +1709,9 @@ function alerts(){
   if(S.away){const w=S.away;
     h+=`<div class="banner warn">${ico("alert")}<div><b>${w.days} days off.</b> The ${w.streak}-day streak is gone. Nothing else moved — every record and every medal is exactly where you left it.
       <button class="ghost" data-a="dismissaway">got it</button></div></div>`;}
+  if(U.newBuild)
+    h+=`<div class="banner">${ico("spark")}<div><b>A newer version is out.</b> You are on ${esc(BUILD)}; ${esc(U.newBuild)} is live.
+      <button class="ghost" data-a="reloadapp">load it</button></div></div>`;
   if(STORE.mode==="memory")
     h+=`<div class="banner warn">${ico("alert")}<div>This browser is blocking storage. Progress will vanish when you close the tab — download a backup from YOU after every session.</div></div>`;
   else if(MP.status==="error")
@@ -1815,11 +1833,11 @@ function tabTrain(ex){
 }
 
 function loggerBody(ex){
-  const cs=computeSet(ex,S.bw,U.sets,U.reps,U.load,sidesNow());
+  const cs=computeSet(ex,S.bw,1,U.reps,U.load,sidesNow());
   let list=EX.filter(e=>e.g===U.group);
   if(U.only) list=list.filter(countsNow);
   const each=U.sd==="each", opt=ex.s==="opt";
-  const pv=prPreview(ex,U.sets,U.reps,U.load), r=S.records[ex.id]||{};
+  const pv=prPreview(ex,1,U.reps,U.load), r=S.records[ex.id]||{};
 
   let status;
   if(pv.fresh) status=`<div class="prline" style="border-color:var(--green);color:var(--green)">First entry — this sets all four records.</div>`;
@@ -1844,7 +1862,6 @@ function loggerBody(ex){
       :`<div class="empty">Nothing in ${GROUPS[U.group].name} counts right now. Muscles with a ● do.</div>`}</div>
 
     <div class="steppers" style="margin-top:15px">
-      ${stepper("sets","sets",1,1)}
       ${stepper(ex.mode==="time"?(each?"sec / side":"seconds"):(each?"reps / side":"reps"),"reps",ex.mode==="time"?5:1,1)}
       ${hasLoad(ex)?stepper(ex.mode==="bwload"?"added kg":(each?"kg / side":"kg"),"load",1,0):""}
     </div>
@@ -1859,7 +1876,7 @@ function loggerBody(ex){
       : `Enter the whole set together (×1).`}${opt?"":" This exercise is always logged this way."}</div>
 
     <div class="mathrow" style="margin-top:12px">
-      <span>${U.sets}×${ex.mode==="time"?U.reps+"s":U.reps}${hasLoad(ex)?` @ ${U.load}kg`:""}</span>
+      <span>one set · ${ex.mode==="time"?U.reps+"s":U.reps+" reps"}${hasLoad(ex)?` @ ${U.load}kg`:""}</span>
       <span><b>${fmt(cs.ton)}</b> kg</span></div>
 
     <div class="kv" style="margin-top:10px">
@@ -1891,7 +1908,7 @@ function loggerBody(ex){
    receipt at the bottom of the page is a receipt nobody reads. */
 function flashCard(f){
   const c=f.chId?chalOf(f.chId):null;
-  const r=f.rep, again = r ? `${r.sets}×${byId(r.ex).mode==="time"?r.reps+"s":r.reps}`
+  const r=f.rep, again = r ? `${byId(r.ex).mode==="time"?r.reps+"s":r.reps}`
     + (hasLoad(byId(r.ex))?` @ ${r.load}kg`:"") : "";
   return `<section class="card pop" style="--accent:var(--green);background:var(--panel2)">
     <div class="chead"><span class="cicon">${ico("bolt")}</span>
@@ -1924,7 +1941,7 @@ function flashCard(f){
       </div>
 
       ${r?`<button class="cta alt" data-a="again" style="margin-top:11px">${
-          f.att?"ATTEMPT AGAIN":"ANOTHER SET"} · ${esc(again)}</button>`:""}
+          f.att?"ATTEMPT AGAIN":"+ ANOTHER SET"} · ${esc(again)}</button>`:""}
       <div class="mini" style="margin-top:8px">Resting <b id="restLen">${S.restLen}s</b> between sets — <b>+30s</b> makes that the new default.</div>
     </div></section>`;
 }
@@ -2411,7 +2428,7 @@ function tabYou(){
         :`<div class="chiprow" style="margin-top:10px">
           <button class="ghost" data-a="export" style="opacity:.7">download a backup file</button></div>`}
       <div style="margin-top:14px"><button class="ghost" data-a="wipe" style="color:var(--red)">wipe all progress</button></div>
-      <div class="mini" style="margin-top:14px;color:var(--dim)">Build <b>${esc(BUILD)}</b>. If that looks old, the page is cached — reopen it with <b>?v=2</b> on the end of the address.</div>`
+      <div class="mini" style="margin-top:14px;color:var(--dim)">Build <b>${esc(BUILD)}</b>. The app checks for a newer one on every open and offers it at the top of the screen — there is nothing to type.</div>`
   });
 
   return cols(profile+recs+stale+prlog, life+acct);
@@ -2419,7 +2436,7 @@ function tabYou(){
 
 /* ══════════════════ POST-RENDER WIRING ══════════════════ */
 function wireInputs(){
-  ["sets","reps","load","attV","attR"].forEach(f=>{
+  ["reps","load","attV","attR"].forEach(f=>{
     const el=document.getElementById("st_"+f); if(!el) return;
     const commit=()=>{
       let v=parseFloat(String(el.value).replace(",","."));
@@ -2489,7 +2506,7 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="logmore"){ U.logDays=(U.logDays||5)+10; render(); }
   else if(a==="server"){ U.openServer=!U.openServer; render(); }
   else if(a==="side"){ U.sd=b.dataset.v;
-    S.last[U.ex]=Object.assign({sets:U.sets,reps:U.reps,load:U.load},S.last[U.ex],{sd:U.sd}); persist(); render(); }
+    S.last[U.ex]=Object.assign({sets:1,reps:U.reps,load:U.load},S.last[U.ex],{sd:U.sd}); persist(); render(); }
   else if(a==="jump"){ const e=byId(b.dataset.e); U.group=e.g; pickEx(e.id); U.openObj=null;
     U.tab="train"; render(); document.querySelector(".exwrap")?.scrollIntoView({behavior:"smooth",block:"center"}); }
   else if(a==="inc"||a==="dec"){
@@ -2503,6 +2520,9 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="skiprest"){ U.rest=0; clearInterval(U.restT); paintRest(); }
   else if(a==="restplus") restPlus();
   else if(a==="flashoff"){ U.flash=null; render(); }
+  /* the query string is only ever a cache dodge, so it is stripped straight
+     back off once the fresh copy is in - the address stays the bare domain */
+  else if(a==="reloadapp") location.replace(location.pathname+"?b="+Date.now());
   else if(a==="again") againSet();
   else if(a==="export") exportSave();
   else if(a==="import") document.getElementById("fileIn").click();
@@ -2571,8 +2591,9 @@ function openChal(id){
 
 function pickEx(id){
   U.ex=id; const l=S.last[id], e=byId(id);
-  if(l){ U.sets=l.sets; U.reps=l.reps; U.load=l.load; }
-  else { U.sets=3; U.reps=e.mode==="time"?30:10; U.load=e.mode==="load"?10:0; }
+  U.sets=1;
+  if(l){ U.reps=l.reps; U.load=l.load; }
+  else { U.reps=e.mode==="time"?30:10; U.load=e.mode==="load"?10:0; }
   U.sd = e.s==="opt" ? ((l&&l.sd)||e.sd) : e.s;
 }
 
@@ -2783,11 +2804,16 @@ async function startSession(){
   if(away) S.away=away;
   rollDaily(); pickEx(U.ex); await persist();
   render();
+  checkBuild(); setInterval(checkBuild, 15*60*1000);
   if(cloudOn()){ await cloudPull(); await refreshBoard(); rollDaily(); render(); }
   else MP.ready=true;
 }
 
 (async function(){
+  /* arrived via ?b=... purely to get past the cache — put the address back */
+  if(location.search && window.history && history.replaceState){
+    try{ history.replaceState(null,"",location.pathname); }catch(e){}
+  }
   try{ const savedTheme=localStorage.getItem("liftmania:theme"); if(savedTheme && THEMES.some(t=>t.id===savedTheme)) U.theme=savedTheme; }catch(e){}
   applyTheme();
   await STORE.init();
