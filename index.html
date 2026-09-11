@@ -337,18 +337,58 @@ input.sval:focus{border-color:var(--focus);outline:none;background:var(--panel2)
 .gatechip{display:block;width:100%;border-radius:12px;padding:11px 13px;background:var(--row);
   border:none;color:var(--cream);font-family:var(--m);font-size:12px;text-align:left;line-height:1.5}
 
-/* ══════════════════ BOSSES ══════════════════ */
-.roster{display:grid;grid-template-columns:1fr;column-gap:26px}
-@media (min-width:900px){ .roster{grid-template-columns:1fr 1fr} }
-.acthead{grid-column:1/-1;font-family:var(--d);font-size:12px;color:var(--gold);
-  margin:20px 0 4px;letter-spacing:.04em}
-.acthead:first-child{margin-top:0}
-.brow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
-.brow.done{opacity:.45}
-.brow.done .bname{text-decoration:line-through}
-.brow.cur{background:var(--row);border-radius:12px;padding:12px;border-bottom:none;margin:4px 0}
-.bnum{font-family:var(--m);font-size:11px;color:var(--dim);flex:none;width:22px}
-.bname{font-family:var(--d);font-size:12px;line-height:1.3}
+/* ══════════════════ TODAY & ROTATION ══════════════════ */
+.card.today{padding-bottom:18px}
+.tday{display:flex;align-items:flex-start;gap:14px}
+.tdow{font-family:var(--m);font-size:10.5px;letter-spacing:.16em;color:var(--dim)}
+.tname{font-family:var(--d);font-size:26px;line-height:1.1;margin-top:5px}
+@media (max-width:420px){ .tname{font-size:21px} }
+.tfocus{font-size:13.5px;color:var(--dim);margin-top:6px}
+.tday .ghost{margin-left:auto;flex:none}
+.rotstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:15px}
+.rotpip{position:relative;text-align:center;border-radius:10px;padding:8px 0 14px;background:var(--row);
+  font-family:var(--m);font-size:10.5px;color:var(--dim);text-transform:uppercase}
+.rotpip.on{color:var(--cream);outline:2px solid var(--accent);outline-offset:1px}
+.rotpip em{position:absolute;left:50%;bottom:5px;transform:translateX(-50%);width:16px;height:4px;
+  border-radius:99px;border:1px dashed}
+.rotrow{padding:12px 0;border-bottom:1px solid var(--line)}
+.rotrow:first-child{padding-top:0}
+.rotrow:last-child{border-bottom:none}
+.rotrow.rest{opacity:.62}
+.rothead{display:flex;align-items:center;gap:11px}
+.rotday{font-family:var(--m);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);width:82px;flex:none}
+.rotname{flex:1;min-width:0;padding:8px 10px!important;font-size:13px!important}
+.rotgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;margin-left:93px}
+@media (max-width:520px){ .rotgs{margin-left:0} .rotday{width:64px} }
+.gtog{border-radius:9px;padding:6px 10px;font-size:12px;background:var(--row);color:var(--dim);
+  border:1px solid var(--line);transition:background-color .18s var(--ease),color .18s var(--ease)}
+.gtog.on{font-weight:700}
+
+/* ══════════════════ CHALLENGES ══════════════════ */
+.roster{display:grid;grid-template-columns:1fr}
+.crow{border-bottom:1px solid var(--line)}
+.crow:last-child{border-bottom:none}
+.crow.open{background:var(--row);border-radius:14px;padding:4px 12px;border-bottom:none;margin:4px -12px}
+.chit{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;padding:13px 0;
+  background:none;border:none;color:inherit}
+.cnum{font-family:var(--m);font-size:11px;color:var(--dim);flex:none;width:22px;padding-top:2px}
+.cname{display:block;font-family:var(--d);font-size:13px;line-height:1.25}
+.crow.med .cname{color:var(--gold)}
+.cbar{display:block;margin:8px 0 6px}
+.cmed{flex:none;width:44px;text-align:center}
+.crm{width:34px;height:34px;display:block;margin:0 auto}
+.nomed{display:block;width:34px;height:34px;margin:0 auto;border-radius:50%;
+  border:1px dashed var(--line);color:var(--dim);font-size:12px;line-height:32px}
+.cpts{display:block;font-family:var(--m);font-size:9.5px;color:var(--dim);margin-top:4px}
+.chalbox{margin-top:16px;border-radius:14px;background:var(--row);padding:13px}
+.attbox{margin-top:15px;border-radius:14px;background:var(--deep);padding:13px;
+  box-shadow:inset 0 0 0 1px var(--line)}
+.attbadge{display:inline-block;font-family:var(--m);font-size:9.5px;letter-spacing:.07em;padding:2px 5px;
+  border-radius:5px;background:var(--cobaltF);color:var(--onCobalt);margin-left:6px}
+.chalhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.chalname{font-family:var(--d);font-size:12px;color:var(--gold);letter-spacing:.03em}
+.fxmedal{width:96px;height:96px;display:block;margin:0 auto}
 
 /* ══════════════════ WEEK ══════════════════ */
 /* medal metals are literal, so they are the same in every theme */
@@ -364,12 +404,11 @@ input.sval:focus{border-color:var(--focus);outline:none;background:var(--panel2)
   transition:filter .35s var(--ease),opacity .35s var(--ease)}
 /* a tier you have not taken is the same disc, drained of its metal */
 .medal:not(.on) .mimg{filter:grayscale(1) brightness(var(--mdim,.82));opacity:.5}
-.medal b{display:block;font-size:13px;color:var(--cream);margin-top:4px;font-weight:500}
-.mbadge{display:inline-block;vertical-align:-4px;margin-left:6px}
-.mbimg{width:18px;height:18px;display:block}
+.medal b{display:block;font-size:11.5px;color:var(--cream);margin-top:4px;font-weight:500;
+  font-family:var(--m);letter-spacing:-.01em}
+.mbimg{width:18px;height:18px;display:inline-block;vertical-align:-3px;margin-left:6px}
 .fimg{width:19px;height:19px;display:inline-block;vertical-align:-4px;margin:0 1px}
 .fbig{width:40px;height:40px;display:block;flex:none}
-.wday .mpic{position:absolute;left:50%;transform:translateX(-50%);bottom:4px;width:17px;height:17px}
 .medal.bronze{--mc:#A9722F;--mi:#FFFFFF}
 .medal.silver{--mc:#AEB6C6;--mi:#1A1D26}
 .medal.gold{--mc:#E8B33C;--mi:#241900}
@@ -379,8 +418,9 @@ input.sval:focus{border-color:var(--focus);outline:none;background:var(--panel2)
 
 
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.wday{position:relative;overflow:hidden;text-align:center;border-radius:11px;padding:10px 1px 24px;
+.wday{position:relative;overflow:hidden;text-align:center;border-radius:11px;padding:11px 1px;
   background:var(--row);font-family:var(--m);font-size:10.5px;color:var(--dim);line-height:1.7}
+.wday.r{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
 .wday.p{background:var(--panel2);color:var(--cream)}
 .wday.f{background:var(--greenF);color:var(--onGreen)}
 .wday.today{outline:2px solid var(--gold);outline-offset:1px;color:var(--cream)}
@@ -579,138 +619,10 @@ const EX = [
 ];
 const byId = id => EX.find(e=>e.id===id) || EX[0];
 
-/* ══════════════════ 100 BOSSES ══════════════════ */
-const G=(g)=>({g}), L=(g,minLoad)=>({g,minLoad}), R=(g,minReps)=>({g,minReps}),
-      T=(g)=>({g,time:true}), RA=(minReps)=>({minReps}), LA=(minLoad)=>({minLoad}), TA=()=>({time:true});
-
-const ACT_NAMES=["I · Foundation","II · The Push","III · The Pull","IV · The Base","V · The Core",
-                 "VI · The Furnace","VII · Iron","VIII · Endurance","IX · The Mirror","X · Ripped"];
-
-const ROSTER = [
-/* I */
-["The Snooze Button",null,"Undefeated every morning so far."],
-["Bad Form",null,"Slow the rep down. It hates that."],
-["Cold Start",null,"The first two minutes are the worst."],
-["The Two-Week Wall",null,"Where most attempts quietly end."],
-["Rest Day Forever",null,"Very convincing. Very patient."],
-["Sock Drawer Squats",G("legs"),"Ten squats before socks. That's the whole fight."],
-["Wall Pusher",G("chest"),"Any chest work lands."],
-["Dead Hang Doubt",G("back"),"Pull something toward you."],
-["The Shaky Plank",T("core"),"Thirty seconds is a start."],
-["Consistency",null,"The only boss that never gets weaker."],
-/* II */
-["Pancake Chest",G("chest"),"Flat, and proud of it."],
-["The Floor Says No",R("chest",10),"Chest to the ground or nothing."],
-["Shoulder Gremlin",G("shoulders"),"Lives in your rear delts."],
-["Tricep Ghost",G("triceps"),"Two-thirds of your arm, ignored."],
-["Bench Envy",R("chest",12),"Volume beats ego here."],
-["The Lockout",R("triceps",12),"Finish every single rep."],
-["Deltoid Drought",L("shoulders",8),"Load it, even lightly."],
-["Incline Denial",G("chest"),"Feet up. Now try."],
-["Pike Warden",R("shoulders",10),"Hips high, head down."],
-["The Press",L("chest",15),"Fifteen kilos through the palms."],
-/* III */
-["Desk Posture",G("back"),"Eight hours a day of quiet damage."],
-["The Lat Void",G("back"),"Nothing there yet. Fill it."],
-["Sleeve Filler",G("biceps"),"Curls. Just curls."],
-["The Curl Judge",L("biceps",12),"Under 12kg it doesn't look up."],
-["Rowing Debt",R("back",12),"You owe your back a decade."],
-["Iron Elbow",L("biceps",18),"Load it or leave."],
-["Rear Delt Recluse",R("shoulders",15),"High reps or it hides."],
-["Grip Slip",L("back",20),"Every pull ends at your hands."],
-["The Peak",R("biceps",12),"Squeeze at the top. It's watching."],
-["Scapular Silence",G("back"),"Nobody trains what they can't see."],
-/* IV */
-["Chicken Legs",G("legs"),"The oldest insult there is."],
-["Stair Dread",G("legs"),"Third floor. No lift."],
-["Quad Tyrant",R("legs",15),"Rules the front of the thigh."],
-["Hamstring Hermit",R("legs",12),"Never trained, always injured."],
-["Calf Skeptic",R("legs",25),"Doesn't believe in low reps."],
-["The Bulgarian",R("legs",10),"One leg. All of it."],
-["Glute Amnesia",G("legs"),"It forgot how to fire."],
-["Knee Whisper",R("legs",20),"Blood, not load."],
-["Wall Sit Warden",T("legs"),"Time is the only currency it takes."],
-["Load Bearing",L("legs",20),"Hold something heavy and squat."],
-/* V */
-["The Soft Middle",G("core"),"Last to go. First to be seen."],
-["Hollow King",T("core"),"Only holds land here."],
-["Oblique Serpent",G("core"),"Coils around the ribs."],
-["Breathing Room",R("core",20),"Twenty or it doesn't count."],
-["The Lower Two",R("core",15),"Everyone stops at four."],
-["Anti-Rotation",L("core",10),"Resist the twist."],
-["Dead Bug Dominion",R("core",20),"Boring. Effective. Undefeated."],
-["Side Gate",T("core"),"Both sides. Every time."],
-["The Brace",L("core",12),"Loaded, or it's just a stretch."],
-["Midline",G("core"),"Everything else runs through here."],
-/* VI */
-["Lung Burner",RA(25),"Any muscle. Twenty-five a set."],
-["The Sweat Line",null,"Everything you have, all week."],
-["Set Seven",RA(15),"The one you usually skip."],
-["The Long Tuesday",null,"Nothing special happened. You trained anyway."],
-["Burpee Tax",R("legs",20),"Nobody enjoys paying it."],
-["Second Round",RA(20),"Go back and do the whole thing again."],
-["The Drop Set",RA(30),"Thirty. No rest to hide in."],
-["Heart Rate",R("legs",25),"Legs move the most blood."],
-["The Finisher",RA(20),"Last thing before the shower."],
-["No Excuses Left",null,"It has read all of them."],
-/* VII */
-["Mirror Check",L("chest",20),"Heavy chest only."],
-["The Pump Thief",L("biceps",22),"22kg curls. Non-negotiable."],
-["Shoulder Vault",L("shoulders",15),"Locked from the outside."],
-["Back Cathedral",L("back",25),"Built one heavy row at a time."],
-["Tricep Anvil",L("triceps",18),"Straight through the elbow."],
-["Squat Sovereign",L("legs",25),"Weighted, or it laughs."],
-["Iron Elbow Reborn",L("biceps",26),"It got stronger too."],
-["Cable Tension",L("back",30),"Anchor high. Pull like you mean it."],
-["The Overhead",L("shoulders",20),"Straight arms over the skull."],
-["Vanity Muscle",L("biceps",30),"Shallow. Still worth it."],
-/* VIII */
-["The Plank Eternal",T("core"),"Two minutes. Then two more."],
-["Hundred Club",R("chest",30),"Thirty a set, until a hundred."],
-["The Slow Descent",R("legs",15),"Five seconds down. Every rep."],
-["Isometric Warden",TA(),"Any hold. Preferably all of them."],
-["Grease The Groove",RA(12),"Little and often beats heroic."],
-["Wall Sit Eternal",T("legs"),"The chair that isn't there."],
-["Rep Two Hundred",RA(25),"Count out loud. It's worse."],
-["The Static Hold",R("back",15),"Hold the contraction at the top. Don't swing."],
-["Tempo Judge",R("chest",20),"Speed is cheating."],
-["The Long Set",RA(40),"Forty. One set. No stopping."],
-/* IX */
-["Shirt Off",R("core",25),"The honest test."],
-["Side Profile",L("shoulders",18),"Width is built, not born."],
-["The V",L("back",28),"Lats do all the shaping."],
-["Sleeve Test",L("biceps",28),"Fabric doesn't lie."],
-["Upper Chest",R("chest",20),"The half everyone forgets."],
-["Leg Day Photo",R("legs",25),"You skipped it. It knows."],
-["The Serratus",L("core",15),"The finger muscles on the ribs."],
-["Symmetry",RA(15),"Both sides equally. No favourites."],
-["Body Fat",null,"Fought in the kitchen, mostly."],
-["The Ghost of March",null,"You, before any of this started."],
-/* X */
-["The Ceiling",null,"The number you decided you couldn't pass."],
-["Iron Will",LA(25),"Heavy, whatever the muscle."],
-["The Last Excuse",null,"It sounds exactly like you."],
-["Total Load",LA(30),"Everything, at thirty plus."],
-["The Century",RA(30),"One hundred bosses. One hundred reasons."],
-["Failure Point",RA(20),"Go one rep past it."],
-["Peak Week",null,"Every muscle. Every day. One week."],
-["The Standard",LA(35),"Not impressive. Just yours now."],
-["Author Time",null,"The you that never skipped a single day."],
-["RIPPED",null,"No flavour text. You know what this is."]
-];
-
 /* ══════════════════ MEDALS ══════════════════
-   A medal belongs to a SET, not to a day, and it is a standard rather than a
-   multiplier: estimated 1RM divided by bodyweight, judged against a per-lift
-   figure. Nothing about it moves when you have an easy week.
-
-   EX_STD[id] is the ratio a roughly one-year lifter hits - the Gold line. The
-   other four tiers are fixed fractions of it, pinned so the push-up ladder
-   lands on 3 / 17 / 30 / 45 / 61 reps for a 75kg lifter: untrained, about
-   three months in, about a year, about two years, and genuinely elite.
-
-   The figures are calibrated to a typical male lifter; S.stdScale shifts the
-   whole ladder for a typical female one (YOU > Lifetime). */
+   Five tiers, and they exist only on the ten challenges. Every cut is an
+   absolute number written down once and never moved afterwards, so your Gold
+   means exactly what anyone else's Gold means. */
 const MEDALS=[{k:"bronze",n:"Bronze"},{k:"silver",n:"Silver"},{k:"gold",n:"Gold"},
               {k:"author",n:"Author"},{k:"champion",n:"Champion"}];
 /* the five discs, cut to a circle on transparency and inlined */
@@ -723,134 +635,168 @@ const MEDAL_IMG={
 };
 const medalImg=(t,cls)=>(t>=0&&t<5)
   ? `<img class="${cls||"mimg"}" src="${MEDAL_IMG[MEDALS[t].k]}" alt="${MEDALS[t].n}" title="${MEDALS[t].n} medal">` : "";
-const MED_MULT=[0.55,0.78,1.00,1.25,1.52];   /* on the 1RM ratio, loaded lifts */
-const REP_MULT=[0.32,0.60,1.00,1.44,2.00];   /* on the rep/second figure below */
-
-/* Gold = a solid working set for a lifter about a year in - the sort of set
-   you can put in three times on a normal day, not an all-out AMRAP. Reps for
-   bodyweight moves, seconds for holds, per side where the exercise is. */
-const EX_WORK={
-  pushup:25, incpush:32, decpush:20, defpush:20, archer:10,
-  trow:20, sman:60,
-  pike:15,
-  diamond:18, dip:20,
-  squat:35, split:15, bulg:12, lunge:20, nordic:8, calf:30, bridge:25,
-  wallsit:90, burpee:20, jsquat:20,
-  plank:90, splank:60, hollow:45, lsit:30, lraise:20, mclimb:40, deadbug:24
-};
-const EX_STD={
-  pushup:1.28, incpush:1.08, decpush:1.37, defpush:1.30, archer:1.13, cpress:0.85, cfly:0.45,
-  crow:0.90, clat:0.85, csap:0.45, cpullover:0.50, trow:1.28, sman:0.40,
-  pike:1.00, cohp:0.60, lat:0.18, front:0.18, face:0.45, upright:0.45,
-  curl:0.30, hammer:0.32, ccurl:0.30, conc:0.25, rcurl:0.24, "21s":0.20,
-  diamond:1.17, dip:1.45, pdown:0.55, ohext:0.40, kickback:0.15,
-  squat:1.17, goblet:1.26, split:1.42, bulg:1.43, lunge:1.10, rdl:1.10, pthru:0.90,
-  nordic:0.98, calf:1.95, bridge:0.80, wallsit:1.17, burpee:1.28, jsquat:1.28, stepup:0.98,
-  plank:0.80, splank:0.84, hollow:0.64, lsit:0.90, lraise:0.55, ccrunch:0.60,
-  chop:0.25, pallof:0.20, twist:0.25, mclimb:0.67, deadbug:0.47
-};
-EX.forEach(e=>{ e.std=EX_STD[e.id]||0.60; e.work=EX_WORK[e.id]||0; });
-/* reps and holds are scored on their own count; anything you load is scored
-   on what it estimates your one-rep max to be */
-const byReps=ex=>(ex.mode==="bw"||ex.mode==="time")&&ex.work>0;
-
 const stdScale=()=>(S&&S.stdScale)||1;
-const unitsOf=(ex,reps)=>ex.mode==="time"?reps/SEC_PER_REP:reps;
-/* the medal a single set is worth, -1 for none */
-function setMedal(ex,prk,reps,bw){
-  if(byReps(ex)){
-    const g=ex.work*stdScale();
-    let t=-1; for(let i=0;i<REP_MULT.length;i++) if(reps>=Math.round(g*REP_MULT[i])) t=i;
-    return t;
-  }
-  const st=ex.std*stdScale();
-  if(!st||!bw||!prk) return -1;
-  const ratio=e1rm(prk,unitsOf(ex,reps))/bw;
-  let t=-1; for(let i=0;i<MED_MULT.length;i++) if(ratio>=st*MED_MULT[i]) t=i;
+
+/* ══════════════════ THE TEN CHALLENGES ══════════════════
+   Ten fixed tests, the same ten for everybody, and every one of them is
+   uncapped: no time limit, no ceiling, just a number that goes up. That is
+   what makes them raceable — your 38 push-ups and a friend's 41 are the same
+   test run twice, so the board under a challenge is a real ranking instead of
+   a difficulty setting.
+
+   Medal cuts are absolute and hand-set. They never scale with your bodyweight
+   and never move with your history, so a Gold means the same thing on every
+   phone. Champion is meant to be out of reach for nearly everyone.
+   S.stdScale (YOU › calibrated for) shifts all five cuts together for a
+   lifter the standards were not written around. */
+const CH_KIND={
+  reps:{verb:"Most reps in one set",          unit:"reps",         short:""},
+  side:{verb:"Most reps in one set, per side",unit:"reps per side",short:"/side"},
+  hold:{verb:"Longest unbroken hold",         unit:"seconds",      short:"s"},
+  load:{verb:"Heaviest set of eight or more", unit:"kg per rep",   short:"kg"}
+};
+const CHALLENGES=[
+  {id:"c_push",  ex:"pushup", kind:"reps", name:"The Floor",
+   rule:"Chest to the ground, arms locked at the top, one continuous set. Resting in the plank is allowed; putting a knee down is not.",
+   cuts:[10,20,35,50,75]},
+  {id:"c_row",   ex:"trow",   kind:"reps", name:"Under The Table",
+   rule:"Body in one line, chest to the edge every rep. Heels stay planted where they started.",
+   cuts:[8,15,25,35,50]},
+  {id:"c_pike",  ex:"pike",   kind:"reps", name:"The Pike",
+   rule:"Hips high, crown of the head to the floor. The closest thing to an overhead press you own.",
+   cuts:[5,10,18,28,40]},
+  {id:"c_dip",   ex:"dip",    kind:"reps", name:"The Edge",
+   rule:"Off a chair or a step, elbows to ninety degrees behind you. Feet stay put.",
+   cuts:[8,15,25,40,60]},
+  {id:"c_curl",  ex:"curl",   kind:"load", name:"Dead Weight",
+   rule:"Eight clean reps or more with no swing and no leaning back. The record is the weight on each rep, not the total.",
+   cuts:[8,12,18,24,32]},
+  {id:"c_squat", ex:"squat",  kind:"reps", name:"Below Parallel",
+   rule:"Hip crease under the knee on every rep. Nobody has ever counted the half ones.",
+   cuts:[20,40,65,100,150]},
+  {id:"c_bulg",  ex:"bulg",   kind:"side", name:"One Leg",
+   rule:"Rear foot elevated, front knee tracking over the foot. Log your weaker side — that is the one that counts.",
+   cuts:[8,15,25,35,50]},
+  {id:"c_burp",  ex:"burpee", kind:"reps", name:"The Furnace",
+   rule:"Chest to the floor at the bottom, feet leaving the ground at the top. One set, the clock is irrelevant.",
+   cuts:[10,20,30,45,65]},
+  {id:"c_plank", ex:"plank",  kind:"hold", name:"The Long Minute",
+   rule:"Forearms down, hips level with the shoulders. It ends the moment the hips drop, not the moment it hurts.",
+   cuts:[45,90,150,240,360]},
+  {id:"c_hollow",ex:"hollow", kind:"hold", name:"The Hollow",
+   rule:"Lower back pinned flat to the floor, shoulders and heels lifted. Any gap under the spine and the clock stops.",
+   cuts:[20,40,70,110,160]}
+];
+const CH_BY_EX={}; CHALLENGES.forEach(c=>{ CH_BY_EX[c.ex]=c; });
+const chalOf=id=>CHALLENGES.find(c=>c.id===id)||CHALLENGES[0];
+const chalEx=c=>byId(c.ex);
+
+/* the cut this player has to clear, after their calibration */
+const chalCut=(c,t)=>{ const raw=c.cuts[t]*stdScale();
+  return c.kind==="load" ? Math.round(raw*2)/2 : Math.max(1,Math.round(raw)); };
+/* the medal a value is worth on a challenge, -1 for none */
+function chalMedal(c,v){
+  if(!(v>0)) return -1;
+  let t=-1; for(let i=0;i<5;i++) if(v>=chalCut(c,i)) t=i;
   return t;
 }
-/* what one more notch would cost, in the unit you actually control */
-function medalGap(ex,prk,reps,bw,tier){
-  const next=tier+1;
-  if(byReps(ex)){
-    if(next>=REP_MULT.length) return null;
-    const d=Math.round(ex.work*stdScale()*REP_MULT[next])-reps;
-    if(d<=0) return null;
-    return ex.mode==="time" ? `+${d}s` : `+${d} rep${d===1?"":"s"}`;
-  }
-  if(next>=MED_MULT.length||!prk) return null;
-  const target=ex.std*stdScale()*MED_MULT[next]*bw, u=unitsOf(ex,reps);
-  const need=target/(1+u/30), d=Math.ceil((need-prk)*2)/2;
-  return d>0?`+${d}kg per rep`:null;
-}
-function medalCounts(){
-  const c=[0,0,0,0,0];
-  Object.values(S.medals||{}).forEach(t=>{ if(t>=0&&t<5) c[t]++; });
-  return c;
-}
-const medBadge=t=>(t>=0&&t<5)?`<span class="mbadge">${medalImg(t,"mbimg")}</span>`:"";
+/* Each medal is earned once and kept: taking Silver does not take Bronze away
+   from you, so the number you hold on a challenge is the running total of every
+   cut you have passed on it. Nineteen is the most one challenge can pay. */
+const MED_PTS=[1,2,3,5,8];
+const CUM_PTS=[1,3,6,11,19];
+const chalPts=t=>(t>=0&&t<5)?CUM_PTS[t]:0;
+/* Champion is a ceiling on the medals, so above it the only thing left to win
+   is position: every challenge pays again for where you stand on its board.
+   Deliberately smaller than a medal — first place on one challenge is worth
+   less than a Gold on it, and nothing at all until somebody else turns up to
+   be beaten, because standing alone on a board you are the only entrant on is
+   not an achievement. */
+const RANK_PTS=[5,3,2];
+const rankPts=(n,field)=>(!n||(field||0)<2)?0:(RANK_PTS[n-1]||1);
 
-const HOLD_HP=0.28;
-const ENDLESS=[null,G("legs"),G("chest"),G("back"),RA(25),L("biceps",32),T("core"),G("shoulders"),LA(35),R("legs",30)];
-/* Boss HP is not an absolute number — it's a week of YOUR output.
-   Every boss is the same size for everyone.
-   The demand then climbs on a decelerating curve: ~2.5% per boss early,
-   under 1% per boss late, reaching ~2.9× your starting output by boss 100.
-   Keep up and each boss falls in about a week. Coast and they don't. */
-const DEMAND_BASE=20000;
-const demandMult = i => Math.pow(1+i*0.035, 0.72);
-/* the same number for every player, on every device */
-const bossHp = i => Math.round(DEMAND_BASE*demandMult(i)/100)*100;
-function bossAt(i){
-  if(i<ROSTER.length){
-    const [name,gate,flavor]=ROSTER[i];
-    return {i,name,gate,flavor,hp:Math.round(bossHp(i)*(gate&&gate.time?HOLD_HP:1)/10)*10,act:ACT_NAMES[Math.floor(i/10)]};
-  }
-  const k=i-ROSTER.length;
-  return {i,name:"The Ceiling +"+(k+1),gate:ENDLESS[k%ENDLESS.length],flavor:"Nobody has cleared this one yet.",
-    hp:Math.round(bossHp(99)*Math.pow(1.12,k+1)*(ENDLESS[k%ENDLESS.length]&&ENDLESS[k%ENDLESS.length].time?HOLD_HP:1)/50)*50, act:"XI · Endless"};
+const chalRec=id=>(S&&S.chal&&S.chal[id])||null;
+const chalVal=id=>{ const r=chalRec(id); return r?r.v:0; };
+const chalTier=id=>chalMedal(chalOf(id),chalVal(id));
+/* the one number the board ranks on — works on a foreign board card too */
+function medalPoints(ch){
+  const rec=ch||(S&&S.chal)||{}; let p=0;
+  CHALLENGES.forEach(c=>{ const r=rec[c.id]; if(r&&r.v>0) p+=chalPts(chalMedal(c,r.v)); });
+  return p;
 }
-function gateText(gt){
-  if(!gt) return "any exercise, any weight";
-  const b=[];
-  if(gt.g) b.push(GROUPS[gt.g].name.toLowerCase()+" only");
-  if(gt.minLoad) b.push(gt.minLoad+"kg+ per rep");
-  if(gt.minReps) b.push("sets of "+gt.minReps+"+");
-  if(gt.time) b.push("holds only");
-  return b.join(" · ");
+/* a Champion holds all five, the way a champion medal implies the ones under it */
+function medalTally(ch){
+  const rec=ch||(S&&S.chal)||{}, out=[0,0,0,0,0];
+  CHALLENGES.forEach(c=>{ const r=rec[c.id]; if(!r||!(r.v>0)) return;
+    const t=chalMedal(c,r.v); for(let k=0;k<=t;k++) out[k]++; });
+  return out;
 }
-const gatePass=(gt,e)=> !gt ? true :
-  !((gt.g&&e.g!==gt.g)||(gt.minLoad&&e.prk<gt.minLoad)
-    ||(gt.minReps&&(e.mode==="time"||e.reps<gt.minReps))||(gt.time&&e.mode!=="time"));
+/* What a declared attempt is worth — 0 when it is not a legal one, because a
+   set of six curls cannot claim a set-of-eight record. Only an attempt made
+   from the challenge screen is ever measured: a normal training set, however
+   good, is training, and the ten are tests you choose to sit. */
+function chalRunValue(c,reps,prk,sd){
+  if(!c) return 0;
+  if(c.kind==="load") return reps>=8 ? prk : 0;
+  if(c.kind==="side") return sd==="each" ? reps : Math.floor(reps/2);
+  return reps;
+}
+const chalFmt=(c,v)=>!v?"—"
+  : c.kind==="load" ? v+"kg"
+  : c.kind==="hold" ? v+"s"
+  : v+(c.kind==="side"?" /side":" reps");
+/* what one more notch costs, in the unit you actually control */
+function chalGap(c,v,t){
+  if(t>=4) return null;
+  const d=Math.round((chalCut(c,t+1)-v)*10)/10;
+  if(d<=0) return null;
+  return c.kind==="load" ? `+${d}kg per rep`
+    : c.kind==="hold" ? `+${d}s`
+    : `+${d} rep${d===1?"":"s"}${c.kind==="side"?" per side":""}`;
+}
+/* the five cuts as a single readable line */
+const cutLine=c=>MEDALS.map((m,i)=>`${m.n[0]} ${chalFmt(c,chalCut(c,i))}`).join("  ·  ");
 
-/* which exercises can ever satisfy a gate, given your bodyweight */
-function gateQualifiers(gt,bw){
-  if(!gt) return EX;
-  return EX.filter(e=>{
-    if(gt.g && e.g!==gt.g) return false;
-    if(gt.time && e.mode!=="time") return false;
-    if(gt.minReps && e.mode==="time") return false;
-    if(gt.minLoad){
-      if(e.mode==="bw" && bw*e.f < gt.minLoad) return false;
-      if(e.mode==="time") return false;
-    }
-    return true;
-  });
-}
 const MODE_TAG={time:["hold","HOLD"],load:["kg","KG"],bwload:["kg","BW+KG"],bw:["bw","BW"]};
 
-/* ══════════════════ WEEKLY PLAN ══════════════════
-   Every muscle group is hit exactly twice across the 7 days. */
-const PLAN=[
- {id:"pushA",name:"Push A",label:"chest & triceps",gs:["chest","triceps"]},
- {id:"pullA",name:"Pull A",label:"back & biceps",gs:["back","biceps"]},
- {id:"legsA",name:"Legs A",label:"legs",gs:["legs"]},
- {id:"coreA",name:"Core & Delts",label:"core & shoulders",gs:["core","shoulders"]},
- {id:"pushB",name:"Push B",label:"chest & shoulders",gs:["chest","shoulders"]},
- {id:"pullB",name:"Pull B",label:"back & biceps",gs:["back","biceps"]},
- {id:"legsB",name:"Legs B",label:"legs & core",gs:["legs","core"]}
+/* ══════════════════ THE ROTATION ══════════════════
+   Which muscles you are meant to be on, day by day. The default hits every
+   group exactly twice across the seven days; past that it is yours — rename a
+   day, swap its groups, or empty one out entirely and it becomes a rest day
+   with nothing asked of it.
+
+   Today's missions are drawn from the rotation, so editing it re-rolls today
+   rather than leaving three missions behind for muscles you just took off the
+   calendar. */
+const DEFAULT_ROT=[
+ {name:"Push A",      gs:["chest","triceps"]},
+ {name:"Pull A",      gs:["back","biceps"]},
+ {name:"Legs A",      gs:["legs"]},
+ {name:"Core & Delts",gs:["core","shoulders"]},
+ {name:"Push B",      gs:["chest","shoulders","triceps"]},
+ {name:"Pull B",      gs:["back","biceps"]},
+ {name:"Legs B",      gs:["legs","core"]}
 ];
 const DOWL=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const DOWF=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+
+const rotList=()=>(S&&Array.isArray(S.rot)&&S.rot.length===7)?S.rot:DEFAULT_ROT;
+/* one day of the rotation, always complete and always safe to read */
+function rotAt(dow){
+  const r=rotList()[dow]||{};
+  const gs=(Array.isArray(r.gs)?r.gs:[]).filter(g=>GROUPS[g]);
+  return {dow,gs,
+    name:String(r.name||(gs.length?"Training":"Rest")).slice(0,22),
+    label:gs.length?gs.map(g=>GROUPS[g].name.toLowerCase()).join(" & "):"rest day"};
+}
+const isRest=dow=>!rotAt(dow).gs.length;
+/* editing any day invalidates the missions that were drawn from it */
+const rotSig=()=>rotList().map(r=>((r&&r.gs)||[]).join("+")).join("|");
+function normRot(v){
+  if(!Array.isArray(v)||v.length!==7) return null;
+  return v.map((r,i)=>({name:String((r&&r.name)||DEFAULT_ROT[i].name).slice(0,22),
+    gs:((r&&Array.isArray(r.gs))?r.gs:[]).filter(g=>GROUPS[g]).slice(0,4)}));
+}
 
 /* ══════════════════ DATES & MATHS ══════════════════ */
 const pad=n=>String(n).padStart(2,"0");
@@ -867,7 +813,8 @@ const hasLoad = ex => ex.mode==="load" || ex.mode==="bwload";
 const perRepKg=(ex,bw,load)=> ex.mode==="load"?load : ex.mode==="bwload"?bw*ex.f+load : bw*ex.f;
 /* sides: 1 = both limbs on one implement, 2 = each limb worked separately.
    Load and reps are always entered PER SIDE, so tonnage multiplies but
-   per-rep load (used by boss gates and records) stays honest. */
+   per-rep load (what the records and the challenges are scored on) stays
+   honest. */
 const sideMode = ex => ex.s==="opt" ? ((S&&S.last[ex.id]&&S.last[ex.id].sd) || ex.sd) : ex.s;
 const sidesNow = () => (U.sd==="each"?2:1);
 function computeSet(ex,bw,sets,reps,load,sides){
@@ -875,10 +822,9 @@ function computeSet(ex,bw,sets,reps,load,sides){
   const units= ex.mode==="time" ? reps/SEC_PER_REP : reps;
   return {ton:Math.round(prk*units*sets*(sides||1)), prk:Math.round(prk*10)/10};
 }
-const flowMult=s=>1+.02*Math.min(Math.max(s-1,0),15);
 const e1rm=(kg,reps)=>Math.round(kg*(1+reps/30)*10)/10;
 
-/* ══════════════════ DAILY CHALLENGE ENGINE ══════════════════ */
+/* ══════════════════ DAILY MISSION ENGINE ══════════════════ */
 const TASKS=[
  {t:"set_reps", mk:(T,p)=>({target:12+T*2, label:`One set of ${12+T*2}+ reps · ${p.label}`})},
  {t:"total_reps", mk:(T,p)=>({target:60+T*15, label:`${60+T*15} total reps · ${p.label}`})},
@@ -903,21 +849,24 @@ function baseTonnage(S){
 function weekIndex(S,k){ return S.start ? Math.max(0,Math.floor((dayNum(k)-dayNum(S.start))/7)) : 0; }
 
 function makeDaily(S,k){
-  const dow=dowOf(k), p=PLAN[dow], W=weekIndex(S,k), T=Math.min(9,Math.floor(W/2));
+  const dow=dowOf(k), p=rotAt(dow), W=weekIndex(S,k), T=Math.min(9,Math.floor(W/2));
+  const base={k,dow,rot:rotSig(),plan:p.name,week:W,tier:T,
+    acc:{ton:0,focusTon:0,reps:0,sec:0,sets:0,ex:[],pr:false,bestSetReps:0,bestLoad:0}};
+  /* a rest day asks for nothing: no missions to fail, no tick to miss */
+  if(!p.gs.length) return Object.assign(base,{quota:0,objs:[],perfect:true,rest:true});
   const quota=Math.max(400, Math.round(baseTonnage(S)*.6*(1+.02*Math.min(W,25))/10)*10);
   const n=dayNum(k), NT=TASKS.length;
   let i1=(n*3+W*2)%NT, i2=(n*5+W*4+3)%NT;
   if(i2===i1) i2=(i2+1)%NT;
   const a=TASKS[i1], b=TASKS[i2];
   const oa=a.mk(T,p,S), ob=b.mk(Math.min(9,T+2),p,S);
-  return {k,dow,plan:p.id,week:W,tier:T,quota,
-    acc:{ton:0,focusTon:0,reps:0,sec:0,sets:0,ex:[],pr:false,bestSetReps:0,bestLoad:0},
+  return Object.assign(base,{quota,
     objs:[
-      {t:"quota",target:quota,label:`Move ${fmt(quota)}kg of ${p.label}`,done:false,reward:Math.round(quota/3)},
-      {t:a.t,target:oa.target,label:oa.label,done:false,reward:Math.round(quota/4)},
-      {t:b.t,target:ob.target,label:ob.label,done:false,reward:Math.round(quota/3)}
+      {t:"quota",target:quota,label:`Move ${fmt(quota)}kg of ${p.label}`,done:false},
+      {t:a.t,target:oa.target,label:oa.label,done:false},
+      {t:b.t,target:ob.target,label:ob.label,done:false}
     ],
-    perfect:false};
+    perfect:false,rest:false});
 }
 function progressOf(o,acc){
   switch(o.t){
@@ -1042,10 +991,11 @@ function statsCard(){
     if(r&&(r.e1rm>0||r.reps>0)) lifts[id]={e:Math.round(r.e1rm||0),l:Math.round((r.load||0)*10)/10,r:r.reps||0}; });
   const recent=(S.log||[]).slice(0,8).map(r=>({t:r.t||dayNum(r.d)*864e5+432e5,ex:r.ex,sets:r.sets,
     reps:r.reps,load:r.load,sd:r.sd,ton:Math.round(r.ton||0),pr:r.pr||null,md:r.md==null?-1:r.md}));
-  return {name:MP.me.name,pwr:S.power|0,ci:S.ci|0,streak:S.streak|0,ton:Math.round(S.totalTon||0),
+  return {name:MP.me.name,pwr:S.power|0,mp:myStanding().score,chal:S.chal||{},
+          streak:S.streak|0,ton:Math.round(S.totalTon||0),
           prs:(S.prLog||[]).length,pw:S.perfectWeeks|0,sets:(S.log||[]).length,lastDay:S.lastDay,lifts,recent,
           crew:S.crew?S.crew.id:null, crewName:S.crew?S.crew.name:null,
-          crewOwner:!!S.crewOwner, crewBans:S.crewOwner?(S.crewBans||[]):[], med:medalCounts(),
+          crewOwner:!!S.crewOwner, crewBans:S.crewOwner?(S.crewBans||[]):[], med:medalTally(),
           pic:S.pic||null};
 }
 
@@ -1090,10 +1040,11 @@ async function refreshBoard(){
   }catch(e){ MP.status="error"; MP.err=String(e.message||e).slice(0,140); }
 }
 
-const EMPTY={ver:4,bw:75,power:0,streak:0,lastDay:null,start:null,ci:0,cd:0,peak:0,
-  crew:null,crewOwner:false,crewBans:[],medals:{},stdScale:1,pic:null,
-  decayedThrough:null,away:null,daily:null,records:{},prLog:[],last:{},log:[],totalTon:0,weeks:{},
+const EMPTY={ver:5,bw:75,power:0,streak:0,lastDay:null,start:null,
+  crew:null,crewOwner:false,crewBans:[],chal:{},rot:null,stdScale:1,pic:null,
+  away:null,daily:null,records:{},prLog:[],last:{},log:[],totalTon:0,weeks:{},
   lastExport:0,perfectWeeks:0,savedAt:0};
+
 const THEMES=[{id:"night",label:"☾",title:"Night"},{id:"foresty",label:"🌿",title:"Foresty"},{id:"bright",label:"☀",title:"Bright"}];
 
 /* forward-compatible: unknown keys from newer saves are kept, missing ones defaulted */
@@ -1105,23 +1056,25 @@ function migrate(o){
   if(!s.last||typeof s.last!=="object") s.last={};
   if(!s.weeks||typeof s.weeks!=="object") s.weeks={};
   if(!Array.isArray(s.crewBans)) s.crewBans=[];
-  if(!s.medals||typeof s.medals!=="object") s.medals={};
+  if(!s.chal||typeof s.chal!=="object") s.chal={};
+  s.rot=normRot(s.rot);
+  /* a save from the boss era: the campaign counters go, the training stays */
+  delete s.ci; delete s.cd; delete s.peak; delete s.medals; delete s.decayedThrough;
   if(![1,0.73].includes(s.stdScale)) s.stdScale=1;
   s.pic=safePic(s.pic);
   if(!s.crew||typeof s.crew!=="object"||!s.crew.id) s.crew=null;
   s.crewOwner=!!s.crewOwner&&!!s.crew;
-  if(!s.pace||![4,7,10].includes(s.pace)) s.pace=7;
   if(typeof s.bw!=="number"||!isFinite(s.bw)||s.bw<=0) s.bw=75;
-  s.ci=Math.max(0,s.ci|0); s.cd=Math.max(0,s.cd||0);
-  s.peak=Math.max(s.peak|0,s.ci);
-  s.ver=4;
+  delete s.pace;
+  s.ver=5;
   return s;
 }
 
 /* ══════════════════ STATE ══════════════════ */
 let S=null;
 const U={tab:"train",group:"chest",ex:"pushup",sets:3,reps:10,load:10,flash:null,rest:0,restT:null,
-  metric:"pwr",rgroup:"all",theme:"night",help:{},logDays:5,openServer:false,openObj:null,openGate:false,scope:"all"};
+  metric:"score",rgroup:"all",theme:"night",help:{},logDays:5,openServer:false,openObj:null,
+  openChal:null,attV:20,attR:8,editRot:false,scope:"all"};
 
 function applyTheme(){
   const theme=THEMES.some(t=>t.id===U.theme)?U.theme:"night";
@@ -1138,7 +1091,11 @@ async function persist(){ S.savedAt=Date.now();
 function rollDaily(){
   const k=dayKey();
   if(!S.start) S.start=k;
-  if(!S.daily || S.daily.k!==k) S.daily=makeDaily(S,k);
+  if(S.daily && S.daily.k===k && S.daily.rot===rotSig()) return;
+  /* re-rolling mid-day must not throw away work already logged against it */
+  const keep=(S.daily&&S.daily.k===k)?S.daily.acc:null;
+  S.daily=makeDaily(S,k);
+  if(keep) S.daily.acc=keep;
 }
 
 /* ══════════════════ RECORDS ══════════════════ */
@@ -1169,153 +1126,140 @@ function staleRecords(){
     .sort((a,b)=>b.days-a.days);
 }
 
-/* ══════════════════ CALIBRATION & PACE ══════════════════ */
-function dailyRate(){
-  const t=dayNum(dayKey());
-  const w=S.log.filter(r=>t-dayNum(r.d)<14);
-  if(!w.length) return 0;
-  const span=Math.max(1,Math.min(14,t-dayNum(w[w.length-1].d)+1));
-  return w.reduce((a,r)=>a+(r.ap||r.dmg||0),0)/span;
-}
-const weeklyOut = () => Math.round(dailyRate()*7);
-function bossEta(){
-  const r=dailyRate();
-  return r<=0 ? null : Math.max(1,Math.ceil((bossAt(S.ci).hp-S.cd)/r));
-}
-
-/* ══════════════════ DETRAINING ══════════════════
-   One rest day is free. From the second day off, the current boss heals a
-   growing share of its max HP each day: 3%, 4%, 5% … capped at 10% a day.
-   Enough regeneration rolls you back onto bosses you'd already beaten, but
-   never out of the act you're standing in. */
-function decayRate(off){ return Math.min(.10, .02+.01*(off-1)); }
+/* ══════════════════ TIME OFF ══════════════════
+   Nothing you have earned decays. A record is a record and a medal, once cut,
+   stays cut — the ten challenges are a ladder you climb, not a bar you have to
+   keep holding up. What a long gap actually costs is the streak, the week's
+   ticks, and the lifts that quietly drift onto the going-stale list. */
 function applyDecay(){
-  const t=dayNum(dayKey());
-  if(!S.lastDay){ S.decayedThrough=t; return null; }
-  const last=dayNum(S.lastDay);
-  const from=Math.max(last+2,(S.decayedThrough||last)+1);
-  if(t<from){ S.decayedThrough=Math.max(S.decayedThrough||0,t); return null; }
-  const floor=Math.floor(S.ci/10)*10;
-  let healed=0; const revived=[];
-  for(let d=from; d<=t; d++){
-    const heal=Math.round(bossAt(S.ci).hp*decayRate(d-last));
-    healed+=heal; S.cd-=heal;
-    while(S.cd<0){
-      if(S.ci<=floor){ S.cd=0; break; }
-      S.ci--; revived.push(bossAt(S.ci).name); S.cd=bossAt(S.ci).hp+S.cd;
-    }
-  }
-  S.decayedThrough=t; S.streak=0;
-  return {days:t-last,healed,revived,atFloor:S.ci<=floor&&S.cd===0};
+  if(!S.lastDay) return null;
+  const gap=dayNum(dayKey())-dayNum(S.lastDay);
+  if(gap<2 || !S.streak) return null;
+  const lost=S.streak; S.streak=0;
+  return {days:gap,streak:lost};
 }
 function restStatus(){
   if(!S.lastDay) return {t:"new",msg:"Nothing logged yet. The clock starts on your first set."};
   const gap=dayNum(dayKey())-dayNum(S.lastDay);
-  if(gap===0) return {t:"ok",msg:"Trained today. Nothing decays."};
-  if(gap===1) return {t:"grace",msg:"Rest day — free. Miss tomorrow too and the boss starts healing."};
-  return {t:"decay",msg:`${gap} days off. ${bossAt(S.ci).name} is healing ${Math.round(decayRate(gap)*100)}% of its HP a day.`};
+  if(gap===0) return {t:"ok",msg:"Trained today. The streak holds."};
+  if(gap===1) return {t:"grace",msg:isRest(dowOf(dayKey()))
+    ? "Rest day on your rotation. The streak is safe either way."
+    : "One day off. Log anything today and the streak survives."};
+  return {t:"decay",msg:`${gap} days off — the streak is back to zero. Your records and medals are untouched.`};
 }
-function logSet(){
-  const ex=byId(U.ex), sides=sidesNow(), {ton,prk}=computeSet(ex,S.bw,U.sets,U.reps,U.load,sides);
+
+/* One path for both: `att` is null for an ordinary logged set and carries the
+   challenge, the numbers and the side mode when the set is a declared attempt.
+   An attempt is always a single all-out set — nothing about "the most push-ups
+   you can do" survives being spread over three of them. */
+function logSet(att){
+  const ex=att?chalEx(att.c):byId(U.ex);
+  const sets=att?1:U.sets, reps=att?att.reps:U.reps, load=att?att.load:U.load;
+  const sd=att?att.sd:U.sd, sides=sd==="each"?2:1;
+  const {ton,prk}=computeSet(ex,S.bw,sets,reps,load,sides);
   if(ton<=0) return;
   const today=dayKey();
   if(S.lastDay!==today) S.streak = S.lastDay===yKey() ? S.streak+1 : 1;
-  S.lastDay=today; S.decayedThrough=dayNum(today); S.away=null;
+  S.lastDay=today; S.away=null;
   rollDaily();
   /* snapshot the bars before any of this lands, so they animate the distance */
-  const hpFrom=(bossAt(S.ci).hp-S.cd)/bossAt(S.ci).hp*100;
   const objFrom=S.daily.objs.map(o=>{const v=progressOf(o,S.daily.acc);
     return o.t==="pr"?(v?100:0):Math.min(100,v/o.target*100);});
   const popObj=[];
-  const medFrom=Math.max(-1,S.medals[dayKey()]==null?-1:S.medals[dayKey()]);
 
-  /* records */
+  /* records — four per exercise, the private ledger under everything else */
   const rec=S.records[ex.id]||{};
-  const units = ex.mode==="time" ? U.reps/SEC_PER_REP : U.reps;
+  const units = ex.mode==="time" ? reps/SEC_PER_REP : reps;
   const setVol=Math.round(prk*units), est=e1rm(prk,units);
   const broke=[];
   const nr={load:rec.load||0,loadD:rec.loadD,reps:rec.reps||0,repsD:rec.repsD,
             vol:rec.vol||0,volD:rec.volD,e1rm:rec.e1rm||0,e1rmD:rec.e1rmD,
             n:rec.n||0,last:rec.last,seen:(rec.seen||0)+1};
   if(prk>nr.load){ nr.load=prk; nr.loadD=today; broke.push("load"); }
-  if(U.reps>nr.reps){ nr.reps=U.reps; nr.repsD=today; broke.push(ex.mode==="time"?"hold":"reps"); }
+  if(reps>nr.reps){ nr.reps=reps; nr.repsD=today; broke.push(ex.mode==="time"?"hold":"reps"); }
   if(setVol>nr.vol){ nr.vol=setVol; nr.volD=today; broke.push("set volume"); }
   if(est>nr.e1rm){ nr.e1rm=est; nr.e1rmD=today; broke.push("est. 1RM"); }
   if(broke.length){
     nr.n+=broke.length; nr.last=today; S.power++;
-    S.prLog=[{d:today,ex:ex.id,k:broke.slice(),prk,reps:U.reps},...(S.prLog||[])].slice(0,80);
+    S.prLog=[{d:today,ex:ex.id,k:broke.slice(),prk,reps},...(S.prLog||[])].slice(0,80);
   }
   S.records[ex.id]=nr;
 
-  let dmg=Math.round((ton/5)*(1+Math.min(S.power,60)*.01)*flowMult(S.streak));
+  /* ── the attempt ───────────────────────────────────────────────────
+     Only a set declared as an attempt is measured against the ten. */
+  const ch=att?att.c:null;
+  const runV=ch ? Math.round(chalRunValue(ch,reps,prk,sd)*10)/10 : 0;
+  const medNow=ch&&runV>0 ? chalMedal(ch,runV) : -1;
+  let got=null;
+  if(ch && runV>0){
+    const cur=S.chal[ch.id]||null, wasT=cur?chalMedal(ch,cur.v):-1;
+    const beat=!cur || runV>cur.v;
+    S.chal[ch.id]={v:beat?runV:cur.v, d:beat?today:cur.d, n:((cur&&cur.n)||0)+1};
+    if(beat){
+      got={id:ch.id,name:ch.name,v:runV,prev:cur?cur.v:0,tier:medNow,up:medNow>wasT};
+      /* a tier you already hold is yours for good, so the ceremony is for a
+         cut you have just passed for the first time and nothing else */
+      if(medNow>wasT) FXQ.push({tier:medNow,name:ch.name,rec:chalFmt(ch,runV),
+        rank:`${medNow+1} of 5`, gap:chalGap(ch,runV,medNow),
+        next:medNow<4?MEDALS[medNow+1].n:null, pts:medalPoints()});
+    }
+  }
 
   /* daily accumulators */
-  const p=PLAN[S.daily.dow], inFocus=p.gs.includes(ex.g), a=S.daily.acc;
+  const p=rotAt(S.daily.dow), inFocus=p.gs.includes(ex.g), a=S.daily.acc;
   a.ton+=ton;
-  if(ex.mode==="time") a.sec+=U.reps*U.sets*sides;
+  if(ex.mode==="time") a.sec+=reps*sets*sides;
   if(broke.length) a.pr=true;
   if(inFocus){
-    a.focusTon+=ton; a.sets+=U.sets;
-    if(ex.mode!=="time") a.reps+=U.reps*U.sets*sides;
+    a.focusTon+=ton; a.sets+=sets;
+    if(ex.mode!=="time") a.reps+=reps*sets*sides;
     if(!a.ex.includes(ex.id)) a.ex.push(ex.id);
-    if(ex.mode!=="time" && U.reps>a.bestSetReps) a.bestSetReps=U.reps;
+    if(ex.mode!=="time" && reps>a.bestSetReps) a.bestSetReps=reps;
     if(prk>a.bestLoad) a.bestLoad=prk;
   }
 
-  /* objectives */
-  let bounty=0; const finished=[];
+  /* today's missions */
+  const finished=[];
   S.daily.objs.forEach((o,i)=>{
-    if(!o.done && progressOf(o,a)>=o.target){ o.done=true; bounty+=o.reward; finished.push(o.label); popObj.push(i); }
+    if(!o.done && progressOf(o,a)>=o.target){ o.done=true; finished.push(o.label); popObj.push(i); }
   });
   let perfect=false;
-  if(!S.daily.perfect && S.daily.objs.every(o=>o.done)){
-    S.daily.perfect=true; perfect=true; bounty+=Math.round(S.daily.quota/2);
+  if(!S.daily.perfect && S.daily.objs.length && S.daily.objs.every(o=>o.done)){
+    S.daily.perfect=true; perfect=true;
   }
 
-  /* the set's own medal; the day keeps the best one taken in it */
-  const medNow=setMedal(ex,prk,U.reps,S.bw);
-  if(medNow>=0){
-    S.medals[today]=Math.max(medFrom,medNow);
-    const days=Object.keys(S.medals);
-    if(days.length>200) days.sort().slice(0,days.length-200).forEach(d=>delete S.medals[d]);
-  }
-
-  /* week ledger */
+  /* week ledger — a rest day on your own rotation counts as kept */
   const wk=mondayOf(today);
   if(!S.weeks[wk]) S.weeks[wk]=[0,0,0,0,0,0,0];
   S.weeks[wk][S.daily.dow]=Math.max(S.weeks[wk][S.daily.dow], S.daily.perfect?2:1);
-  let weekBonus=0;
-  if(S.weeks[wk].every(v=>v===2) && !S.weeks[wk+":paid"]){
-    S.weeks[wk+":paid"]=true; S.perfectWeeks++; S.power+=2; weekBonus=S.daily.quota*3; bounty+=weekBonus;
+  let weekDone=false;
+  if(S.weeks[wk].every((v,i)=>v===2||isRest(i)) && !S.weeks[wk+":paid"]){
+    S.weeks[wk+":paid"]=true; S.perfectWeeks++; weekDone=true;
   }
 
-  /* campaign damage */
-  const boss=bossAt(S.ci);
-  const pass=gatePass(boss.gate,{g:ex.g,mode:ex.mode,reps:U.reps,prk});
-  const applied=Math.round(dmg*(pass?1:.25))+bounty;
-  S.cd+=applied; S.totalTon+=ton;
-  const cleared=[];
-  while(S.cd>=bossAt(S.ci).hp){
-    const b=bossAt(S.ci); S.cd-=b.hp; S.ci++; const nb=bossAt(S.ci);
-    cleared.push(b.name);
-    FXQ.push({n:b.i+1,name:b.name,flavor:b.flavor,
-      act:(b.i<ROSTER.length && (b.i+1)%10===0) ? ACT_NAMES[Math.floor(b.i/10)] : null,
-      next:nb.name,nextHp:nb.hp,nextGate:gateText(nb.gate)});
-  }
-  if(S.ci>S.peak) S.peak=S.ci;
-
-  S.last[ex.id]={sets:U.sets,reps:U.reps,load:U.load,sd:U.sd};
-  S.log.unshift({d:today,t:Date.now(),ex:ex.id,sets:U.sets,reps:U.reps,load:U.load,sd:U.sd,prk,ton,dmg,ap:applied,
-    pr:broke.length?broke.slice():null,md:medNow});
+  S.totalTon+=ton;
+  /* an all-out attempt is a terrible suggestion for your next working set */
+  if(!att) S.last[ex.id]={sets,reps,load,sd};
+  S.log.unshift({d:today,t:Date.now(),ex:ex.id,sets,reps,load,sd,prk,ton,
+    pr:broke.length?broke.slice():null,md:medNow,att:att?1:0});
   S.log=S.log.slice(0,900);
 
-  U.flash={ton,dmg,applied,pass,bounty,cleared,broke,finished,perfect,weekBonus,boss:boss.name,
-    medal:medNow>medFrom?medNow:null};
-  /* a cleared boss swaps the bar for a different fight, so do not travel it */
-  U.fx={objFrom,popObj,hpFrom:cleared.length?null:hpFrom};
+  U.flash={ton,broke,finished,perfect,weekDone,chal:got,run:runV,chId:ch?ch.id:null,att:!!att};
+  U.fx={objFrom,popObj};
   startRest(90);
   persist(); publish(); render();
   if(FXQ.length) playFx();
+}
+
+/* Sit the test: one set, all out, from the challenge screen. */
+function submitAttempt(id){
+  const c=chalOf(id), ex=chalEx(c), isLoad=c.kind==="load";
+  const reps=Math.max(1,Math.round(isLoad?U.attR:U.attV));
+  const load=isLoad?Math.round(U.attV*2)/2:0;
+  if(isLoad && reps<8) return alert(`A run at ${c.name} is a set of eight reps or more. Fewer than that and it is a heavy set, not this test.`);
+  if(isLoad && load<=0) return alert("Put some weight on it first.");
+  const sd=ex.s==="opt" ? (ex.sd||"both") : ex.s;
+  logSet({c,reps,load,sd});
 }
 
 function startRest(n){ U.rest=n; clearInterval(U.restT);
@@ -1341,23 +1285,25 @@ function playFx(){
   }
   el.innerHTML=`${r?"":`<div class="ring"></div><div class="ring" style="animation-delay:.18s;border-color:var(--gold)"></div>`}${sparks}
     <div class="fxcard">
-      <div class="fxpill" style="color:var(--green)">boss ${it.n} of 100 defeated</div>
-      <div class="disp ${r?"":"slam"}" style="font-size:29px;margin:12px 0 0">${esc(it.name.toUpperCase())}</div>
+      <div class="fxpill" style="color:var(--green)">medal ${esc(it.rank)}</div>
+      <div class="${r?"":"slam"}" style="margin:16px 0 0">${medalImg(it.tier,"fxmedal")}</div>
+      <div class="disp" style="font-size:29px;margin:10px 0 0">${esc(MEDALS[it.tier].n.toUpperCase())}</div>
       ${r?"":`<div class="crack"></div>`}
-      <div class="rise muted">${esc(it.flavor)}</div>
-      ${it.act?`<div style="margin-top:16px"><div class="actban">ACT ${esc(it.act.split(" · ")[0])} COMPLETE · ${esc(it.act.split(" · ")[1].toUpperCase())}</div></div>`:""}
+      <div class="rise muted">${esc(it.name)} · <b style="color:var(--cream)">${esc(it.rec)}</b></div>
 
       <div class="rise" style="margin-top:20px">
-        <div class="fxpill">now entering</div>
-        <div class="disp" style="font-size:18px;color:var(--gold);margin-top:5px">${esc(it.next.toUpperCase())}</div>
-        <div class="mono" style="font-size:13px;color:var(--dim);margin-top:5px">${fmt(it.nextHp)} HP · ${esc(it.nextGate)}</div>
+        ${it.next?`<div class="fxpill">next up</div>
+          <div class="disp" style="font-size:18px;color:var(--gold);margin-top:5px">${esc(it.next.toUpperCase())}</div>
+          <div class="mono" style="font-size:13px;color:var(--dim);margin-top:5px">${esc(it.gap||"")}</div>`
+        :`<div class="fxpill" style="color:var(--gold)">nothing sits above this one</div>`}
+        <div class="mono" style="font-size:12px;color:var(--dim);margin-top:12px">${it.pts} medal points</div>
       </div>
       <div class="tapdis mono" style="font-size:12px;color:var(--dim);margin-top:22px">tap anywhere to continue</div>
     </div>`;
   el.classList.add("on");
   if(!r){ const app=document.getElementById("app");
     app.classList.add("shake"); setTimeout(()=>app.classList.remove("shake"),700); }
-  clearTimeout(FXT); FXT=setTimeout(dismissFx, it.act?7000:4600);
+  clearTimeout(FXT); FXT=setTimeout(dismissFx, 4600);
 }
 function dismissFx(){
   clearTimeout(FXT);
@@ -1445,7 +1391,6 @@ const kgs=n=>Math.abs(n)>=10000?fmtK(n)+" kg":fmt(n)+"kg";
    it is read. 24×24, stroked in the section's accent colour. */
 const ICONS={
   target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/>',
-  skull:'<path d="M5.2 11.2a6.8 6.8 0 1 1 13.6 0v3a1.8 1.8 0 0 1-1 1.6l-1.1.6V19a1 1 0 0 1-1 1H8.3a1 1 0 0 1-1-1v-2.6l-1.1-.6a1.8 1.8 0 0 1-1-1.6Z"/><circle cx="9.2" cy="11.2" r="1.7" fill="currentColor" stroke="none"/><circle cx="14.8" cy="11.2" r="1.7" fill="currentColor" stroke="none"/><path d="M12 14.6v2.2"/>',
   dumbbell:'<path d="M3.5 10v4M6.5 8v8M17.5 8v8M20.5 10v4M6.5 12h11"/>',
   receipt:'<path d="M6 3.5h12v17l-2.4-1.5-2.4 1.5-2.4-1.5L8.4 20.5 6 19Z"/><path d="M9.2 8.5h5.6M9.2 12.5h5.6"/>',
   users:'<circle cx="9.3" cy="8.8" r="3.2"/><path d="M3.8 19.5a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3.2 3.2 0 0 1 0 5.6"/><path d="M17.4 15.4a5.5 5.5 0 0 1 2.8 4.1"/>',
@@ -1461,6 +1406,7 @@ const ICONS={
   flag:'<path d="M6 21.2V3.4"/><path d="M6 4.4h11.6l-2.1 3.6 2.1 3.6H6Z"/>',
   alert:'<path d="M12 3.6 21 19.4H3Z"/><path d="M12 9.6v4.2"/><circle cx="12" cy="16.6" r="1.1" fill="currentColor" stroke="none"/>',
   clock:'<circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12l3.2 2.1"/>',
+  medal:'<circle cx="12" cy="15.2" r="5.6"/><path d="M9.4 10.2 6.4 3.4M14.6 10.2l3-6.8M8.6 3.4h6.8"/><path d="m12 12.9.8 1.7 1.8.3-1.3 1.3.3 1.8-1.6-.9-1.6.9.3-1.8-1.3-1.3 1.8-.3Z" fill="currentColor" stroke="none"/>',
   news:'<path d="M3.6 5.8h12.8v13.4H5.6a2 2 0 0 1-2-2Z"/><path d="M16.4 9.4H20.4v7.8a2 2 0 0 1-2 2h-2Z"/><path d="M6.6 9.2h6.8M6.6 12.4h6.8M6.6 15.6h4.4"/>'
 };
 const ico=n=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||""}</svg>`;
@@ -1525,8 +1471,9 @@ function feedItems(withMe){
 }
 function feedRow(it){
   const e=byId(it.ex), who=esc(it.mine?"You":it.who), md=it.md;
-  const head = md>=0&&md!=null
-    ? `<b>${who}</b> took ${/^[aeiou]/i.test(MEDALS[md].n)?"an":"a"} ${medalImg(md,"fimg")} medal`
+  const c=CH_BY_EX[it.ex];
+  const head = md>=0&&md!=null&&c
+    ? `<b>${who}</b> ran ${esc(c.name)} for ${medalImg(md,"fimg")} ${esc(MEDALS[md].n)}`
     : `<b>${who}</b> logged ${esc(e.n)}`;
   return `<div class="fr">
     ${ava(it.mine?S.pic:it.pic, it.who, it.mine?"me":"")}
@@ -1537,21 +1484,74 @@ function feedRow(it){
 }
 const todaySets=()=>{const k=dayKey();return (S.log||[]).filter(r=>r.d===k);};
 
+/* Your own card on the board was published on your last sync, so in your own
+   view it is always a little stale. Everyone else's is the best we have; yours
+   is sitting in front of us, so patch the live numbers over it. */
+function liveRows(pool){
+  const mine=MP.me&&MP.me.id;
+  const rows=(pool||Object.values(MP.board)).map(pl=>pl.id!==mine?pl:Object.assign({},pl,{
+    chal:S.chal||{}, pwr:S.power|0, ton:Math.round(S.totalTon||0), streak:S.streak|0,
+    prs:(S.prLog||[]).length, lastDay:S.lastDay, pic:S.pic||null}));
+  if(mine && !rows.some(r=>r.id===mine)) rows.push(selfRow());
+  return rows;
+}
+
+/* ══════════════════ STANDINGS ══════════════════
+   Every score is worked out here rather than read off a board card. The ten
+   challenges are identical for everyone and everyone publishes their raw
+   records, so the same arithmetic runs on every device and nobody's rank
+   depends on how recently they happened to sync.
+
+   A score is two things added together: the medals you hold, each one earned
+   once and kept for good, and the position you hold on each challenge's board.
+   The medals stop at Champion. The positions never do — once the cuts are all
+   behind you the only thing left to take is somebody else's place. */
+function standings(pool){
+  const rows=liveRows(pool).map(pl=>Object.assign({},pl,{
+    chal:pl.chal||{}, med:[0,0,0,0,0], mpts:0, rpts:0, rank:{}, ran:0}));
+  CHALLENGES.forEach(c=>{
+    rows.forEach(r=>{
+      const v=r.chal[c.id]&&r.chal[c.id].v; if(!(v>0)) return;
+      r.ran++;
+      const t=chalMedal(c,v);
+      if(t>=0){ r.mpts+=CUM_PTS[t]; for(let k=0;k<=t;k++) r.med[k]++; }
+    });
+    const runs=rows.filter(r=>r.chal[c.id]&&r.chal[c.id].v>0)
+                   .sort((a,b)=>b.chal[c.id].v-a.chal[c.id].v);
+    runs.forEach((r,i)=>{ r.rank[c.id]=i+1; r.field=runs.length;
+                          r.rpts+=rankPts(i+1,runs.length); });
+  });
+  rows.forEach(r=>{ r.score=r.mpts+r.rpts; r.mp=r.score; });
+  return rows.sort((a,b)=>b.score-a.score || (b.mpts|0)-(a.mpts|0));
+}
+const myStanding=()=>{
+  const mine=MP.me&&MP.me.id;
+  return standings().find(r=>r.id===mine)
+    || {score:medalPoints(),mpts:medalPoints(),rpts:0,med:medalTally(),rank:{},ran:0};
+};
+/* one challenge's board, best first */
+function chalBoard(c){
+  return standings().filter(r=>r.chal[c.id]&&r.chal[c.id].v>0)
+                    .sort((a,b)=>b.chal[c.id].v-a.chal[c.id].v);
+}
+
 /* ══════════════════ RENDER ══════════════════ */
 const TABS=[["feed","FEED","news"],["train","TRAIN","dumbbell"],["week","WEEK","cal"],
-            ["bosses","BOSSES","skull"],["crew","CREW","users"],["you","YOU","trophy"]];
+            ["chal","CHALLENGES","medal"],["crew","CREW","users"],["you","YOU","trophy"]];
 
 function render(){
   rollDaily();
   FX=U.fx||{}; U.fx=null;
-  const ex=byId(U.ex), boss=bossAt(S.ci), p=PLAN[S.daily.dow];
+  const ex=byId(U.ex);
   let h=topBar()+tabBar()+alerts();
   if(U.tab==="feed")   h+=tabFeed();
-  else if(U.tab==="train")  h+=tabTrain(ex,boss,p);
+  else if(U.tab==="train")  h+=tabTrain(ex);
   else if(U.tab==="week")   h+=tabWeek();
-  else if(U.tab==="bosses") h+=tabBosses();
+  else if(U.tab==="chal")   h+=tabChal();
   else if(U.tab==="crew")   h+=tabCrew();
   else if(U.tab==="you")    h+=tabYou();
+  /* the receipt for a set belongs under whichever screen you logged it from */
+  if(U.flash && (U.tab==="train"||U.tab==="chal")) h+=flashCard(U.flash);
   const app=document.getElementById("app");
   /* only a genuine view change earns the entrance run - otherwise every tap on
      a stepper would replay the whole page */
@@ -1572,14 +1572,16 @@ function topBar(){
       `<button class="theme-pill ${U.theme===t.id?"active":""}" data-a="theme" data-v="${t.id}" title="${t.title}" aria-label="${t.title}">${t.label}</button>`).join("")}</div>
   </header>`;
 }
-/* streak and power are damage modifiers on the set you are about to log, so
-   they belong with the training screen rather than above the navigation */
+/* The three numbers that actually move: what you have collected, whether you
+   turned up, and how much has gone through your hands since the start. */
 function statStrip(){
+  const t0=dayNum(dayKey());
+  const wsets=(S.log||[]).reduce((a,r)=>a+(t0-dayNum(r.d)<7?r.sets:0),0);
   return `<div class="statstrip">
-    <div class="stat" style="--accent:var(--gold)">${ico("flame")}
-      <span class="sv"><b>${S.streak}d <i>×${flowMult(S.streak).toFixed(2)}</i></b><span class="k">streak</span></span></div>
-    <div class="stat" style="--accent:var(--green)">${ico("bolt")}
-      <span class="sv"><b>${S.power} <i>+${Math.min(S.power,60)}%</i></b><span class="k">power</span></span></div>
+    <div class="stat" style="--accent:var(--green)">${ico("flame")}
+      <span class="sv"><b>${S.streak}<i>d</i></b><span class="k">streak</span></span></div>
+    <div class="stat" style="--accent:var(--magenta)">${ico("bars")}
+      <span class="sv"><b>${wsets} <i>sets</i></b><span class="k">this week</span></span></div>
     <div class="stat" style="--accent:var(--cobalt)">${ico("weight")}
       <span class="sv"><b>${fmtK(S.totalTon)} <i>kg</i></b><span class="k">lifted</span></span></div>
   </div>`;
@@ -1592,7 +1594,7 @@ function tabBar(){
 function alerts(){
   let h="";
   if(S.away){const w=S.away;
-    h+=`<div class="banner warn">${ico("alert")}<div><b>Detrained — ${w.days} days off.</b> ${esc(bossAt(S.ci).name)} regained ${fmt(w.healed)} HP${w.revived.length?`, pushing you back onto ${esc(w.revived[w.revived.length-1])}`:""}. Log one set today to stop it.
+    h+=`<div class="banner warn">${ico("alert")}<div><b>${w.days} days off.</b> The ${w.streak}-day streak is gone. Nothing else moved — every record and every medal is exactly where you left it.
       <button class="ghost" data-a="dismissaway">got it</button></div></div>`;}
   if(STORE.mode==="memory")
     h+=`<div class="banner warn">${ico("alert")}<div>This browser is blocking storage. Progress will vanish when you close the tab — download a backup from YOU after every session.</div></div>`;
@@ -1602,14 +1604,62 @@ function alerts(){
 }
 
 /* ══════════════════ TAB · TRAIN ══════════════════ */
-function tabTrain(ex,boss,p){
-  /* ── today's three missions ── */
-  const done=S.daily.objs.filter(o=>o.done).length;
-  const missions=card({
+/* The first thing on the screen is the answer to "what am I doing today" —
+   the day, the slot your own rotation puts there, and the way to change it. */
+function todayCard(){
+  const dow=S.daily.dow, p=rotAt(dow), rest=!p.gs.length;
+  return `<section class="card today" style="--accent:${rest?"var(--dim)":gcol(p.gs[0])}">
+    <div class="tday">
+      <div style="min-width:0">
+        <div class="tdow">${DOWF[dow].toUpperCase()}</div>
+        <div class="tname">${esc(p.name)}</div>
+        <div class="tfocus">${rest?"Nothing scheduled. Take it."
+          :`focus on <b style="color:${gcol(p.gs[0])}">${esc(p.label)}</b>`}</div>
+      </div>
+      <button class="ghost" data-a="editrot">${U.editRot?"done":"customise"}</button>
+    </div>
+    <div class="rotstrip">${DOWL.map((d,i)=>{const q=rotAt(i);
+      return `<span class="rotpip ${i===dow?"on":""}" title="${esc(DOWF[i])} · ${esc(q.name)}">${d[0]}
+        <em style="background:${q.gs.length?gcol(q.gs[0]):"transparent"};border-color:${q.gs.length?"transparent":"var(--dim)"}"></em></span>`;}).join("")}</div>
+    ${U.editRot?rotEditor():""}
+  </section>`;
+}
+
+function rotEditor(){
+  const counts={}; GK.forEach(g=>counts[g]=rotList().filter(r=>((r&&r.gs)||[]).includes(g)).length);
+  return `<div class="expand${FX.expand?" reveal":""}">
+    <div class="mini" style="margin-bottom:12px">Name each day and tap the groups it trains. Leave a day with no groups and it becomes a rest day — no missions, and the week still counts as kept. Changing today re-rolls today's missions.</div>
+    ${DOWL.map((d,i)=>{const r=rotAt(i);
+      return `<div class="rotrow${r.gs.length?"":" rest"}">
+        <div class="rothead">
+          <span class="rotday">${esc(DOWF[i])}</span>
+          <input type="text" class="rotname" id="rot_${i}" value="${esc(r.name)}" maxlength="22" placeholder="Rest day">
+        </div>
+        <div class="rotgs">${GK.map(g=>`<button class="gtog${r.gs.includes(g)?" on":""}" data-a="rotg" data-i="${i}" data-g="${g}"
+          style="${r.gs.includes(g)?`background:${gcol(g)};color:var(--onGroup);border-color:transparent`:""}">${GROUPS[g].name}</button>`).join("")}</div>
+      </div>`;}).join("")}
+    <div class="mini" style="margin-top:14px">Twice a week per group is the shape worth aiming for — ${GK.map(g=>
+      `<b style="color:${counts[g]>=2?"var(--green)":counts[g]?"var(--gold)":"var(--red)"}">${GROUPS[g].name} ${counts[g]}×</b>`).join(" · ")}.</div>
+    <div class="chiprow" style="margin-top:13px">
+      <button class="ghost" data-a="rotreset">reset to the default week</button>
+      <button class="ghost" data-a="editrot">done</button>
+    </div></div>`;
+}
+
+function tabTrain(ex){
+  const dow=S.daily.dow, p=rotAt(dow), done=S.daily.objs.filter(o=>o.done).length;
+
+  /* ── today's missions, or the permission not to have any ── */
+  const missions = S.daily.rest ? card({
+    title:"Rest day", icon:"clock", k:"daily", accent:"var(--dim)",
+    sub:`${DOWF[dow]} · nothing on your rotation`,
+    help:`A day with no muscle groups on the rotation asks nothing of you. It counts as kept for the week and the streak survives it. Put groups on it under <b>customise</b> if you would rather train.`,
+    body:`<div class="empty">Nothing is asked of you today.<br><br>Train anyway if you feel like it — every set still moves your records and still counts as a run at the ten challenges.</div>`
+  }) : card({
     title:"Today's missions", icon:"target", k:"daily", accent:"var(--gold)",
     meta:`${done}/3`,
-    sub:`${DOWL[S.daily.dow]} · ${esc(p.name)} · ${esc(p.label)}`,
-    help:`Three missions refresh every day and follow the muscle groups on today's plan. Each one you finish pays a <b>bounty</b> straight into the boss's health bar. Tap a mission to see exactly which exercises count toward it.`,
+    sub:`${esc(p.name)} · ${esc(p.label)}`,
+    help:`Three missions refresh every day, drawn from the muscle groups your rotation puts on today. Clear all three for a <b>perfect day</b>; seven kept days is a perfect week. Tap a mission to see exactly which exercises count toward it.`,
     body:`<div class="list">${S.daily.objs.map((o,i)=>{
       const v=progressOf(o,S.daily.acc), open=U.openObj===i;
       return `<button class="objrow ${o.done?"done":""}" data-a="obj" data-i="${i}">
@@ -1617,39 +1667,11 @@ function tabTrain(ex,boss,p){
         <span class="objtxt">
           <span class="objlab">${esc(o.label)}</span>
           <span class="objbar">${bar(o.t==="pr"?(v?100:0):v/o.target*100,o.done?"var(--greenF)":gcol(p.gs[0]),5,FX.objFrom&&FX.objFrom[i])}</span>
-          <span class="lsub">${fmtProg(o,v)} · +${fmt(o.reward)} bounty · ${open?"hide":"what counts?"}</span>
+          <span class="lsub">${fmtProg(o,v)} · ${open?"hide":"what counts?"}</span>
         </span>
       </button>${open?qualList(objQualifiers(o,p,S.bw),OBJ_HINT[o.t]):""}`;
     }).join("")}</div>
-    <div class="mini" style="margin-top:12px">All three → <b>+${fmt(Math.round(S.daily.quota/2))}</b> perfect-day bonus.</div>
-`
-  });
-
-  /* ── the boss ── */
-  const out=weeklyOut(), eta=bossEta(), need=boss.hp, ok=out>=need;
-  const bossCard=card({
-    title:boss.name, big:true, icon:"skull", k:"boss", accent:"var(--cobalt)",
-    meta:`${S.ci+1}/100`,
-    sub:`${esc(boss.act)} · ${esc(boss.flavor)}`,
-    help:`Every boss has the same health for everyone — the roster is one fixed ladder, so boss 40 means the same thing to you as it does to anyone else on the board. Every kilo you move chips it down; mission bounties hit it too. Miss two days in a row and it starts healing.`,
-    body:`
-      <div class="mathrow"><span>hp remaining</span><span><b>${fmt(boss.hp-S.cd)}</b> / ${fmt(boss.hp)}</span></div>
-      <div style="margin-top:10px">${bar((boss.hp-S.cd)/boss.hp*100,"linear-gradient(90deg,var(--cobaltF),var(--cobalt))",10,FX.hpFrom)}</div>
-      <div class="kv" style="margin-top:12px">
-        <div class="kvi"><span class="k">asks</span><b>${fmtK(need)}</b><span class="k2">kg / week</span></div>
-        <div class="kvi"><span class="k">you make</span><b style="color:${ok?"var(--green)":"var(--gold)"}">${out?fmtK(out):"—"}</b><span class="k2">kg / week</span></div>
-        <div class="kvi"><span class="k">falls in</span><b style="color:${eta&&eta<=9?"var(--green)":"var(--gold)"}">${eta?eta+"d":"—"}</b><span class="k2">${eta?"at this rate":"log some sets"}</span></div>
-      </div>
-      <button class="gatechip" data-a="gate" style="margin-top:11px">
-        <span style="color:var(--dim)">${boss.gate?"full damage only from":"every set lands in full"}</span>
-        <b style="display:block;color:${boss.gate?"var(--magenta)":"var(--green)"}">${gateText(boss.gate)}</b>
-        <span style="color:var(--dim)">${U.openGate?"tap to hide":"tap to see what hits it"}</span></button>
-      ${U.openGate?qualList(gateQualifiers(boss.gate,S.bw),
-        boss.gate?(boss.gate.minReps?`Only sets of ${boss.gate.minReps}+ reps land in full. Anything shorter chips for 25%.`
-        :boss.gate.minLoad?`Each rep must carry ${boss.gate.minLoad}kg or more. Lighter sets chip for 25%.`
-        :boss.gate.time?"Only timed holds land in full. Holds can't move the tonnage a dynamic lift does, so this boss carries about a quarter of the usual HP."
-        :"Anything else chips for 25%.")
-        :"No restriction — every set lands in full."):""}`
+    <div class="mini" style="margin-top:12px">All three keeps the day — ${S.daily.perfect?`<b style="color:var(--green)">done</b>.`:`${3-done} to go.`}</div>`
   });
 
   /* ── the logger ── */
@@ -1661,7 +1683,7 @@ function tabTrain(ex,boss,p){
       <span><span class="tag kg">KG</span> you set the weight yourself</span>
       <span><span class="tag bw">BW</span> your bodyweight, scaled by leverage</span>
       <span><span class="side" style="color:var(--magenta);font-family:var(--m)">×2</span> log one side only — both get counted</span>
-      <span><span class="swatch"></span> gold outline — damages the current boss</span>
+      <span><span class="swatch"></span> gold outline — this lift carries a challenge</span>
       <span><span style="color:var(--gold);font-weight:700">●</span> on a muscle — something in it counts today</span></div>`,
     body:loggerBody(ex)
   });
@@ -1675,7 +1697,7 @@ function tabTrain(ex,boss,p){
       const e=byId(r.ex);
       return `<button class="li" data-a="jump" data-e="${r.ex}">
         <span class="ldot" style="background:${gcol(e.g)}"></span>
-        <span class="lmain"><span class="lname">${esc(e.n)}${medBadge(r.md)}${r.pr&&r.pr.length?`<span class="prbadge">PR</span>`:""}</span>
+        <span class="lmain"><span class="lname">${esc(e.n)}${r.att?`<span class="attbadge">ATTEMPT</span>`:""}${r.pr&&r.pr.length?`<span class="prbadge">PR</span>`:""}</span>
           <span class="lsub">${setDesc(r)} · ${r.prk}kg per rep</span></span>
         <span class="lval">${fmt(r.ton)}<span class="u">kg</span></span></button>`;}).join("")}</div>
       ${ts.length>8?`<div class="mini" style="margin-top:10px">+ ${ts.length-8} more — full log in WEEK.</div>`:""}`
@@ -1691,12 +1713,11 @@ function tabTrain(ex,boss,p){
   }):"";
 
   const rest=`<button id="restBtn" class="ghost wide" style="display:${U.rest>0?"block":"none"}" data-a="skiprest">rest</button>`;
-  return statStrip() + cols(missions+bossCard+crew, logger+logged) + rest + (U.flash?flashCard(U.flash):"");
+  return statStrip() + todayCard() + cols(missions+crew, logger+logged) + rest;
 }
 
 function loggerBody(ex){
   const cs=computeSet(ex,S.bw,U.sets,U.reps,U.load,sidesNow());
-  const gq=gateQualifiers(bossAt(S.ci).gate,S.bw);
   let list=EX.filter(e=>e.g===U.group);
   if(U.only) list=list.filter(countsNow);
   const each=U.sd==="each", opt=ex.s==="opt";
@@ -1721,7 +1742,7 @@ function loggerBody(ex){
     </div>
 
     <div class="exwrap" style="margin-top:10px">${
-      list.length?list.map(e=>`<button class="exchip ${U.ex===e.id?"on":""} ${gq.includes(e)?"hit":""}" data-a="ex" data-e="${e.id}">${esc(e.n)} ${exTag(e)}${sideMode(e)==="each"?`<span class="side">×2</span>`:""}</button>`).join("")
+      list.length?list.map(e=>`<button class="exchip ${U.ex===e.id?"on":""} ${CH_BY_EX[e.id]?"hit":""}" data-a="ex" data-e="${e.id}">${esc(e.n)} ${exTag(e)}${sideMode(e)==="each"?`<span class="side">×2</span>`:""}</button>`).join("")
       :`<div class="empty">Nothing in ${GROUPS[U.group].name} counts right now. Muscles with a ● do.</div>`}</div>
 
     <div class="steppers" style="margin-top:15px">
@@ -1752,50 +1773,57 @@ function loggerBody(ex){
     <div style="margin-top:10px">${status}</div>
     <div class="mini" style="margin-top:9px;color:var(--gold)">Next target · ${esc(nextTarget(ex))}</div>
 
-    ${(()=>{const t=setMedal(ex,cs.prk,U.reps,S.bw), gap=medalGap(ex,cs.prk,U.reps,S.bw,t);
-      return `<div class="mini" style="margin-top:14px">This set would take</div>
-      <div class="medalrow" style="margin-top:7px">${MEDALS.map((m,i)=>
-        `<span class="medal ${m.k} ${i<=t?"on":""} ${i===t?"now":""}">${medalImg(i)}</span>`).join("")}</div>
-      <div class="mini" style="margin-top:7px">${
-        t<0 ? `Not yet a medal — <b>${esc(gap||"a little more")}</b> takes Bronze.`
-        : t>=4 ? `<b>Champion.</b> There is nothing above this one.`
-        : `<b>${esc(gap||"")}</b> would take ${MEDALS[t+1].n}.`}</div>`;})()}
+    ${(()=>{const c=CH_BY_EX[ex.id]; if(!c) return "";
+      const i=CHALLENGES.indexOf(c)+1;
+      return `<div class="chalbox">
+        <div class="chalhead">
+          <span class="chalname">CHALLENGE ${pad(i)} · ${esc(c.name.toUpperCase())}</span>
+          <span class="mini">${chalVal(c.id)?`your record ${esc(chalFmt(c,chalVal(c.id)))}`:"never attempted"}</span>
+        </div>
+        <div class="mini" style="margin-top:7px">${esc(CH_KIND[c.kind].verb)}. Sets logged here are training and are not measured — the record only moves when you sit the test.</div>
+        <button class="ghost wide" data-a="goch" data-c="${c.id}" style="margin-top:10px">attempt it</button>
+      </div>`;})()}
 
     <button class="cta" data-a="log" style="margin-top:13px">LOG SET</button>`;
 }
 
 function flashCard(f){
+  const c=f.chId?chalOf(f.chId):null;
   return `<section class="card pop" style="--accent:var(--green);background:var(--panel2)">
     <div class="chead"><span class="cicon">${ico("bolt")}</span>
-      <h2 class="ctitle big" style="color:var(--green)">${fmt(f.ton)} KG MOVED</h2>
-      <div class="cmeta" style="color:var(--magenta);font-size:15px">−${fmt(f.applied)}</div></div>
+      <h2 class="ctitle big" style="color:var(--green)">${fmt(f.ton)} KG MOVED</h2></div>
     <div class="body">
-      <div class="mini" style="color:${f.pass?"var(--cream)":"var(--red)"}">→ ${fmt(f.dmg*(f.pass?1:.25))} damage to ${esc(f.boss)}${f.pass?"":" (gate missed — 25% chip)"}</div>
-      ${f.bounty?`<div class="mini" style="color:var(--gold);margin-top:4px">→ ${fmt(f.bounty)} mission bounty</div>`:""}
-      ${f.broke.length?`<div class="banner" style="margin-top:10px;font-family:var(--d);font-size:11.5px">NEW RECORD · ${esc(f.broke.join(", "))}</div>`:""}
+      ${f.chal?`<div class="banner ${f.chal.up?"pop":"info"}" style="margin-bottom:8px;align-items:center;gap:11px">
+          ${f.chal.tier>=0?medalImg(f.chal.tier,"fbig"):""}
+          <span style="font-family:var(--d);font-size:12.5px;line-height:1.5">
+            ${esc(f.chal.name.toUpperCase())} · ${esc(chalFmt(c,f.chal.v))}
+            <span style="display:block;font-family:var(--b);font-size:12px;opacity:.85">
+              ${f.chal.up?`${esc(MEDALS[f.chal.tier].n.toUpperCase())} MEDAL`
+                :`new record — was ${esc(chalFmt(c,f.chal.prev))}`}</span></span>
+        </div>`
+      :c?`<div class="mini" style="color:var(--dim)">${esc(chalFmt(c,f.run))} on ${esc(c.name)} — your record stands at ${esc(chalFmt(c,chalVal(c.id)))}.</div>`:""}
+      ${f.broke.length?`<div class="banner" style="margin-top:8px;font-family:var(--d);font-size:11.5px">NEW RECORD · ${esc(f.broke.join(", "))}</div>`:""}
       ${f.finished.map(t=>`<div class="banner info" style="margin-top:8px">✓ ${esc(t)}</div>`).join("")}
-      ${f.medal!=null?`<div class="banner info pop medal ${MEDALS[f.medal].k}" style="margin-top:8px;align-items:center;justify-content:center;gap:11px">${medalImg(f.medal,"fbig")}<span style="font-family:var(--d);font-size:13px;color:var(--mc)">${MEDALS[f.medal].n.toUpperCase()} MEDAL</span></div>`:""}
       ${f.perfect?`<div class="banner pop" style="margin-top:8px;background:var(--greenF);color:var(--onGreen);font-family:var(--d);font-size:12px">PERFECT DAY</div>`:""}
-      ${f.weekBonus?`<div class="banner pop" style="margin-top:8px;font-family:var(--d);font-size:12px">PERFECT WEEK · +2 POWER</div>`:""}
-      ${f.cleared.map(n=>`<div class="banner pop" style="margin-top:8px;background:var(--greenF);color:var(--onGreen);font-family:var(--d);font-size:12px">${esc(n.toUpperCase())} DOWN</div>`).join("")}
+      ${f.weekDone?`<div class="banner pop" style="margin-top:8px;font-family:var(--d);font-size:12px">PERFECT WEEK</div>`:""}
     </div></section>`;
 }
 
 /* ══════════════════ TAB · WEEK ══════════════════ */
 function tabWeek(){
   const wk=mondayOf(dayKey()), w=S.weeks[wk]||[0,0,0,0,0,0,0], rs=restStatus();
+  const kept=w.filter((v,i)=>v===2||isRest(i)).length;
 
   const weekCard=card({
     title:"This week", icon:"cal", k:"week", accent:"var(--gold)",
     meta:`${S.perfectWeeks} perfect`,
-    help:`Seven days, each muscle group trained exactly twice. One tick is a day you trained, two is a day you cleared all three missions. All seven doubled is a <b>Perfect Week</b>: triple bounty and +2 permanent Power.<br><br>The medal under a day is the best one you took that day.`,
+    help:`Seven days of your own rotation. One tick is a day you trained, two is a day you cleared all three missions, and a rest day you scheduled yourself counts as kept without either. All seven kept is a <b>perfect week</b>.`,
     body:`<div class="week">${DOWL.map((d,i)=>{
-      const dk=(()=>{const dt=toDate(wk); dt.setDate(dt.getDate()+i); return dayKey(dt);})();
-      const md=S.medals[dk];
-      return `<div class="wday ${w[i]===2?"f":w[i]===1?"p":""} ${i===S.daily.dow?"today":""}">${d}<br>${w[i]===2?"✓✓":w[i]===1?"✓":"·"}`
-        + (md>=0&&md!=null?medalImg(md,"mpic"):"")
-        + `</div>`;}).join("")}</div>
-      <div class="mini" style="margin-top:12px;color:${rs.t==="decay"?"var(--red)":rs.t==="ok"?"var(--green)":"var(--dim)"}">${esc(rs.msg)}</div>`
+      const r=isRest(i);
+      return `<div class="wday ${r?"r":w[i]===2?"f":w[i]===1?"p":""} ${i===S.daily.dow?"today":""}" title="${esc(rotAt(i).name)}">${d}<br>${
+        r?"rest":w[i]===2?"✓✓":w[i]===1?"✓":"·"}</div>`;}).join("")}</div>
+      <div class="mini" style="margin-top:12px">${kept}/7 kept · today is <b>${esc(rotAt(S.daily.dow).name)}</b>.</div>
+      <div class="mini" style="margin-top:6px;color:${rs.t==="decay"?"var(--red)":rs.t==="ok"?"var(--green)":"var(--dim)"}">${esc(rs.msg)}</div>`
   });
 
   const ws={}; GK.forEach(g=>ws[g]=0);
@@ -1823,7 +1851,7 @@ function tabWeek(){
         <div class="list">${cut.map(r=>{const e=byId(r.ex);
           return `<button class="li" data-a="jump" data-e="${r.ex}">
             <span class="ldot" style="background:${gcol(e.g)}"></span>
-            <span class="lmain"><span class="lname">${esc(e.n)}${medBadge(r.md)}${r.pr&&r.pr.length?`<span class="prbadge">PR</span>`:""}</span>
+            <span class="lmain"><span class="lname">${esc(e.n)}${r.att?`<span class="attbadge">ATTEMPT</span>`:""}${r.pr&&r.pr.length?`<span class="prbadge">PR</span>`:""}</span>
               <span class="lsub">${setDesc(r)} · ${r.prk}kg per rep</span></span>
             <span class="lval">${fmt(r.ton)}<span class="u">kg</span></span></button>`;}).join("")}</div>
         ${rows.length>cut.length?`<div class="mini" style="margin-top:8px">+ ${rows.length-cut.length} more that day</div>`:""}`;
@@ -1834,48 +1862,138 @@ function tabWeek(){
 
   const rotCard=card({
     title:"The rotation", icon:"flag", k:"rot", accent:"var(--cobalt)",
-    help:`Mission difficulty steps up every second week — rep targets, hold times, distinct-exercise counts and the load bar all climb. The volume quota tracks your own rolling 21-day median, so it stays hard as you get stronger without ever asking for a boss-sized session.`,
-    body:`<div class="list">${PLAN.map((pl,i)=>`<div class="li">
-      <span class="ldot" style="background:${gcol(pl.gs[0])}"></span>
-      <span class="lmain"><span class="lname">${DOWL[i]} · ${esc(pl.name)}</span>
-        <span class="lsub">${pl.gs.map(g=>GROUPS[g].name).join(" · ")}</span></span>
-      ${i===S.daily.dow?`<span class="lval" style="color:var(--gold);font-size:10.5px">TODAY</span>`:""}</div>`).join("")}</div>`
+    meta:`<button class="ghost" data-a="editrot" style="padding:4px 9px">${U.editRot?"done":"edit"}</button>`,
+    help:`The muscle groups each day of the week is meant to hit. Today's three missions are drawn from it, so it decides what the app asks of you. Edit it freely — the default is only a starting shape, and a day with nothing on it is a rest day.`,
+    body:U.editRot?rotEditor():`<div class="list">${DOWL.map((d,i)=>{const r=rotAt(i), rest=!r.gs.length;
+      return `<div class="li">
+        <span class="ldot" style="background:${rest?"var(--line)":gcol(r.gs[0])}"></span>
+        <span class="lmain"><span class="lname">${esc(DOWF[i])} · ${esc(r.name)}</span>
+          <span class="lsub">${rest?"rest day — nothing asked":esc(r.gs.map(g=>GROUPS[g].name).join(" · "))}</span></span>
+        ${i===S.daily.dow?`<span class="lval" style="color:var(--gold);font-size:10.5px">TODAY</span>`:""}</div>`;}).join("")}</div>`
   });
 
-  const decayCard=card({
-    title:"Detraining", icon:"clock", k:"decay", accent:"var(--red)",
-    meta:`floor: boss ${Math.floor(S.ci/10)*10+1}`,
-    help:`Beaten bosses revive when the current one heals past full — but never past the first boss of the act you're in. A week away costs about a week of work.`,
+  const offCard=card({
+    title:"Time off", icon:"clock", k:"off", accent:"var(--dim)",
+    meta:S.lastDay?agoText(S.lastDay):"never",
+    help:`Nothing you have earned decays. Records stand, medals stay cut, and the ten challenges never claw a number back. A long gap costs you the streak and the week's ticks — and quietly moves lifts onto the going-stale list in YOU.`,
     body:`<div class="kv">
-      <div class="kvi"><span class="k">day 1 off</span><b style="color:var(--green)">free</b><span class="k2">nothing moves</span></div>
-      <div class="kvi"><span class="k">day 2+</span><b style="color:var(--red)">3–10%</b><span class="k2">healed per day</span></div>
-      <div class="kvi"><span class="k">furthest</span><b>${(S.peak||S.ci)+1}</b><span class="k2">boss reached</span></div>
-    </div>`
+      <div class="kvi"><span class="k">last set</span><b>${S.lastDay?agoText(S.lastDay):"—"}</b><span class="k2">${(S.log||[]).length} logged</span></div>
+      <div class="kvi"><span class="k">streak</span><b style="color:${S.streak?"var(--green)":"var(--dim)"}">${S.streak}d</b><span class="k2">${S.streak?"running":"cold"}</span></div>
+      <div class="kvi"><span class="k">records</span><b>${S.power}</b><span class="k2">broken, all time</span></div>
+    </div>
+    <div class="mini" style="margin-top:13px">${esc(rs.msg)}</div>`
   });
 
-  return cols(weekCard+volCard, logCard+rotCard+decayCard);
+  return cols(weekCard+volCard, logCard+rotCard+offCard);
 }
 
-/* ══════════════════ TAB · BOSSES ══════════════════ */
-function tabBosses(){
-  let rows="";
-  ROSTER.forEach((b,i)=>{
-    if(i%10===0) rows+=`<div class="acthead">${ACT_NAMES[i/10]}</div>`;
-    const done=i<S.ci, cur=i===S.ci, hp=bossAt(i).hp;
-    rows+=`<div class="brow ${done?"done":""} ${cur?"cur":""}">
-      <span class="bnum">${pad(i+1)}</span>
-      <span class="lmain"><span class="bname">${esc(b[0].toUpperCase())}</span>
-        <span class="lsub" style="color:${b[1]?"var(--magenta)":"var(--dim)"}">${gateText(b[1])}</span>
-        ${cur?`<span style="display:block;margin-top:8px">${bar(S.cd/hp*100,"var(--cobaltF)",5)}</span>
-          <span class="lsub" style="color:var(--cream)">${esc(b[2])}</span>`:""}</span>
-      <span class="lval" style="font-size:11px;color:var(--dim)">${fmtK(hp)}<span class="u">hp</span></span>
-    </div>`;
+/* ══════════════════ TAB · CHALLENGES ══════════════════
+   The competitive half of the app. Ten tests, everyone's record on each, and
+   the one button that puts a number on the board. */
+function attemptBox(c){
+  const isLoad=c.kind==="load", ex=chalEx(c), pb=chalVal(c.id);
+  const val=isLoad?Math.round(U.attV*2)/2:Math.round(U.attV);
+  const reps=Math.max(1,Math.round(isLoad?U.attR:U.attV));
+  const legal=!isLoad||reps>=8;
+  const t=legal&&val>0?chalMedal(c,isLoad?val:reps):-1;
+  const beats=(isLoad?val:reps)>pb;
+  return `<div class="attbox">
+    <div class="chalhead"><span class="chalname">SIT THE TEST</span>
+      <span class="mini">one set, all out</span></div>
+    <div class="steppers" style="margin-top:11px">
+      ${stepper(isLoad?"kg per rep":CH_KIND[c.kind].unit,"attV",isLoad?1:c.kind==="hold"?5:1,isLoad?0:1)}
+      ${isLoad?stepper("reps (8+)","attR",1,8):""}
+    </div>
+    <div class="mini" style="margin-top:10px">${legal
+      ? `Worth <b style="color:${t>=0?"var(--gold)":"var(--cream)"}">${t>=0?esc(MEDALS[t].n):"no medal"}</b>${
+          beats?` · <b style="color:var(--green)">beats your ${pb?esc(chalFmt(c,pb)):"blank record"}</b>`
+               :pb?` · your record is ${esc(chalFmt(c,pb))}`:""}`
+      : `<span style="color:var(--magenta)">Eight reps or more, or it is not this test.</span>`}</div>
+    <button class="cta" data-a="attempt" data-c="${c.id}" style="margin-top:11px">SUBMIT ATTEMPT</button>
+    <div class="mini" style="margin-top:8px">It goes into your log as one set of ${esc(ex.n)}, so it counts toward today like anything else.</div>
+  </div>`;
+}
+
+function chalDetail(c){
+  const rows=chalBoard(c), r=chalRec(c.id), e=chalEx(c), t=chalTier(c.id), mine=MP.me&&MP.me.id;
+  return `<div class="expand${FX.expand?" reveal":""}">
+    <div class="mini" style="color:var(--cream)">${esc(c.rule)}</div>
+    <div class="mini" style="margin-top:9px">Scored on <b>${esc(CH_KIND[c.kind].unit)}</b> · logged as <b>${esc(e.n)}</b>${
+      r?` · ${r.n} attempt${r.n===1?"":"s"}, record set ${esc(agoText(r.d))}`:" · never attempted"}</div>
+    <div class="medalrow" style="margin-top:12px">${MEDALS.map((m,i)=>
+      `<span class="medal ${m.k} ${i<=t?"on":""} ${i===t?"now":""}">${medalImg(i)}<b>${chalFmt(c,chalCut(c,i))}</b></span>`).join("")}</div>
+    <div class="mini" style="margin-top:8px">Passing a cut takes your total on this challenge to <b>${CUM_PTS.join("</b>, then <b>")}</b> — kept for good once taken. Position pays a further <b>${RANK_PTS.join(" · ")}</b> down the podium and 1 to everyone else, once at least two people have run it.</div>
+    ${attemptBox(c)}
+    <div class="mini" style="margin-top:15px">The board</div>
+    ${rows.length?`<div style="margin-top:6px">${rows.map((pl,i)=>{
+        const v=pl.chal[c.id].v, pt=chalMedal(c,v), me=pl.id===mine;
+        return `<div class="lrow ${me?"me":""}">
+          <div class="rk ${i<3?"g"+(i+1):""}">${i+1}</div>
+          <div class="lmain"><div class="pname">${esc(pl.name)}${me?`<span class="youtag">YOU</span>`:""}</div>
+            <div class="lsub">${pt>=0?esc(MEDALS[pt].n):"no medal"}${rankPts(i+1,rows.length)?` · +${rankPts(i+1,rows.length)} rank`:""}</div></div>
+          <div class="pbig">${esc(chalFmt(c,v))}${pt>=0?medalImg(pt,"mbimg"):""}</div>
+        </div>`;}).join("")}</div>`
+      :`<div class="empty">Nobody has sat this one yet. Be the first name on it.</div>`}
+  </div>`;
+}
+
+function chalRow(c,i){
+  const v=chalVal(c.id), t=chalMedal(c,v), open=U.openChal===c.id, e=chalEx(c);
+  const to=t<4?chalCut(c,t+1):null, from=t>=0?chalCut(c,t):0;
+  const pct=to?Math.max(0,Math.min(100,(v-from)/Math.max(1,to-from)*100)):100;
+  const board=chalBoard(c), lead=board[0], mine=MP.me&&MP.me.id;
+  const pos=board.findIndex(r=>r.id===mine)+1;
+  return `<div class="crow${t>=0?" med":""}${open?" open":""}">
+    <button class="chit" data-a="chal" data-c="${c.id}">
+      <span class="cnum">${pad(i+1)}</span>
+      <span class="lmain">
+        <span class="cname">${esc(c.name.toUpperCase())}</span>
+        <span class="lsub">${esc(e.n)} · ${esc(CH_KIND[c.kind].verb.toLowerCase())}</span>
+        <span class="cbar">${bar(pct,t>=0?"linear-gradient(90deg,var(--goldF),var(--gold))":gcol(e.g),5)}</span>
+        <span class="lsub">${v?`you <b style="color:var(--cream)">${esc(chalFmt(c,v))}</b>${board.length>1&&pos?` · #${pos} of ${board.length}`:""}`
+          :`<span style="color:var(--magenta)">never attempted</span>`}${
+          to?` · ${esc(chalFmt(c,to))} for ${MEDALS[t+1].n}`:` · <b style="color:var(--gold)">maxed</b>`}</span>
+        <span class="lsub">${!lead?"nobody has run it yet"
+          : lead.id===mine?`<b style="color:var(--gold)">you hold it</b>${board.length>1?` from ${esc(board[1].name)}`:", unopposed"}`
+          : `best <b>${esc(lead.name)}</b> ${esc(chalFmt(c,lead.chal[c.id].v))}`}</span>
+      </span>
+      <span class="cmed">${t>=0?medalImg(t,"crm"):`<span class="nomed">—</span>`}<span class="cpts">${t>=0?"+"+CUM_PTS[t]:"—"}</span></span>
+    </button>
+    ${open?chalDetail(c):""}
+  </div>`;
+}
+
+function tabChal(){
+  const me=myStanding(), board=standings(), mine=MP.me&&MP.me.id;
+  const pos=board.findIndex(r=>r.id===mine)+1;
+
+  const head=card({
+    title:"Score", big:true, icon:"medal", k:"score", accent:"var(--gold)",
+    meta:`${me.score} pts`,
+    sub:`${me.mpts} from medals · ${me.rpts} from position${pos?` · ranked #${pos} of ${board.length}`:""}`,
+    help:`Two things add up to a score. <b>Medals</b>: every cut you pass is worth points and is yours for good — Bronze 1, Silver +2, Gold +3, Author +5, Champion +8, so a Champion holds all five and pays 19 on that challenge alone. <b>Position</b>: each challenge pays again for where you stand on its board, ${RANK_PTS.join(", ")} down the podium and 1 below that — but only once two or more people have run it, because being alone on a board is not a win. First place is deliberately worth less than a Gold: being strong beats being early. The medals stop at Champion. The positions never do: after the last cut the only thing left to take is somebody else's place.`,
+    body:`<div class="medalrow">${MEDALS.map((m,i)=>
+        `<span class="medal ${m.k} ${me.med[i]?"on":""}">${medalImg(i)}<b>${me.med[i]}</b></span>`).join("")}</div>
+      <div class="mini" style="margin-top:9px">${me.ran} of ${CHALLENGES.length} challenges attempted. A medal counts every cut under it, the way a Champion holds the four below.</div>
+      <div class="mini" style="margin-top:16px">The board</div>
+      <div style="margin-top:6px">${board.length?board.map((pl,i)=>`<div class="lrow ${pl.id===mine?"me":""}">
+          <div class="rk ${i<3?"g"+(i+1):""}">${i+1}</div>
+          ${ava(pl.pic, pl.name, pl.id===mine?"me":"")}
+          <div class="lmain"><div class="pname">${esc(pl.name)}${pl.id===mine?`<span class="youtag">YOU</span>`:""}</div>
+            <div class="lsub">${pl.mpts} medal · ${pl.rpts} rank · ${pl.ran}/${CHALLENGES.length} run</div></div>
+          <div class="pbig">${pl.score}<span>points</span></div>
+        </div>`).join("")
+        :`<div class="empty">Nobody on the board yet.</div>`}</div>`
   });
-  return card({
-    title:"The campaign", icon:"skull", k:"camp", accent:"var(--cobalt)", meta:`${S.ci}/100 down`,
-    help:`One hundred named bosses across ten acts, the same health for every player. The line under a name says what it takes full damage from, and the demand climbs about 2.5% a boss early and under 1% by the end. After the hundredth they keep generating — 12% harder each time.`,
-    body:`<div class="roster">${rows}</div>`
+
+  const list=card({
+    title:"The ten", icon:"flag", k:"ten", accent:"var(--cobalt)",
+    meta:`${me.ran}/${CHALLENGES.length}`,
+    help:`Every one is uncapped — no time limit, no rep cap, nothing that stops at a target — and every one is a single all-out set, which is why a normal 3×20 does not count as one. Tap a challenge to read its rules, see everyone's record, and sit the test.`,
+    body:`<div class="roster">${CHALLENGES.map(chalRow).join("")}</div>`
   });
+
+  return cols(head, list);
 }
 
 /* ══════════════════ TAB · FEED ══════════════════ */
@@ -1890,7 +2008,7 @@ function tabFeed(){
   });
 
   /* a roster rather than a ranking - who is here and when they last lifted */
-  const all=Object.values(MP.board).slice().sort((a,b)=>{
+  const all=standings().slice().sort((a,b)=>{
     const la=a.lastDay?dayNum(a.lastDay):-9e9, lb=b.lastDay?dayNum(b.lastDay):-9e9;
     return lb-la || (b.ton|0)-(a.ton|0);
   });
@@ -1903,7 +2021,7 @@ function tabFeed(){
         ${ava(pl.id===mine?S.pic:pl.pic, pl.name, pl.id===mine?"me":"")}
         <span class="lmain"><span class="lname">${esc(pl.name)}${pl.id===mine?`<span class="rolebadge">you</span>`:
             (myCrew&&pl.crew===myCrew?`<span class="rolebadge">crew</span>`:"")}</span>
-          <span class="lsub">boss ${(pl.ci|0)+1} · ${kgs(pl.ton||0)} · ${pl.streak|0}d streak</span></span>
+          <span class="lsub">${pl.score|0} pts · ${kgs(pl.ton||0)} · ${pl.streak|0}d streak</span></span>
         <span class="lval" style="font-size:11px;color:var(--dim)">${pl.lastDay?agoText(pl.lastDay):"never"}</span>
       </div>`).join("")}</div>`
       :`<div class="empty">Nobody on the board yet. Share the link and it fills itself.</div>`
@@ -1923,7 +2041,8 @@ const newCrewCode=name=>{
 };
 /* your own card, so you show up in the crew before the first sync lands */
 const selfRow=()=>({id:(MP.me&&MP.me.id)||"me",name:(MP.me&&MP.me.name)||"you",
-  pwr:S.power|0,ci:S.ci|0,ton:Math.round(S.totalTon||0),streak:S.streak|0,
+  pwr:S.power|0,chal:S.chal||{},pic:S.pic||null,
+  ton:Math.round(S.totalTon||0),streak:S.streak|0,
   prs:(S.prLog||[]).length,lastDay:S.lastDay,
   crew:crewId(),crewName:S.crew&&S.crew.name,crewOwner:!!S.crewOwner,crewBans:S.crewBans||[]});
 
@@ -1936,8 +2055,7 @@ function crewBansOf(rows){
 }
 function crewRows(){
   const id=crewId(); if(!id) return [];
-  const rows=Object.values(MP.board).filter(p=>p.crew===id);
-  if(!rows.some(p=>MP.me&&p.id===MP.me.id)) rows.push(selfRow());
+  const rows=standings().filter(p=>p.crew===id);
   const bans=crewBansOf(rows);
   /* you always see yourself, even once you have been removed */
   return rows.filter(p=>!bans.includes(p.id)||(MP.me&&p.id===MP.me.id))
@@ -1963,7 +2081,7 @@ function crewCard(){
   });
 
   const ci=crewInfo(), rows=ci.rows, mine=MP.me&&MP.me.id;
-  const ton=rows.reduce((a,p)=>a+(p.ton|0),0), bosses=rows.reduce((a,p)=>a+(p.ci|0),0);
+  const ton=rows.reduce((a,p)=>a+(p.ton|0),0), pts=rows.reduce((a,p)=>a+(p.score|0),0);
   const best=rows.reduce((a,p)=>Math.max(a,p.streak|0),0);
   return card({
     title:ci.name, icon:"users", k:"crew", accent:"var(--magenta)",
@@ -1973,7 +2091,7 @@ function crewCard(){
       ${ci.removed?`<div class="banner warn" style="margin-bottom:12px">${ico("alert")}<div>You were removed from this crew. Leave to pick another.</div></div>`:""}
       <div class="kv">
         <div class="kvi"><span class="k">together</span><b>${fmtK(ton)}</b><span class="k2">kg moved</span></div>
-        <div class="kvi"><span class="k">bosses</span><b>${bosses}</b><span class="k2">down</span></div>
+        <div class="kvi"><span class="k">score</span><b>${pts}</b><span class="k2">points, together</span></div>
         <div class="kvi"><span class="k">best streak</span><b>${best}d</b><span class="k2">in the crew</span></div>
       </div>
 
@@ -1982,7 +2100,7 @@ function crewCard(){
       <div class="list" style="margin-top:14px">${rows.map(p=>`<div class="li">
         ${ava(p.id===mine?S.pic:p.pic, p.name, p.id===mine?"me":"")}
         <span class="lmain"><span class="lname">${esc(p.name)}${p.crewOwner?`<span class="rolebadge own">owner</span>`:""}${p.id===mine?`<span class="rolebadge">you</span>`:""}</span>
-          <span class="lsub">boss ${(p.ci|0)+1} · ${kgs(p.ton||0)} · ${p.streak|0}d · ${p.lastDay?agoText(p.lastDay):"never"}</span></span>
+          <span class="lsub">${p.score|0} pts · ${kgs(p.ton||0)} · ${p.streak|0}d · ${p.lastDay?agoText(p.lastDay):"never"}</span></span>
         ${S.crewOwner&&p.id!==mine?`<button class="xbtn" data-a="crewkick" data-i="${esc(p.id)}" title="Remove ${esc(p.name)}" aria-label="Remove ${esc(p.name)}">×</button>`:""}
       </div>`).join("")}</div>
 
@@ -2001,11 +2119,11 @@ function crewCard(){
 
 /* ══════════════════ TAB · CREW ══════════════════ */
 function tabCrew(){
-  const METRICS=[{k:"pwr",l:"power"},{k:"ci",l:"bosses"},{k:"ton",l:"kg moved"},{k:"streak",l:"streak"},{k:"prs",l:"records"}];
+  const METRICS=[{k:"score",l:"score"},{k:"ton",l:"kg moved"},{k:"streak",l:"streak"},{k:"prs",l:"records"}];
   const m=METRICS.find(x=>x.k===U.metric)||METRICS[0];
   const inCrew=!!crewId();
   const scope=(inCrew&&U.scope==="crew")?"crew":"all";
-  const pool=scope==="crew"?crewRows():Object.values(MP.board);
+  const pool=scope==="crew"?crewRows():standings();
   const rows=pool.slice().sort((a,b)=>(b[m.k]||0)-(a[m.k]||0));
   const myRank=rows.findIndex(r=>MP.me&&r.id===MP.me.id)+1;
 
@@ -2026,7 +2144,7 @@ function tabCrew(){
           <div class="rk ${i<3?"g"+(i+1):""}">${i+1}</div>
           <div class="lmain">
             <div class="pname">${esc(r.name)}${mine?`<span class="youtag">YOU</span>`:""}</div>
-            <div class="lsub">boss ${(r.ci|0)+1} · ${kgs(r.ton||0)} · ${r.streak|0}d streak · ${r.lastDay?agoText(r.lastDay):"never"}</div>
+            <div class="lsub">${r.score|0} pts · ${kgs(r.ton||0)} · ${r.streak|0}d streak · ${r.lastDay?agoText(r.lastDay):"never"}</div>
           </div>
           <div class="pbig">${fmtK(r[m.k]||0)}<span>${m.l}</span></div>
         </div>`;}).join("")
@@ -2064,14 +2182,14 @@ function tabCrew(){
 
 /* ══════════════════ TAB · YOU ══════════════════ */
 function tabYou(){
-  const c=medalCounts(), best=c.reduce((a,n,i)=>n?i:a,-1);
+  const c=medalTally(), best=c.reduce((a,n,i)=>n?i:a,-1);
   const profile=card({
     title:"Profile", icon:"trophy", k:"profile", accent:"var(--gold)",
     body:`<div class="profrow">
         <span class="bigav ${S.pic?"set":""}">${S.pic?`<img src="${S.pic}" alt="Your profile picture">`:esc(initial((MP.me&&MP.me.name)||"?"))}</span>
         <div style="min-width:0">
           <div class="disp" style="font-size:21px;overflow:hidden;text-overflow:ellipsis">${esc((MP.me&&MP.me.name)||"guest")}</div>
-          <div class="mini" style="margin-top:5px">Boss ${S.ci+1} of 100${best>=0?` · best medal <b>${MEDALS[best].n}</b>`:""}</div>
+          <div class="mini" style="margin-top:5px">${myStanding().score} points${best>=0?` · best <b>${MEDALS[best].n}</b>`:""}</div>
           <div class="chiprow" style="margin-top:10px">
             <button class="ghost" data-a="pic">${S.pic?"change photo":"upload photo"}</button>
             ${S.pic?`<button class="ghost" data-a="picdel">remove</button>`:""}
@@ -2084,7 +2202,7 @@ function tabYou(){
   const recs=card({
     title:"Your records", icon:"trophy", k:"recs", accent:"var(--gold)",
     meta:`${S.power} broken`,
-    help:`Four records per exercise — heaviest rep, most reps, biggest single set and estimated 1RM. Beating any one is <b>+1 Power</b>, a permanent damage bonus capped at +60%.`,
+    help:`Four records per exercise — heaviest rep, most reps, biggest single set and estimated 1RM. These sit under everything: the ten challenges read from them, and the house records on CREW are built out of them.`,
     body:recEntries.length?`<div class="list">${recEntries.map(([id,r])=>{
       const e=byId(id), cold=daysAgo(r.last)>=21;
       return `<button class="li" data-a="jump" data-e="${id}">
@@ -2098,7 +2216,7 @@ function tabYou(){
   const st=staleRecords();
   const stale=st.length?card({
     title:"Going stale", icon:"clock", k:"stale", accent:"var(--magenta)", meta:`${st.length} lift${st.length===1?"":"s"}`,
-    help:`No record broken on these in three weeks or more. Pick one off — every PR is +1 Power, permanently.`,
+    help:`No record broken on these in three weeks or more. Pick one off — nothing you have earned ever expires, but a lift you stop touching stops moving.`,
     body:`<div class="list">${st.slice(0,6).map(s=>`<button class="li" data-a="jump" data-e="${s.id}">
       <span class="ldot" style="background:${gcol(byId(s.id).g)}"></span>
       <span class="lmain"><span class="lname">${esc(byId(s.id).n)}</span></span>
@@ -2119,19 +2237,19 @@ function tabYou(){
     body:`<div class="kv">
         <div class="kvi"><span class="k">moved</span><b>${fmtK(S.totalTon)}</b><span class="k2">kg</span></div>
         <div class="kvi"><span class="k">sets</span><b>${S.log.length}</b><span class="k2">logged</span></div>
-        <div class="kvi"><span class="k">bosses</span><b>${S.ci}</b><span class="k2">down</span></div>
-        <div class="kvi"><span class="k">streak</span><b>${S.streak}d</b><span class="k2">×${flowMult(S.streak).toFixed(2)} flow</span></div>
-        <div class="kvi"><span class="k">power</span><b>${S.power}</b><span class="k2">+${Math.min(S.power,60)}% damage</span></div>
+        <div class="kvi"><span class="k">score</span><b>${myStanding().score}</b><span class="k2">points</span></div>
+        <div class="kvi"><span class="k">streak</span><b>${S.streak}d</b><span class="k2">${S.streak?"running":"cold"}</span></div>
+        <div class="kvi"><span class="k">records</span><b>${S.power}</b><span class="k2">broken</span></div>
         <div class="kvi"><span class="k">perfect</span><b>${S.perfectWeeks}</b><span class="k2">weeks</span></div>
       </div>
-      <div class="mini" style="margin-top:14px">Medals taken</div>
-      <div class="medalrow" style="margin-top:7px">${(()=>{const c=medalCounts();
+      <div class="mini" style="margin-top:14px">Medals held</div>
+      <div class="medalrow" style="margin-top:7px">${(()=>{const c=medalTally();
         return MEDALS.map((m,i)=>`<span class="medal ${m.k} ${c[i]?"on":""}">${medalImg(i)}<b>${c[i]}</b></span>`).join("");})()}</div>
       <div style="display:flex;align-items:center;gap:11px;margin-top:14px">
         <span class="mini" style="flex:none">bodyweight</span>
         <input type="text" inputmode="decimal" id="bwIn" value="${S.bw}" style="width:82px;text-align:center">
         <span class="mini">kg</span></div>
-      <div class="mini" style="margin-top:13px">Medal standards calibrated for</div>
+      <div class="mini" style="margin-top:13px">Challenge cuts calibrated for</div>
       <div class="seg" style="margin-top:7px">
         <button class="${stdScale()===1?"on":""}" data-a="std" data-v="1">a male lifter</button>
         <button class="${stdScale()!==1?"on":""}" data-a="std" data-v="0.73">a female lifter</button>
@@ -2170,28 +2288,35 @@ function tabYou(){
 
 /* ══════════════════ POST-RENDER WIRING ══════════════════ */
 function wireInputs(){
-  ["sets","reps","load"].forEach(f=>{
+  ["sets","reps","load","attV","attR"].forEach(f=>{
     const el=document.getElementById("st_"+f); if(!el) return;
     const commit=()=>{
       let v=parseFloat(String(el.value).replace(",","."));
       if(!isFinite(v)) v=U[f];
-      U[f]=Math.max(f==="load"?0:1, Math.round(v*10)/10);
+      U[f]=Math.max(f==="load"||f==="attV"?0:1, Math.round(v*10)/10);
       render();
     };
     el.addEventListener("change",commit);
     el.addEventListener("focus",()=>el.select());
     el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); el.blur(); } });
   });
+  document.querySelectorAll(".rotname").forEach(el=>{
+    const i=Number(el.id.slice(4));
+    el.addEventListener("change",()=>{
+      if(!S.rot) S.rot=normRot(DEFAULT_ROT);
+      S.rot[i].name=String(el.value||"").trim().slice(0,22)||DEFAULT_ROT[i].name;
+      persist(); publish(); render();
+    });
+    el.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); el.blur(); } });
+  });
   const bwIn=document.getElementById("bwIn");
   if(bwIn) bwIn.addEventListener("change",e=>{ S.bw=Number(String(e.target.value).replace(/[^0-9.]/g,""))||75; persist(); render(); });
 }
 
+/* the ● on a muscle chip: something in it still moves an unfinished mission.
+   Challenges are marked separately, by the gold outline on the chip itself. */
 function countsNow(e){
-  /* an ungated boss takes everything, which would mark every muscle - only
-     a real gate narrows the field */
-  const gt=bossAt(S.ci).gate;
-  if(gt && gateQualifiers(gt,S.bw).includes(e)) return true;
-  const p=PLAN[S.daily.dow];
+  const p=rotAt(S.daily.dow);
   return S.daily.objs.some(o=>!o.done && objQualifiers(o,p,S.bw).includes(e));
 }
 function nextTarget(ex){
@@ -2214,13 +2339,27 @@ document.getElementById("app").addEventListener("click",e=>{
     pickEx(first.id); render(); }
   else if(a==="ex"){ pickEx(b.dataset.e); render(); }
   else if(a==="obj"){ const i=Number(b.dataset.i); U.openObj = U.openObj===i?null:i; U.fx={expand:true}; render(); }
-  else if(a==="gate"){ U.openGate=!U.openGate; U.fx={expand:true}; render(); }
+  else if(a==="chal"){ openChal(U.openChal===b.dataset.c?null:b.dataset.c); U.fx={expand:true}; render(); }
+  else if(a==="goch"){ U.tab="chal"; openChal(b.dataset.c); U.flash=null; render(); window.scrollTo(0,0); }
+  else if(a==="attempt") submitAttempt(b.dataset.c);
+  else if(a==="editrot"){ U.editRot=!U.editRot; U.fx={expand:true}; render(); }
+  else if(a==="rotg"){
+    const i=Number(b.dataset.i), g=b.dataset.g;
+    if(!S.rot) S.rot=normRot(DEFAULT_ROT);
+    const day=S.rot[i], at=day.gs.indexOf(g);
+    if(at>=0) day.gs.splice(at,1); else if(day.gs.length<4) day.gs.push(g);
+    rollDaily(); persist(); publish(); render();
+  }
+  else if(a==="rotreset"){
+    if(!confirm("Put every day back to the default week? Your training and medals are untouched.")) return;
+    S.rot=null; rollDaily(); persist(); publish(); render();
+  }
   else if(a==="only"){ U.only=!U.only; render(); }
   else if(a==="logmore"){ U.logDays=(U.logDays||5)+10; render(); }
   else if(a==="server"){ U.openServer=!U.openServer; render(); }
   else if(a==="side"){ U.sd=b.dataset.v;
     S.last[U.ex]=Object.assign({sets:U.sets,reps:U.reps,load:U.load},S.last[U.ex],{sd:U.sd}); persist(); render(); }
-  else if(a==="jump"){ const e=byId(b.dataset.e); U.group=e.g; pickEx(e.id); U.openObj=null; U.openGate=false;
+  else if(a==="jump"){ const e=byId(b.dataset.e); U.group=e.g; pickEx(e.id); U.openObj=null;
     U.tab="train"; render(); document.querySelector(".exwrap")?.scrollIntoView({behavior:"smooth",block:"center"}); }
   else if(a==="inc"||a==="dec"){
     const f=b.dataset.f, s=Number(b.dataset.s), min=Number(b.dataset.min||0);
@@ -2287,6 +2426,15 @@ document.getElementById("app").addEventListener("click",e=>{
     S=migrate(null); rollDaily(); persist(); U.tab="train"; render(); } }
 });
 
+/* opening a challenge loads the steppers with the number you would have to
+   beat, so the first tap is already aimed at your own record */
+function openChal(id){
+  U.openChal=id; if(!id) return;
+  const c=chalOf(id), pb=chalVal(id);
+  if(c.kind==="load"){ U.attV=pb||10; U.attR=8; }
+  else U.attV=pb||(c.kind==="hold"?30:10);
+}
+
 function pickEx(id){
   U.ex=id; const l=S.last[id], e=byId(id);
   if(l){ U.sets=l.sets; U.reps=l.reps; U.load=l.load; }
@@ -2306,7 +2454,7 @@ function renderLogin(err,busy,keepName){
   document.getElementById("app").innerHTML=`<div class="login">
     <div style="text-align:center">
       <div class="disp" style="font-size:36px">LIFTMANIA</div>
-      <div class="mini" style="margin-top:6px">100 bosses · one crew · one board</div>
+      <div class="mini" style="margin-top:6px">ten challenges · one crew · one board</div>
       <div class="themebox" style="display:inline-flex;margin-top:14px">${THEMES.map(t=>`<button class="theme-pill ${U.theme===t.id?"active":""}" data-l="theme" data-v="${t.id}" title="${t.title}" aria-label="${t.title}">${t.label}</button>`).join("")}</div>
     </div>
     <section class="card">
@@ -2498,7 +2646,7 @@ async function startSession(){
   if(parsed && (parsed.app==="liftmania"||parsed.app==="iron-run") && parsed.save) parsed=parsed.save;
   S=migrate(parsed);
   const away=applyDecay();
-  if(away && (away.healed>0||away.revived.length)) S.away=away;
+  if(away) S.away=away;
   rollDaily(); pickEx(U.ex); await persist();
   render();
   if(cloudOn()){ await cloudPull(); await refreshBoard(); rollDaily(); render(); }
