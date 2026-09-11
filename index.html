@@ -566,6 +566,11 @@ const GROUPS = {
   triceps:{name:"Triceps",c:"#3FCFEE",l:"#0B6980"}, legs:{name:"Legs",c:"#FF6FB2",l:"#B01B5E"},
   core:{name:"Core",c:"#BB9BFF",l:"#6234B8"}
 };
+/* Pages caches the file for ten minutes and browsers hold it longer, so
+   "am I looking at the new one?" needs an answer you can read off the screen
+   instead of guessing. Bump this with any change worth noticing. */
+const BUILD="2026-09-11 · rest timer";
+
 const GK = Object.keys(GROUPS);
 const gcol = g => U.theme==="night" ? GROUPS[g].c : GROUPS[g].l;
 
@@ -2405,7 +2410,8 @@ function tabYou(){
         <div class="mini" style="margin-top:9px">Last backup: ${S.lastExport?new Date(S.lastExport).toLocaleDateString():"never"}</div></div>`
         :`<div class="chiprow" style="margin-top:10px">
           <button class="ghost" data-a="export" style="opacity:.7">download a backup file</button></div>`}
-      <div style="margin-top:14px"><button class="ghost" data-a="wipe" style="color:var(--red)">wipe all progress</button></div>`
+      <div style="margin-top:14px"><button class="ghost" data-a="wipe" style="color:var(--red)">wipe all progress</button></div>
+      <div class="mini" style="margin-top:14px;color:var(--dim)">Build <b>${esc(BUILD)}</b>. If that looks old, the page is cached — reopen it with <b>?v=2</b> on the end of the address.</div>`
   });
 
   return cols(profile+recs+stale+prlog, life+acct);
