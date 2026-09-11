@@ -908,6 +908,40 @@ const fmtProg=(o,v)=> o.t==="pr" ? (v?"done":"not yet")
   : o.t==="hold" ? v+"/"+o.target+"s"
   : o.t==="top_load" ? v+"/"+o.target+"kg" : v+"/"+o.target;
 
+/* ══════════════════ FORM ══════════════════
+   The training measure, and deliberately not the same shape as the challenge
+   one. Records are permanent, so the challenge board is all-time: whoever is
+   strongest wins it and that is correct. Measuring training the same way would
+   just rank people by how long ago they signed up — total kilos only ever goes
+   up, so the earliest player would hold first place forever and nobody new
+   could ever take it.
+
+   So Form is a rolling 28 days and nothing older counts. Turning up is worth
+   the most, finishing the day you were given is worth more than the volume in
+   it, and the sets are the tiebreaker. It resets itself, which means it is
+   always winnable this month by whoever actually trains this month. */
+const FORM_WIN=28;
+const FORM_D=10, FORM_P=5;
+function trainStats(){
+  const t0=dayNum(dayKey()), days={};
+  let ton=0, sets=0;
+  (S.log||[]).forEach(r=>{ const age=t0-dayNum(r.d);
+    if(age<0||age>=FORM_WIN) return;
+    ton+=r.ton||0; sets+=r.sets||0; days[r.d]=1; });
+  let pd=0;
+  Object.keys(S.weeks||{}).forEach(wk=>{
+    const arr=S.weeks[wk];
+    if(!Array.isArray(arr)) return;            /* the ":paid" flags are booleans */
+    arr.forEach((v,i)=>{ if(v!==2) return;
+      const age=t0-(dayNum(wk)+i);
+      if(age>=0&&age<FORM_WIN) pd++; });
+  });
+  return {d:Object.keys(days).length, pd, st:sets, tn:Math.round(ton)};
+}
+const EMPTY_TR={d:0,pd:0,st:0,tn:0};
+/* days you turned up, days you finished, sets you did */
+const formOf=tr=>!tr?0:(tr.d|0)*FORM_D+(tr.pd|0)*FORM_P+(tr.st|0);
+
 /* ══════════════════ STORAGE ══════════════════ */
 let KEY="liftmania:save";
 const LEGACY=["ironrun:save","ironrun:v2","ironrun:v1"];
@@ -996,7 +1030,7 @@ function statsCard(){
     if(r&&(r.e1rm>0||r.reps>0)) lifts[id]={e:Math.round(r.e1rm||0),l:Math.round((r.load||0)*10)/10,r:r.reps||0}; });
   const recent=(S.log||[]).slice(0,8).map(r=>({t:r.t||dayNum(r.d)*864e5+432e5,ex:r.ex,sets:r.sets,
     reps:r.reps,load:r.load,sd:r.sd,ton:Math.round(r.ton||0),pr:r.pr||null,md:r.md==null?-1:r.md}));
-  return {name:MP.me.name,pwr:S.power|0,mp:myStanding().score,chal:S.chal||{},
+  return {name:MP.me.name,pwr:S.power|0,mp:myStanding().score,chal:S.chal||{},tr:trainStats(),
           streak:S.streak|0,ton:Math.round(S.totalTon||0),
           prs:(S.prLog||[]).length,pw:S.perfectWeeks|0,sets:(S.log||[]).length,lastDay:S.lastDay,lifts,recent,
           crew:S.crew?S.crew.id:null, crewName:S.crew?S.crew.name:null,
@@ -1078,7 +1112,7 @@ function migrate(o){
 /* ══════════════════ STATE ══════════════════ */
 let S=null;
 const U={tab:"train",group:"chest",ex:"pushup",sets:3,reps:10,load:10,flash:null,rest:0,restT:null,
-  metric:"score",rgroup:"all",theme:"night",help:{},logDays:5,openServer:false,openObj:null,
+  metric:"form",rgroup:"all",theme:"night",help:{},logDays:5,openServer:false,openObj:null,
   openChal:null,attV:20,attR:8,editRot:false,scope:"all"};
 
 function applyTheme(){
@@ -1495,7 +1529,7 @@ const todaySets=()=>{const k=dayKey();return (S.log||[]).filter(r=>r.d===k);};
 function liveRows(pool){
   const mine=MP.me&&MP.me.id;
   const rows=(pool||Object.values(MP.board)).map(pl=>pl.id!==mine?pl:Object.assign({},pl,{
-    chal:S.chal||{}, pwr:S.power|0, ton:Math.round(S.totalTon||0), streak:S.streak|0,
+    chal:S.chal||{}, tr:trainStats(), pwr:S.power|0, ton:Math.round(S.totalTon||0), streak:S.streak|0,
     prs:(S.prLog||[]).length, lastDay:S.lastDay, pic:S.pic||null}));
   if(mine && !rows.some(r=>r.id===mine)) rows.push(selfRow());
   return rows;
@@ -1526,13 +1560,20 @@ function standings(pool){
     runs.forEach((r,i)=>{ r.rank[c.id]=i+1; r.field=runs.length;
                           r.rpts+=rankPts(i+1,runs.length); });
   });
-  rows.forEach(r=>{ r.score=r.mpts+r.rpts; r.mp=r.score; });
+  rows.forEach(r=>{
+    r.score=r.mpts+r.rpts; r.mp=r.score;
+    /* a player who has not opened a build that publishes it counts as zero
+       rather than breaking the column */
+    r.tr=r.tr&&typeof r.tr==="object"?r.tr:EMPTY_TR;
+    r.form=formOf(r.tr);
+  });
   return rows.sort((a,b)=>b.score-a.score || (b.mpts|0)-(a.mpts|0));
 }
 const myStanding=()=>{
   const mine=MP.me&&MP.me.id;
   return standings().find(r=>r.id===mine)
-    || {score:medalPoints(),mpts:medalPoints(),rpts:0,med:medalTally(),rank:{},ran:0};
+    || {score:medalPoints(),mpts:medalPoints(),rpts:0,med:medalTally(),rank:{},ran:0,
+        tr:trainStats(),form:formOf(trainStats())};
 };
 /* one challenge's board, best first */
 function chalBoard(c){
@@ -1972,21 +2013,21 @@ function tabChal(){
   const pos=board.findIndex(r=>r.id===mine)+1;
 
   const head=card({
-    title:"Score", big:true, icon:"medal", k:"score", accent:"var(--gold)",
+    title:"Challenge board", big:true, icon:"medal", k:"score", accent:"var(--gold)",
     meta:`${me.score} pts`,
-    sub:`${me.mpts} from medals · ${me.rpts} from position`,
-    help:`Two things add up to a score. <b>Medals</b>: every cut you pass is worth points and is yours for good — Bronze 1, Silver +2, Gold +3, Author +5, Champion +8, so a Champion holds all five and pays 19 on that challenge alone. <b>Position</b>: each challenge pays again for where you stand on its board, ${RANK_PTS.join(", ")} down the podium and 1 below that — but only once two or more people have run it, because being alone on a board is not a win. First place is deliberately worth less than a Gold: being strong beats being early. The medals stop at Champion. The positions never do: after the last cut the only thing left to take is somebody else's place.`,
+    sub:`all time · you have ${me.score} points, ${me.mpts} from medals and ${me.rpts} from position`,
+    help:`Strength, all time — what everyone can actually do. Two things add up to a score. <b>Medals</b>: every cut you pass is worth points and is yours for good — Bronze 1, Silver +2, Gold +3, Author +5, Champion +8, so a Champion holds all five and pays 19 on that challenge alone. <b>Position</b>: each challenge pays again for where you stand on its board, ${RANK_PTS.join(", ")} down the podium and 1 below that — but only once two or more people have run it, because being alone on a board is not a win. First place is deliberately worth less than a Gold: being strong beats being early. The medals stop at Champion. The positions never do: after the last cut the only thing left to take is somebody else's place.<br><br>This board barely moves, because a record is permanent. The one that moves week to week — who is turning up — is the training board on CREW.`,
     body:`<div class="medalrow">${MEDALS.map((m,i)=>
         `<span class="medal ${m.k} ${me.med[i]?"on":""}">${medalImg(i)}<b>${me.med[i]}</b></span>`).join("")}</div>
-      <div class="mini" style="margin-top:16px">The board</div>
-      <div style="margin-top:6px">${board.length?board.map((pl,i)=>`<div class="lrow ${pl.id===mine?"me":""}">
+      <div style="margin-top:16px">${board.length?board.map((pl,i)=>`<div class="lrow ${pl.id===mine?"me":""}">
           <div class="rk ${i<3?"g"+(i+1):""}">${i+1}</div>
           ${ava(pl.pic, pl.name, pl.id===mine?"me":"")}
           <div class="lmain"><div class="pname">${esc(pl.name)}${pl.id===mine?`<span class="youtag">YOU</span>`:""}</div>
             <div class="lsub">${pl.ran}/${CHALLENGES.length} challenges</div></div>
           <div class="pbig">${pl.score}<span>points</span></div>
         </div>`).join("")
-        :`<div class="empty">Nobody on the board yet.</div>`}</div>`
+        :`<div class="empty">Nobody on the board yet.</div>`}</div>
+      <button class="ghost wide" data-a="tab" data-t="crew" style="margin-top:12px">who is training most is on CREW</button>`
   });
 
   const list=card({
@@ -2044,7 +2085,7 @@ const newCrewCode=name=>{
 };
 /* your own card, so you show up in the crew before the first sync lands */
 const selfRow=()=>({id:(MP.me&&MP.me.id)||"me",name:(MP.me&&MP.me.name)||"you",
-  pwr:S.power|0,chal:S.chal||{},pic:S.pic||null,
+  pwr:S.power|0,chal:S.chal||{},pic:S.pic||null,tr:trainStats(),
   ton:Math.round(S.totalTon||0),streak:S.streak|0,
   prs:(S.prLog||[]).length,lastDay:S.lastDay,
   crew:crewId(),crewName:S.crew&&S.crew.name,crewOwner:!!S.crewOwner,crewBans:S.crewBans||[]});
@@ -2085,6 +2126,7 @@ function crewCard(){
 
   const ci=crewInfo(), rows=ci.rows, mine=MP.me&&MP.me.id;
   const ton=rows.reduce((a,p)=>a+(p.ton|0),0), pts=rows.reduce((a,p)=>a+(p.score|0),0);
+  const form=rows.reduce((a,p)=>a+(p.form|0),0);
   const best=rows.reduce((a,p)=>Math.max(a,p.streak|0),0);
   return card({
     title:ci.name, icon:"users", k:"crew", accent:"var(--magenta)",
@@ -2094,7 +2136,8 @@ function crewCard(){
       ${ci.removed?`<div class="banner warn" style="margin-bottom:12px">${ico("alert")}<div>You were removed from this crew. Leave to pick another.</div></div>`:""}
       <div class="kv">
         <div class="kvi"><span class="k">together</span><b>${fmtK(ton)}</b><span class="k2">kg moved</span></div>
-        <div class="kvi"><span class="k">score</span><b>${pts}</b><span class="k2">points, together</span></div>
+        <div class="kvi"><span class="k">score</span><b>${pts}</b><span class="k2">challenge points</span></div>
+        <div class="kvi"><span class="k">form</span><b>${form}</b><span class="k2">last ${FORM_WIN} days</span></div>
         <div class="kvi"><span class="k">best streak</span><b>${best}d</b><span class="k2">in the crew</span></div>
       </div>
 
@@ -2122,20 +2165,26 @@ function crewCard(){
 
 /* ══════════════════ TAB · CREW ══════════════════ */
 function tabCrew(){
-  const METRICS=[{k:"score",l:"score"},{k:"ton",l:"kg moved"},{k:"streak",l:"streak"},{k:"prs",l:"records"}];
+  /* Form first, because that is what this board is for; the rest are the
+     ingredients and the two lifetime totals, in case you want to sort by one. */
+  const METRICS=[{k:"form",l:"form",u:"form"},{k:"trd",l:"days",u:"days"},
+                 {k:"trst",l:"sets",u:"sets"},{k:"trtn",l:"kg (28d)",u:"kg"},
+                 {k:"streak",l:"streak",u:"days"},{k:"ton",l:"kg all time",u:"kg"}];
   const m=METRICS.find(x=>x.k===U.metric)||METRICS[0];
   const inCrew=!!crewId();
   const scope=(inCrew&&U.scope==="crew")?"crew":"all";
-  const pool=scope==="crew"?crewRows():standings();
+  const pool=(scope==="crew"?crewRows():standings()).map(r=>Object.assign({},r,{
+    trd:r.tr.d|0, trst:r.tr.st|0, trtn:r.tr.tn|0}));
   const rows=pool.slice().sort((a,b)=>(b[m.k]||0)-(a[m.k]||0));
   const myRank=rows.findIndex(r=>MP.me&&r.id===MP.me.id)+1;
 
   const board=card({
-    title:"The board", icon:"trophy", k:"board", accent:"var(--gold)",
+    title:"Training board", big:true, icon:"flame", k:"board", accent:"var(--green)",
     meta:`<button class="ghost" data-a="sync" style="padding:4px 9px">${MP.loading?"syncing…":"refresh"}</button>`,
-    sub:MP.status==="live"?`<span style="color:var(--green)">synced ${MP.synced?new Date(MP.synced).toLocaleTimeString():"just now"}</span>`
+    sub:`last ${FORM_WIN} days · ${MP.status==="live"?`<span style="color:var(--green)">synced ${MP.synced?new Date(MP.synced).toLocaleTimeString():"just now"}</span>`
        :MP.status==="error"?`<span style="color:var(--red)">sync failed — ${esc(MP.err)}</span>`
-       :`offline — connect a server in YOU`,
+       :`offline — connect a server in YOU`}`,
+    help:`Who is actually training, over the last ${FORM_WIN} days only — nothing older counts toward it. <b>Form</b> is ${FORM_D} per day you trained, ${FORM_P} more for each day you cleared all three missions, and 1 per hard set.<br><br>It is a rolling window on purpose. Lifetime kilos only ever climb, so ranking on that would just rank everybody by who signed up first and nobody new could ever take the top. This one resets under you, so it is winnable every month by whoever turns up.<br><br>How <i>strong</i> everyone is, rather than how much they turn up, is the board on CHALLENGES.`,
     body:`${inCrew?`<div class="seg" style="margin-bottom:11px">
         <button class="${scope==="all"?"on":""}" data-a="scope" data-v="all">everyone</button>
         <button class="${scope==="crew"?"on":""}" data-a="scope" data-v="crew">my crew</button></div>`:""}
@@ -2145,14 +2194,16 @@ function tabCrew(){
         const mine=MP.me&&r.id===MP.me.id;
         return `<div class="lrow ${mine?"me":""}">
           <div class="rk ${i<3?"g"+(i+1):""}">${i+1}</div>
+          ${ava(r.pic, r.name, mine?"me":"")}
           <div class="lmain">
             <div class="pname">${esc(r.name)}${mine?`<span class="youtag">YOU</span>`:""}</div>
-            <div class="lsub">${r.score|0} pts · ${kgs(r.ton||0)} · ${r.streak|0}d streak · ${r.lastDay?agoText(r.lastDay):"never"}</div>
+            <div class="lsub">${r.trd|0} day${(r.trd|0)===1?"":"s"} · ${r.tr.pd|0} perfect · ${r.trst|0} set${(r.trst|0)===1?"":"s"} · ${kgs(r.trtn||0)}</div>
           </div>
-          <div class="pbig">${fmtK(r[m.k]||0)}<span>${m.l}</span></div>
+          <div class="pbig">${fmtK(r[m.k]||0)}<span>${m.u}</span></div>
         </div>`;}).join("")
         :`<div class="empty">Nobody has logged a set yet. Send your friends this link, have them pick a name, and the board fills itself.</div>`}</div>
-      ${myRank?`<div class="mini" style="margin-top:13px">You rank <b>#${myRank}</b> of ${rows.length} on ${m.l}.</div>`:""}`
+      ${myRank?`<div class="mini" style="margin-top:13px">You rank <b>#${myRank}</b> of ${rows.length} on ${m.l}.</div>`:""}
+      <button class="ghost wide" data-a="tab" data-t="chal" style="margin-top:12px">strength rankings are on CHALLENGES</button>`
   });
 
   const house=card({
@@ -2240,7 +2291,8 @@ function tabYou(){
     body:`<div class="kv">
         <div class="kvi"><span class="k">moved</span><b>${fmtK(S.totalTon)}</b><span class="k2">kg</span></div>
         <div class="kvi"><span class="k">sets</span><b>${S.log.length}</b><span class="k2">logged</span></div>
-        <div class="kvi"><span class="k">score</span><b>${myStanding().score}</b><span class="k2">points</span></div>
+        <div class="kvi"><span class="k">score</span><b>${myStanding().score}</b><span class="k2">challenge points</span></div>
+        <div class="kvi"><span class="k">form</span><b>${myStanding().form}</b><span class="k2">last ${FORM_WIN} days</span></div>
         <div class="kvi"><span class="k">streak</span><b>${S.streak}d</b><span class="k2">${S.streak?"running":"cold"}</span></div>
         <div class="kvi"><span class="k">records</span><b>${S.power}</b><span class="k2">broken</span></div>
         <div class="kvi"><span class="k">perfect</span><b>${S.perfectWeeks}</b><span class="k2">weeks</span></div>
