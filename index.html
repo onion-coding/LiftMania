@@ -297,8 +297,12 @@ h2{margin:0}
 .formpic{display:block;width:100%;max-width:320px;margin:0 auto;border-radius:11px;background:#fff}
 .formcue{margin-top:10px;font-size:13px;line-height:1.5;color:var(--cream)}
 .exchip.on.hit{box-shadow:0 0 0 2px var(--goldF)}
-.tag{font-family:var(--m);font-size:10px;font-weight:500;letter-spacing:.07em;padding:3px 5px;
-  border-radius:5px;background:var(--panel2);color:var(--dim);flex:none;line-height:1.1}
+.tag{display:inline-flex;align-items:center;justify-content:center;padding:3px;
+  border-radius:6px;background:var(--panel2);color:var(--dim);flex:none;vertical-align:-4px}
+.tag .ic{width:14px;height:14px;display:block}
+.side .ic{width:15px;height:15px;display:block}
+.objbox .ic{width:14px;height:14px}
+.lsub .ic{width:13px;height:13px;vertical-align:-2px;margin-right:1px;opacity:.85}
 .tag.hold{background:var(--holdBg);color:var(--holdFg)}
 .tag.kg{background:var(--kgBg);color:var(--kgFg)}
 .tag.bw{background:var(--bwBg);color:var(--bwFg)}
@@ -581,7 +585,7 @@ const GROUPS = {
 /* Pages caches the file for ten minutes and browsers hold it longer, so
    "am I looking at the new one?" needs an answer you can read off the screen
    instead of guessing. Bump this with any change worth noticing. */
-const BUILD="2026-09-11 · form help";
+const BUILD="2026-09-11 · icons";
 
 const GK = Object.keys(GROUPS);
 const gcol = g => U.theme==="night" ? GROUPS[g].c : GROUPS[g].l;
@@ -753,10 +757,10 @@ const stdScale=()=>(S&&S.stdScale)||1;
    S.stdScale (YOU › calibrated for) shifts all five cuts together for a
    lifter the standards were not written around. */
 const CH_KIND={
-  reps:{verb:"most reps in one set", unit:"reps",     short:""},
-  side:{verb:"most reps per side",   unit:"reps",     short:"/side"},
-  hold:{verb:"longest hold",         unit:"seconds",  short:"s"},
-  load:{verb:"heaviest set of 8+",   unit:"kg",       short:"kg"}
+  reps:{verb:"most reps in one set", unit:"reps",    short:"",      ico:"reps"},
+  side:{verb:"most reps per side",   unit:"reps",    short:"/side", ico:"side"},
+  hold:{verb:"longest hold",         unit:"seconds", short:"s",     ico:"hold"},
+  load:{verb:"heaviest set of 8+",   unit:"kg",      short:"kg",    ico:"load"}
 };
 const CHALLENGES=[
   {id:"c_push",  ex:"pushup", kind:"reps", name:"The Floor",
@@ -861,7 +865,14 @@ function chalGap(c,v,t){
 /* the five cuts as a single readable line */
 const cutLine=c=>MEDALS.map((m,i)=>`${m.n[0]} ${chalFmt(c,chalCut(c,i))}`).join("  ·  ");
 
-const MODE_TAG={time:["hold","HOLD"],load:["kg","KG"],bwload:["kg","BW+KG"],bw:["bw","BW"]};
+/* class, icon, and the words the icon replaces — kept for the title so the
+   meaning is still one hover or one screen-reader away */
+const MODE_TAG={
+  time:  ["hold","hold","timed hold, logged in seconds"],
+  load:  ["kg","dumbbell","you set the weight"],
+  bwload:["kg","dumbbell","your bodyweight plus added weight"],
+  bw:    ["bw","bw","your own bodyweight"]
+};
 
 /* ══════════════════ THE ROTATION ══════════════════
    Which muscles you are meant to be on, day by day. The default hits every
@@ -992,6 +1003,9 @@ function objQualifiers(o,plan,bw){
     default: return [];
   }
 }
+/* what each objective is actually asking of you, at a glance */
+const OBJ_ICON={quota:"load",set_reps:"reps",total_reps:"reps",distinct:"layers",
+                hold:"hold",top_load:"load",pr:"up",sets:"repeat"};
 const OBJ_HINT={
   quota:"Total kilos moved in today's muscle groups. Sets × reps × the weight on each rep.",
   set_reps:"One single set has to reach this rep count. Holds don't count.",
@@ -1555,7 +1569,7 @@ const bar=(pct,color,h,from)=>{
   return `<div class="track" style="height:${h||6}px"><div class="fill${anim?" animw":""}" `
     + `style="width:${clamp(pct)}%;background:${color}${anim?`;--from:${clamp(from)}%`:""}"></div></div>`;
 };
-const exTag=e=>{const[c,t]=MODE_TAG[e.mode];return `<span class="tag ${c}">${t}</span>`;};
+const exTag=e=>{const[c,i,t]=MODE_TAG[e.mode];return `<span class="tag ${c}" title="${t}">${ico(i)}</span>`;};
 const hasEx=id=>EX.some(e=>e.id===id);
 const initial=n=>(String(n||"?").trim()[0]||"?").toUpperCase();
 
@@ -1576,7 +1590,19 @@ const kgs=n=>Math.abs(n)>=10000?fmtK(n)+" kg":fmt(n)+"kg";
 
 /* ══════════════════ ICONS ══════════════════
    One line-drawing per section so a screen is recognisable before a word of
-   it is read. 24×24, stroked in the section's accent colour. */
+   it is read. 24×24, stroked in the section's accent colour.
+
+   The lower group is pulled from Iconify (lucide, ISC) at build time and
+   stripped to bare path data — ico() supplies fill, stroke, width and caps,
+   so any presentation attribute of their own would only fight it. Inlined
+   rather than hotlinked: a photo that fails to load is a gap, an icon that
+   fails to load is a hole in the interface, and these are a few hundred
+   bytes each.
+
+   Every one of them was rasterised and looked at around 20px before being
+   chosen. Anatomical muscle icons were tried first and rejected there: at the
+   size a chip actually uses they turn to mush, which is why the muscle groups
+   keep their names and their colours. */
 const ICONS={
   target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/>',
   dumbbell:'<path d="M3.5 10v4M6.5 8v8M17.5 8v8M20.5 10v4M6.5 12h11"/>',
@@ -1594,6 +1620,14 @@ const ICONS={
   flag:'<path d="M6 21.2V3.4"/><path d="M6 4.4h11.6l-2.1 3.6 2.1 3.6H6Z"/>',
   alert:'<path d="M12 3.6 21 19.4H3Z"/><path d="M12 9.6v4.2"/><circle cx="12" cy="16.6" r="1.1" fill="currentColor" stroke="none"/>',
   clock:'<circle cx="12" cy="12" r="8.4"/><path d="M12 7.2V12l3.2 2.1"/>',
+  bw:'<circle cx="12" cy="5" r="1"/><path d="m9 20l3-6l3 6M6 8l6 2l6-2m-6 2v4"/>',   /* lucide:person-standing */
+  hold:'<path d="M10 2h4m-2 12l3-3"/><circle cx="12" cy="14" r="8"/>',   /* lucide:timer */
+  side:'<path d="m18 8l4 4l-4 4M2 12h20M6 8l-4 4l4 4"/>',   /* lucide:move-horizontal */
+  reps:'<path d="M4 9h16M4 15h16M10 3L8 21m8-18l-2 18"/>',   /* lucide:hash */
+  load:'<circle cx="12" cy="5" r="3"/><path d="M6.5 8a2 2 0 0 0-1.905 1.46L2.1 18.5A2 2 0 0 0 4 21h16a2 2 0 0 0 1.925-2.54L19.4 9.5A2 2 0 0 0 17.48 8Z"/>',   /* lucide:weight */
+  repeat:'<path d="m17 2l4 4l-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4l4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',   /* lucide:repeat */
+  layers:'<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/>',   /* lucide:layers */
+  up:'<path d="M16 7h6v6"/><path d="m22 7l-8.5 8.5l-5-5L2 17"/>',   /* lucide:trending-up */
   medal:'<circle cx="12" cy="15.2" r="5.6"/><path d="M9.4 10.2 6.4 3.4M14.6 10.2l3-6.8M8.6 3.4h6.8"/><path d="m12 12.9.8 1.7 1.8.3-1.3 1.3.3 1.8-1.6-.9-1.6.9.3-1.8-1.3-1.3 1.8-.3Z" fill="currentColor" stroke="none"/>',
   news:'<path d="M3.6 5.8h12.8v13.4H5.6a2 2 0 0 1-2-2Z"/><path d="M16.4 9.4H20.4v7.8a2 2 0 0 1-2 2h-2Z"/><path d="M6.6 9.2h6.8M6.6 12.4h6.8M6.6 15.6h4.4"/>'
 };
@@ -1878,7 +1912,7 @@ function tabTrain(ex){
     body:`<div class="list">${S.daily.objs.map((o,i)=>{
       const v=progressOf(o,S.daily.acc), open=U.openObj===i;
       return `<button class="objrow ${o.done?"done":""}" data-a="obj" data-i="${i}">
-        <span class="objbox${o.done&&(FX.popObj||[]).includes(i)?" justdone":""}">${o.done?"✓":i+1}</span>
+        <span class="objbox${o.done&&(FX.popObj||[]).includes(i)?" justdone":""}">${o.done?"✓":ico(OBJ_ICON[o.t]||"target")}</span>
         <span class="objtxt">
           <span class="objlab">${esc(o.label)}</span>
           <span class="objbar">${bar(o.t==="pr"?(v?100:0):v/o.target*100,o.done?"var(--greenF)":gcol(p.gs[0]),5,FX.objFrom&&FX.objFrom[i])}</span>
@@ -1894,12 +1928,13 @@ function tabTrain(ex){
     title:"Log a set", icon:"dumbbell", k:"logger", accent:"var(--green)",
     meta:esc(GROUPS[U.group].name),
     help:`<div class="legend">
-      <span><span class="tag hold">HOLD</span> timed — you log seconds, not reps</span>
-      <span><span class="tag kg">KG</span> you set the weight yourself</span>
-      <span><span class="tag bw">BW</span> your bodyweight, scaled by leverage</span>
-      <span><span class="side" style="color:var(--magenta);font-family:var(--m)">×2</span> log one side only — both get counted</span>
+      <span><span class="tag hold">${ico("hold")}</span> timed — you log seconds, not reps</span>
+      <span><span class="tag kg">${ico("dumbbell")}</span> you set the weight yourself</span>
+      <span><span class="tag bw">${ico("bw")}</span> your bodyweight, scaled by leverage</span>
+      <span><span class="side">${ico("side")}</span> log one side only — both get counted</span>
       <span><span class="swatch"></span> gold outline — this lift carries a challenge</span>
-      <span><span style="color:var(--gold);font-weight:700">●</span> on a muscle — something in it counts today</span></div>`,
+      <span><span style="color:var(--gold);font-weight:700">●</span> on a muscle — something in it counts today</span>
+      <span><span class="exq" style="width:auto;padding:0 6px;border-radius:7px">?</span> how the lift is done</span></div>`,
     body:loggerBody(ex)
   });
 
@@ -1957,7 +1992,7 @@ function loggerBody(ex){
     </div>
 
     <div class="exwrap" style="margin-top:10px">${
-      list.length?list.map(e=>`<span class="exwrapchip"><button class="exchip ${U.ex===e.id?"on":""} ${CH_BY_EX[e.id]?"hit":""}" data-a="ex" data-e="${e.id}">${esc(e.n)} ${exTag(e)}${sideMode(e)==="each"?`<span class="side">×2</span>`:""}</button><button class="exq${U.form===e.id?" on":""}" data-a="form" data-e="${e.id}" title="How is it done?" aria-label="How ${esc(e.n)} is done">?</button></span>`).join("")
+      list.length?list.map(e=>`<span class="exwrapchip"><button class="exchip ${U.ex===e.id?"on":""} ${CH_BY_EX[e.id]?"hit":""}" data-a="ex" data-e="${e.id}">${esc(e.n)} ${exTag(e)}${sideMode(e)==="each"?`<span class="side" title="logged one side at a time, both counted">${ico("side")}</span>`:""}</button><button class="exq${U.form===e.id?" on":""}" data-a="form" data-e="${e.id}" title="How is it done?" aria-label="How ${esc(e.n)} is done">?</button></span>`).join("")
       :`<div class="empty">Nothing in ${GROUPS[U.group].name} counts right now. Muscles with a ● do.</div>`}</div>
     ${U.form?formCard(U.form):""}
 
@@ -2187,7 +2222,7 @@ function chalRow(c,i){
       <span class="cnum">${pad(i+1)}</span>
       <span class="lmain">
         <span class="cname">${esc(c.name.toUpperCase())}</span>
-        <span class="lsub">${esc(e.n)} · ${esc(CH_KIND[c.kind].verb)}</span>
+        <span class="lsub">${ico(CH_KIND[c.kind].ico)} ${esc(e.n)} · ${esc(CH_KIND[c.kind].verb)}</span>
         <span class="cbar">${bar(pct,t>=0?"linear-gradient(90deg,var(--goldF),var(--gold))":gcol(e.g),5)}</span>
         <span class="lsub">${v?`<b style="color:var(--cream)">${esc(chalFmt(c,v))}</b>`
             :`<span style="color:var(--magenta)">not attempted</span>`}${
