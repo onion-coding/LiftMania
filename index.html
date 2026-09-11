@@ -284,6 +284,18 @@ h2{margin:0}
   border:1px solid transparent;display:inline-flex;align-items:center;gap:7px;line-height:1.15}
 .exchip.on{background:var(--cream);color:var(--night);font-weight:700}
 .exchip.hit{border-color:var(--gold)}
+/* the chip and its ? travel together, so the pair never wraps apart */
+.exwrapchip{display:inline-flex;align-items:stretch;gap:0}
+.exwrapchip .exchip{border-top-right-radius:0;border-bottom-right-radius:0;border-right:none}
+.exq{flex:none;width:26px;border-radius:0 10px 10px 0;background:var(--row);color:var(--dim);
+  border:1px solid var(--line);border-left:1px solid var(--line);
+  font-family:var(--m);font-size:12px;line-height:1;padding:0}
+.exq:hover,.exq.on{background:var(--goldF);color:var(--onGold);border-color:transparent}
+.formcard{margin-top:11px;border-radius:14px;background:var(--row);padding:12px;overflow:hidden}
+.formhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.formname{font-family:var(--d);font-size:12px;color:var(--gold);flex:1;min-width:0}
+.formpic{display:block;width:100%;max-width:320px;margin:0 auto;border-radius:11px;background:#fff}
+.formcue{margin-top:10px;font-size:13px;line-height:1.5;color:var(--cream)}
 .exchip.on.hit{box-shadow:0 0 0 2px var(--goldF)}
 .tag{font-family:var(--m);font-size:10px;font-weight:500;letter-spacing:.07em;padding:3px 5px;
   border-radius:5px;background:var(--panel2);color:var(--dim);flex:none;line-height:1.1}
@@ -569,7 +581,7 @@ const GROUPS = {
 /* Pages caches the file for ten minutes and browsers hold it longer, so
    "am I looking at the new one?" needs an answer you can read off the screen
    instead of guessing. Bump this with any change worth noticing. */
-const BUILD="2026-09-11 · one set at a time";
+const BUILD="2026-09-11 · form help";
 
 const GK = Object.keys(GROUPS);
 const gcol = g => U.theme==="night" ? GROUPS[g].c : GROUPS[g].l;
@@ -639,6 +651,76 @@ const EX = [
   {id:"deadbug",n:"Dead bug",g:"core",mode:"bw",f:.20,s:"opt",sd:"both"}
 ];
 const byId = id => EX.find(e=>e.id===id) || EX[0];
+
+/* ══════════════════ HOW IT IS DONE ══════════════════
+   One picture and one line per exercise, behind the ? on its chip.
+
+   Pictures come from free-exercise-db (public domain, the Unlicense),
+   served off jsDelivr and only fetched when you actually open one — the
+   app stays a single small file and costs nothing to load until asked.
+
+   Where the database had no honest match — the pike push-up, the
+   Bulgarian, burpees, wall sits, hollow holds and a few others — there is
+   no picture, only the cue. A near-enough picture of a different movement
+   is worse than none, most of all on a challenge. */
+const FORM_CDN="https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/";
+const FORM={
+  pushup:["Pushups/0.jpg","Chest to the floor. Elbows about 45° from your ribs, not flared wide."],
+  incpush:["Incline_Push-Up/0.jpg","Hands on a bench or step. The higher the hands, the easier it is."],
+  decpush:["Decline_Push-Up/0.jpg","Feet up, hands on the floor. Keep the hips from sagging."],
+  defpush:["Pushups/0.jpg","Hands on books or handles so the chest drops below them."],
+  archer:[null,"Push up over one arm, the other stays straight out to the side."],
+  cpress:["Cable_Chest_Press/0.jpg","Press forward and slightly together. Don't let the elbows drift behind you."],
+  cfly:["Flat_Bench_Cable_Flyes/0.jpg","Soft bend in the elbows, held throughout. Squeeze at the front."],
+  crow:["Seated_Cable_Rows/0.jpg","Pull to the navel, shoulders down. Don't lean back to finish it."],
+  clat:["Wide-Grip_Lat_Pulldown/0.jpg","Pull the elbows down, not the hands. Chest up, no swinging."],
+  csap:["Straight-Arm_Pulldown/0.jpg","Arms stay locked straight. The movement is only at the shoulder."],
+  cpullover:["Straight-Arm_Dumbbell_Pullover/0.jpg","Ribs down, arms sweep overhead. Stop when the shoulders complain."],
+  trow:["Inverted_Row/0.jpg","Body in one straight line. Chest to the edge, heels planted."],
+  sman:["Superman/0.jpg","Lift chest and thighs together. Look at the floor, not forward."],
+  pike:[null,"Hips high, head to the floor between the hands. Nearly vertical."],
+  cohp:["Cable_Shoulder_Press/0.jpg","Press overhead without arching the lower back. Ribs stay down."],
+  lat:["Side_Lateral_Raise/0.jpg","Up to shoulder height only. Lead with the elbow, not the hand."],
+  front:["Front_Plate_Raise/0.jpg","Raise to eye level. No swinging from the hips."],
+  face:["Face_Pull/0.jpg","Pull to the forehead, elbows high, and rotate the hands back."],
+  upright:["Upright_Cable_Row/0.jpg","Elbows lead, stop at chest height. Higher pinches the shoulder."],
+  curl:["Dumbbell_Bicep_Curl/0.jpg","Elbows pinned to your sides. No swing, no leaning back."],
+  hammer:["Hammer_Curls/0.jpg","Palms face each other the whole way. Elbows still."],
+  ccurl:["Standing_Biceps_Cable_Curl/0.jpg","Constant tension - don't rest at the bottom."],
+  conc:["Concentration_Curls/0.jpg","Elbow braced on the thigh. Slow on the way down."],
+  rcurl:["Standing_Dumbbell_Reverse_Curl/0.jpg","Palms down. Much lighter than a normal curl, and that's fine."],
+  "21s":[null,"Seven bottom halves, seven top halves, seven full. No rest between."],
+  diamond:["Close-Grip_Push-Up_off_of_a_Dumbbell/0.jpg","Hands together under the chest. Elbows stay close to the body."],
+  dip:["Bench_Dips/0.jpg","Elbows straight back to 90°. Shoulders down, away from the ears."],
+  pdown:["Triceps_Pushdown/0.jpg","Upper arms locked at your sides. Only the forearms move."],
+  ohext:["Cable_Rope_Overhead_Triceps_Extension/0.jpg","Elbows point forward and stay there. Full stretch behind the head."],
+  kickback:["Tricep_Dumbbell_Kickback/0.jpg","Upper arm parallel to the floor. Straighten fully, pause."],
+  squat:["Bodyweight_Squat/0.jpg","Hip crease below the knee. Heels down, knees tracking over the toes."],
+  goblet:["Goblet_Squat/0.jpg","Weight at the chest, elbows inside the knees at the bottom."],
+  split:["Split_Squats/0.jpg","Back knee to the floor. Front shin close to vertical."],
+  bulg:[null,"Rear foot on a chair. Drop straight down, front knee over the foot."],
+  lunge:["Dumbbell_Rear_Lunge/0.jpg","Step back, not forward. Torso upright the whole way."],
+  rdl:["Romanian_Deadlift/0.jpg","Push the hips back, back flat. Stop when the hamstrings stop you."],
+  pthru:["Pull_Through/0.jpg","It's a hip hinge, not a squat. Snap the hips forward to finish."],
+  nordic:["Platform_Hamstring_Slides/0.jpg","Heels slide out slowly. Hips stay up the whole time."],
+  calf:["Rocking_Standing_Calf_Raise/0.jpg","Full stretch at the bottom, pause at the top. Don't bounce."],
+  bridge:["Barbell_Glute_Bridge/0.jpg","Drive through the heels, squeeze at the top. Ribs down."],
+  wallsit:[null,"Thighs parallel to the floor, back flat on the wall. Breathe."],
+  burpee:[null,"Chest to the floor at the bottom, feet leave the ground at the top."],
+  jsquat:["Freehand_Jump_Squat/0.jpg","Land soft, straight into the next rep. Knees never cave in."],
+  stepup:["Dumbbell_Step_Ups/0.jpg","Drive through the top foot. Don't push off the bottom one."],
+  plank:["Plank/0.jpg","Hips level with the shoulders. It ends when they drop."],
+  splank:[null,"Body in one line from ear to ankle. Hips lifted, not sagging."],
+  hollow:[null,"Lower back pressed flat to the floor. Shoulders and heels lifted."],
+  lsit:[null,"Press the floor away, shoulders down. Tuck the knees if you must."],
+  lraise:["Flat_Bench_Lying_Leg_Raise/0.jpg","Lower back stays on the floor. Lower slowly, don't drop."],
+  ccrunch:["Cable_Crunch/0.jpg","Round the spine down toward the knees. Hips stay put."],
+  chop:["Standing_Cable_Wood_Chop/0.jpg","Turn from the trunk, arms stay long. Pivot the back foot."],
+  pallof:["Pallof_Press/0.jpg","Press straight out and resist the twist. That's the whole exercise."],
+  twist:["Russian_Twist/0.jpg","Turn the shoulders, not just the arms. Heels can stay down."],
+  mclimb:["Mountain_Climbers/0.jpg","Hips stay low and level. Drive the knees, don't bounce the hips."],
+  deadbug:["Dead_Bug/0.jpg","Opposite arm and leg. Lower back glued to the floor throughout."],
+};
 
 /* ══════════════════ MEDALS ══════════════════
    Five tiers, and they exist only on the ten challenges. Every cut is an
@@ -1131,7 +1213,7 @@ function migrate(o){
 let S=null;
 const U={tab:"train",group:"chest",ex:"pushup",sets:3,reps:10,load:10,flash:null,rest:0,restT:null,
   metric:"form",rgroup:"all",theme:"night",help:{},logDays:5,openServer:false,openObj:null,
-  openChal:null,attV:20,attR:8,editRot:false,scope:"all"};
+  openChal:null,attV:20,attR:8,editRot:false,form:null,scope:"all"};
 
 function applyTheme(){
   const theme=THEMES.some(t=>t.id===U.theme)?U.theme:"night";
@@ -1535,6 +1617,23 @@ function setDesc(r){
     + (r.sd==="each"?" /side":"");
 }
 
+/* One picture, one line, and nothing else. The image is lazy so opening the
+   picker costs nothing; a broken CDN hides the frame rather than leaving a
+   torn icon sitting in the card. */
+function formCard(id){
+  const e=byId(id), f=FORM[id];
+  if(!f) return "";
+  return `<div class="formcard${FX.form?" reveal":""}">
+    <div class="formhead">
+      <span class="formname">${esc(e.n)}</span>
+      <button class="xbtn" data-a="form" data-e="${id}" title="Close" aria-label="Close">×</button>
+    </div>
+    ${f[0]?`<img class="formpic" loading="lazy" decoding="async" alt="${esc(e.n)}"
+       src="${FORM_CDN}${f[0]}" onerror="this.style.display='none'">`:""}
+    <div class="formcue">${esc(f[1])}</div>
+  </div>`;
+}
+
 /* one-shot animation flags, set by a handler and consumed by the next render */
 let FX={}, lastView=null;
 
@@ -1858,8 +1957,9 @@ function loggerBody(ex){
     </div>
 
     <div class="exwrap" style="margin-top:10px">${
-      list.length?list.map(e=>`<button class="exchip ${U.ex===e.id?"on":""} ${CH_BY_EX[e.id]?"hit":""}" data-a="ex" data-e="${e.id}">${esc(e.n)} ${exTag(e)}${sideMode(e)==="each"?`<span class="side">×2</span>`:""}</button>`).join("")
+      list.length?list.map(e=>`<span class="exwrapchip"><button class="exchip ${U.ex===e.id?"on":""} ${CH_BY_EX[e.id]?"hit":""}" data-a="ex" data-e="${e.id}">${esc(e.n)} ${exTag(e)}${sideMode(e)==="each"?`<span class="side">×2</span>`:""}</button><button class="exq${U.form===e.id?" on":""}" data-a="form" data-e="${e.id}" title="How is it done?" aria-label="How ${esc(e.n)} is done">?</button></span>`).join("")
       :`<div class="empty">Nothing in ${GROUPS[U.group].name} counts right now. Muscles with a ● do.</div>`}</div>
+    ${U.form?formCard(U.form):""}
 
     <div class="steppers" style="margin-top:15px">
       ${stepper(ex.mode==="time"?(each?"sec / side":"seconds"):(each?"reps / side":"reps"),"reps",ex.mode==="time"?5:1,1)}
@@ -2486,6 +2586,7 @@ document.getElementById("app").addEventListener("click",e=>{
     const first=(U.only?EX.filter(x=>x.g===U.group&&countsNow(x)):EX.filter(x=>x.g===U.group))[0]||EX.find(x=>x.g===U.group);
     pickEx(first.id); render(); }
   else if(a==="ex"){ pickEx(b.dataset.e); render(); }
+  else if(a==="form"){ const id=b.dataset.e; U.form = U.form===id?null:id; U.fx={form:true}; render(); }
   else if(a==="obj"){ const i=Number(b.dataset.i); U.openObj = U.openObj===i?null:i; U.fx={expand:true}; render(); }
   else if(a==="chal"){ openChal(U.openChal===b.dataset.c?null:b.dataset.c); U.fx={expand:true}; render(); }
   else if(a==="goch"){ U.tab="chal"; openChal(b.dataset.c); U.flash=null; render(); window.scrollTo(0,0); }
